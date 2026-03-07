@@ -1,0 +1,109 @@
+# Netlify Configuration - Managed Capture 3D Platform
+# Production deployment for React SPA with Supabase backend
+
+[build]
+  # Build command - produces optimized production bundle
+  command = "npm run build"
+
+  # Publish directory - Vite output
+  publish = "dist"
+
+# ============================================================================
+# REDIRECTS - API proxies and SPA fallback
+# ============================================================================
+
+# Auth proxy — route /api/auth/* to Netlify Functions (must be before SPA fallback)
+[[redirects]]
+  from = "/api/auth/*"
+  to = "/.netlify/functions/auth-:splat"
+  status = 200
+  force = true
+
+# SPA fallback - all routes redirect to index.html for client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# ============================================================================
+# HEADERS - Security and Performance
+# ============================================================================
+
+[[headers]]
+  # Apply to all files
+  for = "/*"
+
+  [headers.values]
+    # Security headers
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+    # CSP - restrictive policy with allowances for Tailwind, fonts, Supabase, and model-viewer
+    # Tightened: added form-action, upgrade-insecure-requests, restricted img-src https origins
+    Content-Security-Policy = "default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://*.googleapis.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; worker-src 'self' blob:; media-src 'self' blob: https://*.supabase.co; form-action 'self'; upgrade-insecure-requests"
+
+# Cache busting for assets with content hash
+[[headers]]
+  for = "/assets/*"
+
+  [headers.values]
+    # Cache immutable assets for 1 year
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# HTML files - no cache (always fetch latest)
+[[headers]]
+  for = "/*.html"
+
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# ============================================================================
+# FUNCTIONS - Server-side logic (for future API extensions)
+# ============================================================================
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# ============================================================================
+# ENVIRONMENT VARIABLES - Required for production
+# ============================================================================
+
+# Note: These must be configured in Netlify dashboard under:
+# Settings → Build & Deploy → Environment
+#
+# Required variables:
+# - VITE_SUPABASE_URL: https://your-project.supabase.co
+# - VITE_SUPABASE_ANON_KEY: Your Supabase anonymous key
+# - VITE_USE_MOCK_DATA: false (enable real backend)
+# - VITE_API_BASE_URL: https://your-api.com/api (if applicable)
+#
+# For server-side functions only:
+# - SUPABASE_SERVICE_ROLE_KEY: Service role key (admin API)
+
+# ============================================================================
+# BUILD PLUGINS - Optional enhancements
+# ============================================================================
+
+# Example: Content Security Policy report
+# [[plugins]]
+#   package = "@netlify/plugin-csp-reporter"
+
+# ============================================================================
+# CONTEXT CONFIGURATION - Deploy contexts
+# ============================================================================
+
+# Production context (main branch)
+[context.production]
+  command = "npm run build"
+
+# Preview context (pull requests)
+[context.deploy-preview]
+  command = "npm run build"
+
+# Branch deploy context
+[context.branch-deploy]
+  command = "npm run build"

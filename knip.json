@@ -1,0 +1,38 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["src/App.tsx"],
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignore": [
+    "src/components/motion/AnimatedOutlet.tsx",
+    "src/components/motion/index.ts",
+    "src/components/motion/PageTransition.tsx",
+    "src/components/portal/IndustryHeader.tsx",
+    "src/components/portal/IndustryKPIStrip.tsx",
+    "src/components/portal/IndustryWidgetRenderer.tsx",
+    "src/components/portal/ProjectProgress.tsx",
+    "src/components/portal/QAReviewPanel.tsx",
+    "src/components/portal/ReviewBanner.tsx",
+    "src/components/portal/TechnicianMetrics.tsx",
+    "src/components/portal/TechnicianUpload.tsx",
+    "src/components/portal/OnboardingChecklist.tsx"
+  ],
+  "ignoreDependencies": [
+    "@types/eslint__js",
+    "lint-staged",
+    "vite-plugin-compression2",
+    "@vitest/coverage-v8"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "rules": {
+    "files": "error",
+    "dependencies": "error",
+    "devDependencies": "error",
+    "unlisted": "error",
+    "binaries": "error",
+    "exports": "off",
+    "types": "off",
+    "enumMembers": "off",
+    "classMembers": "off",
+    "duplicates": "error"
+  }
+}

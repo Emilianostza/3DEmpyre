@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(wc:*)",
+      "Bash(ls:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm install:*)",
+      "Bash(pkill:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npm run test:run:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npm uninstall:*)"
+    ]
+  }
+}

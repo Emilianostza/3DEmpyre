@@ -1,0 +1,574 @@
+/* Tailwind CSS directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =================================
+   Custom Scrollbar Styling
+   ================================= */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #09090b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
+
+/* Scrollbar-hiding utility (used across template pages) */
+@layer utilities {
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .font-sans-premium {
+    font-family: 'Outfit', system-ui, sans-serif;
+  }
+
+  .font-serif-premium {
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+/* Enhanced 3D Empyre Styles */
+
+/* =================================
+   CSS Custom Properties (Variables)
+   ================================= */
+
+:root {
+  /* Brand Colors - Vivid Violet-Indigo (Linear-inspired) */
+  --brand-50: #f5f3ff;
+  --brand-100: #ede9fe;
+  --brand-200: #ddd6fe;
+  --brand-300: #c4b5fd;
+  --brand-400: #a78bfa;
+  --brand-500: #8b5cf6;
+  /* Vivid violet */
+  --brand-600: #7c3aed;
+  /* Primary action */
+  --brand-700: #6d28d9;
+  --brand-800: #5b21b6;
+  --brand-900: #1e1b4b;
+  --brand-950: #0d0b2e;
+
+  /* Accent Colors */
+  --accent-orange: #f97316;
+  --accent-purple: #a78bfa;
+  --accent-green: #10b981;
+  --accent-cyan: #06b6d4;
+
+  /* Neutrals - Zinc (cleaner chrome) */
+  --zinc-50: #fafafa;
+  --zinc-100: #f4f4f5;
+  --zinc-200: #e4e4e7;
+  --zinc-300: #d4d4d8;
+  --zinc-400: #a1a1aa;
+  --zinc-500: #71717a;
+  --zinc-600: #52525b;
+  --zinc-700: #3f3f46;
+  --zinc-800: #27272a;
+  --zinc-900: #18181b;
+  --zinc-950: #09090b;
+
+  /* Legacy slate aliases (keep for backwards compat) */
+  --slate-50: #fafafa;
+  --slate-100: #f4f4f5;
+  --slate-200: #e4e4e7;
+  --slate-500: #71717a;
+  --slate-900: #18181b;
+
+  /* Shadows - Diffused & Ambient */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+  --shadow-soft: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
+  /* Special premium shadow */
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Border Radius - Super Rounded */
+  --radius-sm: 0.5rem;
+  /* 8px */
+  --radius-md: 0.75rem;
+  /* 12px */
+  --radius-lg: 1rem;
+  /* 16px */
+  --radius-xl: 1.5rem;
+  /* 24px */
+  --radius-2xl: 2rem;
+  /* 32px */
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Bouncy feel */
+}
+
+/* =================================
+   Base Styles
+   ================================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Sticky-header scroll-into-view offset ─────────────────────
+   Every section whose id starts with "cat-" will start 80px
+   below the top of the viewport when it is the target of
+   an anchor navigation (clicking a tab, #hash in the URL,
+   or any scrollIntoView call that uses the default "start").
+   ---------------------------------------------------------------- */
+section[id^='cat-'] {
+  scroll-margin-top: 80px; /* header height (64px) + 16px breathing room */
+}
+
+body {
+  font-family:
+    'DM Sans',
+    system-ui,
+    -apple-system,
+    sans-serif;
+  line-height: 1.6;
+  color: #f4f4f5;
+  background-color: #09090b;
+}
+
+/* =================================
+   Typography
+   ================================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Syne', system-ui, sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+}
+
+h2 {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+h3 {
+  font-size: clamp(1.25rem, 3vw, 1.875rem);
+}
+
+p {
+  margin-bottom: 1rem;
+}
+
+/* =================================
+   Utilities
+   ================================= */
+
+.gradient-mesh {
+  background:
+    radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.12) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(167, 139, 250, 0.08) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(6, 182, 212, 0.06) 0px, transparent 50%);
+}
+
+/* Subtle dot/grid background for sections */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(120, 120, 120, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 120, 120, 0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.text-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--brand-600) 0%,
+    var(--brand-500) 25%,
+    var(--accent-purple) 50%,
+    var(--accent-cyan) 85%,
+    var(--accent-cyan) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, var(--brand-500) 0%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-warm {
+  background: linear-gradient(135deg, var(--brand-500) 0%, var(--accent-orange) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glass-effect {
+  background: rgba(9, 9, 11, 0.75);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(24, 24, 27, 0.6);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.glass-card-hover {
+  background: rgba(24, 24, 27, 0.6);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card-hover:hover {
+  background: rgba(24, 24, 27, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.18);
+}
+
+/* Noise texture overlay for premium surfaces.
+   Uses a tiny repeating PNG-like pattern via CSS gradient instead of
+   an expensive inline SVG feTurbulence filter. Much cheaper to paint. */
+.noise-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEWFhYWDg4N3d3dtbW17e3t1dXWBgYGHh4d5eXlzc3Oelieli9teleVeli9Keli0Nra2ueli2eli3lpaWxeli1bnZ2eli3eli5eli7Dw8PFxcXHx8cQeli7eli4AAACZ0lEQVR4Ae3UNNLDQBSE4X9mZoaZ+f6HPAl6yt3V2HW+dA0AAAAAAADAK4N/8Q+Gf+IY/I2jbxxNGkSRJhGj/4jFYLCILAIAAA==");
+  background-repeat: repeat;
+  opacity: 0.03;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Animated gradient border utility */
+.animated-border {
+  position: relative;
+  overflow: hidden;
+}
+
+.animated-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.4), transparent 40%, transparent 60%, rgba(6, 182, 212, 0.3));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: borderRotate 4s linear infinite;
+}
+
+@keyframes borderRotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Smooth selection styling */
+::selection {
+  background: rgba(124, 58, 237, 0.3);
+  color: #fff;
+}
+
+/* =================================
+   Animations
+   ================================= */
+
+/* Core keyframes are defined in tailwind.config.js and auto-generated.
+   Only CSS-specific keyframes NOT covered by Tailwind go here.
+   Removed: pulse, spin, float keyframes (use Tailwind animate-pulse,
+   animate-spin, animate-float instead). */
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Slide-in utilities (not in Tailwind config) */
+.animate-slide-in-left {
+  animation: slideInLeft 0.8s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out forwards;
+}
+
+/* Shimmer gradient (Tailwind handles the keyframe, this adds the gradient bg) */
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Premium card hover lighting effect */
+.premium-card-glow {
+  position: relative;
+}
+
+.premium-card-glow::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1),
+    transparent 40%,
+    transparent 60%,
+    rgba(255, 255, 255, 0.05)
+  );
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.premium-card-glow:hover::after {
+  opacity: 1;
+}
+
+/* =================================
+   Scroll Reveal
+   ================================= */
+
+/* Elements start hidden; useScrollReveal adds is-visible when in viewport */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Scale-up reveal variant for 3D viewers and hero elements */
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.96) translateY(12px);
+  transition:
+    opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-scale.is-visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* Stagger children inside a reveal container.
+   Uses CSS custom property --stagger-index (set via inline style or JS)
+   so the stagger scales to ANY number of children, not just 6.
+   Usage: <div class="reveal-stagger"> <div style="--stagger-index:0"> ... </div> </div>
+   If no --stagger-index is set, falls back to 0 delay (no stagger). */
+.reveal-stagger > * {
+  --stagger-index: 0;
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--stagger-index) * 80ms);
+}
+
+.reveal-stagger.is-visible > * {
+  opacity: 1;
+  transform: none;
+}
+
+/* =================================
+   Component Specific Styles
+   ================================= */
+
+/* Smooth transitions for interactive elements (scoped to safe properties to avoid
+   conflicting with Tailwind's transition-transform, transition-colors, etc.) */
+button,
+a,
+input,
+select,
+textarea {
+  transition-property: color, background-color, border-color, opacity, box-shadow;
+  transition-duration: 0.2s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =================================
+   Accessibility
+   ================================= */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Enhanced focus states for better accessibility.
+   Only remove outline on non-:focus-visible focus (mouse/touch clicks).
+   Keyboard focus (:focus-visible) retains a visible outline below. */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 3px solid var(--brand-400);
+  outline-offset: 3px;
+  border-radius: 0.25rem;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--brand-400);
+  outline-offset: 2px;
+}
+
+/* Custom focus ring for branded buttons */
+button.bg-brand-600:focus-visible,
+button.bg-indigo-600:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--brand-500);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark mode is always active — base styles above are dark-only.
+   The .dark class on <html> is added by Layout.tsx for Tailwind dark: prefixes. */
+
+/* =================================
+   Print Styles
+   ================================= */
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+
+  a[href]::after {
+    content: ' (' attr(href) ')';
+  }
+}
+
+/* =================================
+   Responsive Design
+   ================================= */
+
+@media (max-width: 640px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+}

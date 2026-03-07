@@ -1,0 +1,197 @@
+
+> managed-capture-3d-platform@1.0.0 build
+> vite build
+
+[36mvite v6.4.1 [32mbuilding for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 2443 modules transformed.
+
+Γ£¿ [vite-plugin-compression]:algorithm=gzip - compressed file successfully: 
+dist/C:/Users/emili/Downloads/New folder/test/assets/ARViewer-CVvVflLW.js.gz                    3.53kb / gzip: 1.47kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Accordion-BHlF1vzk.js.gz                   1.58kb / gzip: 0.79kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/AssetUploader-CdJywCPE.js.gz               3.31kb / gzip: 1.41kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/ArtifactViewer-eGTdPlbT.js.gz              16.43kb / gzip: 5.66kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Button--sWGszSD.js.gz                      2.35kb / gzip: 0.95kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/About-Df3aqILB.js.gz                       8.87kb / gzip: 2.25kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/AssetAnalyticsBoard-C043ViFZ.js.gz         21.91kb / gzip: 5.38kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/assets-CpTLKl_A.js.gz                      9.86kb / gzip: 2.38kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Blog-DvFglKBN.js.gz                        5.30kb / gzip: 1.80kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Card-CE7StClt.js.gz                        1.43kb / gzip: 0.67kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/blog-posts-DctdLASC.js.gz                  11.09kb / gzip: 4.69kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/CaseStudies-eUdhE6N-.js.gz                 8.68kb / gzip: 2.42kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/AccessBadge-CypzRjVG.js.gz                 18.68kb / gzip: 4.86kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Compare-BNPCPjsA.js.gz                     12.14kb / gzip: 2.56kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/BillingPage-BgEnmOfN.js.gz                 14.90kb / gzip: 3.29kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/CustomersPage-DL_vEVHx.js.gz               1.08kb / gzip: 0.62kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/BlogPost-DgNzxLSz.js.gz                    5.28kb / gzip: 1.77kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/CatalogGrid-C2XRCDkn.js.gz                 19.06kb / gzip: 5.16kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/dataProvider-DbZUBu4X.js.gz                1.36kb / gzip: 0.49kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/CompareMenus-hBvN41Yo.js.gz                10.80kb / gzip: 2.55kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/CompareARCode-CkYeVK9-.js.gz               10.65kb / gzip: 2.48kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/HowItWorks-D5LDkfsA.js.gz                  9.25kb / gzip: 2.43kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/EmbeddedModelEditor-BsD34RjH.js.gz         9.90kb / gzip: 2.86kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/CustomerDashboardPage-Bc2tOf-n.js.gz       18.66kb / gzip: 4.76kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/DailySpecials-DYfXV-75.js.gz               21.29kb / gzip: 6.14kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/menus-D5Vgwq0B.js.gz                       3.59kb / gzip: 1.43kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Home-BGWZzJ6-.js.gz                        24.44kb / gzip: 5.44kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/EmployeeDashboardPage-BNw1cEib.js.gz       28.44kb / gzip: 6.92kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/NotFound-DrgmZ6I_.js.gz                    2.00kb / gzip: 0.81kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Library-CFcy72TI.js.gz                     18.43kb / gzip: 4.86kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Login-kw0TM6L0.js.gz                       6.73kb / gzip: 2.26kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Industry-Cmb-zsCK.js.gz                    7.36kb / gzip: 2.04kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/MenuSettingsModal-BQBjLkPX.js.gz           5.72kb / gzip: 1.71kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/ModelEditor-DieU2RL0.js.gz                 18.98kb / gzip: 4.31kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/PhotoUploadWizard-Crjyi_gK.js.gz           21.78kb / gzip: 6.35kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Privacy-BEWwrze6.js.gz                     3.83kb / gzip: 1.11kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/PhotoPipelinePage-DD1mxUlf.js.gz           31.43kb / gzip: 8.25kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Pricing-JngBrW31.js.gz                     23.57kb / gzip: 4.25kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/PortfolioGallery-BwIm426r.js.gz            18.12kb / gzip: 5.89kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/ProductShowcase-B-_AXoB3.js.gz             19.99kb / gzip: 6.10kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/projects-BD6ivMbG.js.gz                    3.98kb / gzip: 1.34kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/PortalLayout-CRvNWRS0.js.gz                44.37kb / gzip: 10.29kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/QRCodeModal-C_1c2wAb.js.gz                 3.89kb / gzip: 1.48kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/ProjectsPage-D5h-TnpF.js.gz                1.08kb / gzip: 0.61kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/ProjectTable-CdIBKbJ6.js.gz                13.12kb / gzip: 3.51kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/ProjectDetailPage-DpHVgVBz.js.gz           13.47kb / gzip: 3.49kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/SettingsBillingPage-DgpuU2Ly.js.gz         1.04kb / gzip: 0.54kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/RequestForm-lz4qqRNJ.js.gz                 30.37kb / gzip: 7.27kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/SceneDashboard-Dned6keJ.js.gz              14.01kb / gzip: 4.34kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Roadmap-DQu6yrxD.js.gz                     10.45kb / gzip: 2.75kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/SEO-BQSKpZC8.js.gz                         1.56kb / gzip: 0.68kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Security-_0lkrlTG.js.gz                    4.19kb / gzip: 1.18kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/SettingsNotificationsPage-BoaG7aZf.js.gz   3.21kb / gzip: 1.09kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/RestaurantPricing-Du9BqTmc.js.gz           19.41kb / gzip: 4.02kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/SettingsProfilePage-B2DF56jL.js.gz         4.33kb / gzip: 1.12kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/ROICalculator-ePXrNX5Q.js.gz               11.67kb / gzip: 3.16kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/site-Y_5r8nvL.js.gz                        2.21kb / gzip: 0.86kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/SettingsLayout-b-UID4IS.js.gz              1.59kb / gzip: 0.76kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/SettingsSecurityPage-DDEoSTmr.js.gz        4.37kb / gzip: 1.22kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Skeleton-x6h7ibnq.js.gz                    1.31kb / gzip: 0.55kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/StructuredData-DbwdFDHX.js.gz              2.55kb / gzip: 0.90kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Terms-82yzPyVl.js.gz                       3.84kb / gzip: 1.11kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/TemplateGallery-Xl8AOOVG.js.gz             8.22kb / gzip: 2.80kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/vendor-icons-C0piFm7E.js.gz                66.66kb / gzip: 13.29kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/vendor-motion-JbetARMB.js.gz               30.65kb / gzip: 10.68kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/vendor-router-DxoLl1No.js.gz               35.49kb / gzip: 12.84kb
+dist/C:/Users/emili/Downloads/New folder/test/index.html.gz                                     3.84kb / gzip: 1.42kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/index-CDoZKoMQ.js.gz                       62.00kb / gzip: 17.69kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/index-CxaHvJSW.css.gz                      175.51kb / gzip: 24.78kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/RestaurantMenu-B9xodNlE.js.gz              95.05kb / gzip: 21.91kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/SuperAdmin-CKbLScyG.js.gz                  121.71kb / gzip: 21.53kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/vendor-supabase-D544Kwsx.js.gz             158.13kb / gzip: 41.78kb
+dist/C:/Users/emili/Downloads/New folder/test/locales/de/translation.json.gz                    155.64kb / gzip: 42.52kb
+dist/C:/Users/emili/Downloads/New folder/test/locales/en/translation.json.gz                    149.07kb / gzip: 39.44kb
+dist/C:/Users/emili/Downloads/New folder/test/locales/es/translation.json.gz                    157.04kb / gzip: 41.55kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/vendor-react-C0V6Iq5w.js.gz                176.59kb / gzip: 54.98kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/vendor-model-viewer-CnU7o4Vg.js.gz         202.31kb / gzip: 55.23kb
+dist/C:/Users/emili/Downloads/New folder/test/locales/ru/translation.json.gz                    205.15kb / gzip: 49.54kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/vendor-CIW3Sgy8.js.gz                      231.05kb / gzip: 75.87kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/vendor-three-BZ_itjsD.js.gz                709.87kb / gzip: 194.63kb
+
+
+
+Γ£¿ [vite-plugin-compression]:algorithm=brotliCompress - compressed file successfully: 
+dist/C:/Users/emili/Downloads/New folder/test/assets/AssetUploader-CdJywCPE.js.br               3.31kb / brotliCompress: 1.23kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Accordion-BHlF1vzk.js.br                   1.58kb / brotliCompress: 0.69kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/About-Df3aqILB.js.br                       8.87kb / brotliCompress: 1.97kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/ArtifactViewer-eGTdPlbT.js.br              16.43kb / brotliCompress: 4.94kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/AccessBadge-CypzRjVG.js.br                 18.68kb / brotliCompress: 4.32kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/BillingPage-BgEnmOfN.js.br                 14.90kb / brotliCompress: 2.92kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Blog-DvFglKBN.js.br                        5.30kb / brotliCompress: 1.59kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/AssetAnalyticsBoard-C043ViFZ.js.br         21.91kb / brotliCompress: 4.73kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/BlogPost-DgNzxLSz.js.br                    5.28kb / brotliCompress: 1.56kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/ARViewer-CVvVflLW.js.br                    3.53kb / brotliCompress: 1.29kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Button--sWGszSD.js.br                      2.35kb / brotliCompress: 0.84kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/assets-CpTLKl_A.js.br                      9.86kb / brotliCompress: 2.01kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Card-CE7StClt.js.br                        1.43kb / brotliCompress: 0.59kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/CaseStudies-eUdhE6N-.js.br                 8.68kb / brotliCompress: 2.14kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/CompareARCode-CkYeVK9-.js.br               10.65kb / brotliCompress: 2.22kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/blog-posts-DctdLASC.js.br                  11.09kb / brotliCompress: 3.58kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Compare-BNPCPjsA.js.br                     12.14kb / brotliCompress: 2.29kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/CustomersPage-DL_vEVHx.js.br               1.08kb / brotliCompress: 0.58kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/dataProvider-DbZUBu4X.js.br                1.36kb / brotliCompress: 0.43kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/CompareMenus-hBvN41Yo.js.br                10.80kb / brotliCompress: 2.28kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/CatalogGrid-C2XRCDkn.js.br                 19.06kb / brotliCompress: 4.56kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/EmbeddedModelEditor-BsD34RjH.js.br         9.90kb / brotliCompress: 2.49kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/DailySpecials-DYfXV-75.js.br               21.29kb / brotliCompress: 5.46kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/CustomerDashboardPage-Bc2tOf-n.js.br       18.66kb / brotliCompress: 4.16kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/HowItWorks-D5LDkfsA.js.br                  9.25kb / brotliCompress: 2.14kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Industry-Cmb-zsCK.js.br                    7.36kb / brotliCompress: 1.78kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Login-kw0TM6L0.js.br                       6.73kb / brotliCompress: 1.99kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Library-CFcy72TI.js.br                     18.43kb / brotliCompress: 4.27kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/EmployeeDashboardPage-BNw1cEib.js.br       28.44kb / brotliCompress: 6.16kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Home-BGWZzJ6-.js.br                        24.44kb / brotliCompress: 4.75kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/MenuSettingsModal-BQBjLkPX.js.br           5.72kb / brotliCompress: 1.47kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/menus-D5Vgwq0B.js.br                       3.59kb / brotliCompress: 1.28kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/NotFound-DrgmZ6I_.js.br                    2.00kb / brotliCompress: 0.71kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/ModelEditor-DieU2RL0.js.br                 18.98kb / brotliCompress: 3.73kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/PortfolioGallery-BwIm426r.js.br            18.12kb / brotliCompress: 5.09kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/PhotoUploadWizard-Crjyi_gK.js.br           21.78kb / brotliCompress: 5.65kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/ProductShowcase-B-_AXoB3.js.br             19.99kb / brotliCompress: 5.35kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/PhotoPipelinePage-DD1mxUlf.js.br           31.43kb / brotliCompress: 7.28kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/index-CDoZKoMQ.js.br                       62.00kb / brotliCompress: 14.96kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Privacy-BEWwrze6.js.br                     3.83kb / brotliCompress: 0.95kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/ProjectDetailPage-DpHVgVBz.js.br           13.47kb / brotliCompress: 3.04kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/PortalLayout-CRvNWRS0.js.br                44.37kb / brotliCompress: 9.02kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Pricing-JngBrW31.js.br                     23.57kb / brotliCompress: 3.77kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/ProjectsPage-D5h-TnpF.js.br                1.08kb / brotliCompress: 0.55kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/QRCodeModal-C_1c2wAb.js.br                 3.89kb / brotliCompress: 1.25kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/projects-BD6ivMbG.js.br                    3.98kb / brotliCompress: 1.15kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/ProjectTable-CdIBKbJ6.js.br                13.12kb / brotliCompress: 3.06kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/ROICalculator-ePXrNX5Q.js.br               11.67kb / brotliCompress: 2.79kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/RestaurantPricing-Du9BqTmc.js.br           19.41kb / brotliCompress: 3.54kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/SettingsBillingPage-DgpuU2Ly.js.br         1.04kb / brotliCompress: 0.46kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/SEO-BQSKpZC8.js.br                         1.56kb / brotliCompress: 0.57kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/SceneDashboard-Dned6keJ.js.br              14.01kb / brotliCompress: 3.86kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/RequestForm-lz4qqRNJ.js.br                 30.37kb / brotliCompress: 6.34kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Roadmap-DQu6yrxD.js.br                     10.45kb / brotliCompress: 2.41kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/SettingsNotificationsPage-BoaG7aZf.js.br   3.21kb / brotliCompress: 0.95kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/SettingsLayout-b-UID4IS.js.br              1.59kb / brotliCompress: 0.68kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/site-Y_5r8nvL.js.br                        2.21kb / brotliCompress: 0.75kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/SettingsProfilePage-B2DF56jL.js.br         4.33kb / brotliCompress: 0.96kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Skeleton-x6h7ibnq.js.br                    1.31kb / brotliCompress: 0.50kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/SettingsSecurityPage-DDEoSTmr.js.br        4.37kb / brotliCompress: 1.06kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/StructuredData-DbwdFDHX.js.br              2.55kb / brotliCompress: 0.73kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Security-_0lkrlTG.js.br                    4.19kb / brotliCompress: 1.05kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/TemplateGallery-Xl8AOOVG.js.br             8.22kb / brotliCompress: 2.46kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/Terms-82yzPyVl.js.br                       3.84kb / brotliCompress: 0.97kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/vendor-motion-JbetARMB.js.br               30.65kb / brotliCompress: 9.67kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/vendor-icons-C0piFm7E.js.br                66.66kb / brotliCompress: 11.08kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/vendor-router-DxoLl1No.js.br               35.49kb / brotliCompress: 11.53kb
+dist/C:/Users/emili/Downloads/New folder/test/index.html.br                                     3.84kb / brotliCompress: 1.08kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/RestaurantMenu-B9xodNlE.js.br              95.05kb / brotliCompress: 17.33kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/index-CxaHvJSW.css.br                      175.51kb / brotliCompress: 18.80kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/SuperAdmin-CKbLScyG.js.br                  121.71kb / brotliCompress: 18.31kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/vendor-model-viewer-CnU7o4Vg.js.br         202.31kb / brotliCompress: 47.13kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/vendor-supabase-D544Kwsx.js.br             158.13kb / brotliCompress: 35.64kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/vendor-react-C0V6Iq5w.js.br                176.59kb / brotliCompress: 47.48kb
+dist/C:/Users/emili/Downloads/New folder/test/locales/de/translation.json.br                    155.64kb / brotliCompress: 36.44kb
+dist/C:/Users/emili/Downloads/New folder/test/locales/en/translation.json.br                    149.07kb / brotliCompress: 32.66kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/vendor-CIW3Sgy8.js.br                      231.05kb / brotliCompress: 67.07kb
+dist/C:/Users/emili/Downloads/New folder/test/locales/ru/translation.json.br                    205.15kb / brotliCompress: 38.81kb
+dist/C:/Users/emili/Downloads/New folder/test/locales/es/translation.json.br                    157.04kb / brotliCompress: 34.96kb
+dist/C:/Users/emili/Downloads/New folder/test/assets/vendor-three-BZ_itjsD.js.br                709.87kb / brotliCompress: 159.96kb
+
+
+Γ£ù Build failed in 11.39s
+error during build:
+src/pages/SuperAdmin.tsx (44:7): "default" is not exported by "src/components/portal/WorkflowPipeline.tsx", imported by "src/pages/SuperAdmin.tsx".
+file: C:/Users/emili/Downloads/New folder/test/src/pages/SuperAdmin.tsx:44:7
+
+42: import { MultiMarketView } from '@/components/portal/MultiMarketView';
+43: import { AutomatedReporting } from '@/components/portal/AutomatedReporting';
+44: import WorkflowPipeline from '@/components/portal/WorkflowPipeline';
+           ^
+45: import Skeleton, { SkeletonCard, SkeletonRow } from '@/components/Skeleton';
+46: import { AssetsProvider, ProjectsProvider } from '@/services/dataProvider';
+
+    at getRollupError (file:///C:/Users/emili/Downloads/New%20folder/test/node_modules/rollup/dist/es/shared/parseAst.js:402:41)
+    at error (file:///C:/Users/emili/Downloads/New%20folder/test/node_modules/rollup/dist/es/shared/parseAst.js:398:42)
+    at Module.error (file:///C:/Users/emili/Downloads/New%20folder/test/node_modules/rollup/dist/es/shared/node-entry.js:17040:16)
+    at Module.traceVariable (file:///C:/Users/emili/Downloads/New%20folder/test/node_modules/rollup/dist/es/shared/node-entry.js:17452:29)
+    at ModuleScope.findVariable (file:///C:/Users/emili/Downloads/New%20folder/test/node_modules/rollup/dist/es/shared/node-entry.js:15070:39)
+    at ReturnValueScope.findVariable (file:///C:/Users/emili/Downloads/New%20folder/test/node_modules/rollup/dist/es/shared/node-entry.js:5673:38)
+    at FunctionBodyScope.findVariable (file:///C:/Users/emili/Downloads/New%20folder/test/node_modules/rollup/dist/es/shared/node-entry.js:5673:38)
+    at Identifier.bind (file:///C:/Users/emili/Downloads/New%20folder/test/node_modules/rollup/dist/es/shared/node-entry.js:5447:40)
+    at CallExpression.bind (file:///C:/Users/emili/Downloads/New%20folder/test/node_modules/rollup/dist/es/shared/node-entry.js:2825:28)
+    at CallExpression.bind (file:///C:/Users/emili/Downloads/New%20folder/test/node_modules/rollup/dist/es/shared/node-entry.js:12179:15)

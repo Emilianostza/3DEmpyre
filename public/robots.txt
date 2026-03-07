@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://3dempyre.com/sitemap.xml
+
+# Disallow admin/app routes from crawling
+Disallow: /app/
+Disallow: /portal/
+Disallow: /editor/

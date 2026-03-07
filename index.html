@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#09090b" />
+    <!-- Prevent FOUC: apply saved theme before first paint (external to comply with CSP) -->
+    <script src="/theme-init.js"></script>
+
+    <title>3D Empyre - Professional Photogrammetry Services</title>
+    <meta
+      name="description"
+      content="Professional 3D capture services for enterprise. We digitize the physical world with expert photogrammetry for restaurants, museums, and e-commerce."
+    />
+    <meta
+      name="keywords"
+      content="3D capture, photogrammetry, 3D scanning, AR, VR, restaurant menus, museum digitization, e-commerce 3D"
+    />
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://3dempyre.com/" />
+    <meta property="og:site_name" content="3D Empyre" />
+    <meta property="og:title" content="3D Empyre - Professional Photogrammetry Services" />
+    <meta
+      property="og:description"
+      content="Professional 3D capture services for enterprise. We digitize the physical world with expert photogrammetry."
+    />
+    <meta property="og:image" content="https://3dempyre.com/og-image.jpg" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="3D Empyre" />
+    <meta name="twitter:description" content="Professional 3D capture services for enterprise" />
+    <meta name="twitter:image" content="https://3dempyre.com/og-image.jpg" />
+
+    <!-- Favicon + Web App Manifest -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- gstatic.com also serves model-viewer's Draco decoder WASM -->
+    <link rel="dns-prefetch" href="https://www.gstatic.com" />
+
+    <!-- Typography — DM Sans (body) + Syne (display headings) + Outfit (modern sans) + Playfair Display (classic serif) -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="/src/index.css" />
+  </head>
+  <body class="bg-zinc-950 text-zinc-100 font-sans antialiased">
+    <noscript>
+      <div
+        style="
+          padding: 2rem;
+          text-align: center;
+          color: #a1a1aa;
+          font-family: system-ui, sans-serif;
+        "
+      >
+        <h1 style="color: #fff; margin-bottom: 0.5rem">3D Empyre</h1>
+        <p>Please enable JavaScript to use this application.</p>
+      </div>
+    </noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/index.tsx"></script>
+  </body>
+</html>
