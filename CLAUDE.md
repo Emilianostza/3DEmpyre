@@ -5,7 +5,7 @@ Primary objective for review tasks: improve the website’s clarity, trust, conv
 ## Project
 
 React 19 + Vite 6 + Tailwind CSS 3 SPA for a managed 3D capture service serving restaurants and enterprises.
-Supabase backend, React Router v7 with lazy routes, deployed on Netlify.
+Supabase backend, React Router v7 with lazy routes, deployed on Cloudflare Workers.
 
 This is a production website. Improve it carefully. Prefer small safe changes with clear user benefit.
 
@@ -143,12 +143,15 @@ Watch for:
 ## Build & Dev
 
 Available commands:
-- `npm run dev` — local dev server
+- `npm run dev` — local Vite dev server (frontend only)
 - `npm run build` — production build (Vite)
 - `npm run check` — full CI pipeline (format → lint → typecheck → test:coverage → knip → audit)
 - `npm run lint` — ESLint with `--max-warnings=0`
 - `npm run typecheck` — `tsc --noEmit`
 - `npm run knip` — dead code detection (config in `knip.json`)
+- `npm run worker:dev` — local Cloudflare Worker (full stack on port 8787)
+- `npm run worker:deploy` — deploy to Cloudflare production
+- `npm run worker:typecheck` — typecheck Worker files (`tsconfig.worker.json`)
 
 Rules:
 - All checks must pass before merging
@@ -222,27 +225,42 @@ Add "No credit card required" reassurance near primary CTAs where appropriate.
 - Never push directly to `main`
 - Branch → PR → merge
 - `.claude/worktrees/` entries may appear as gitlinks in the index; ignore them and do not try to fix submodule errors related to these
-- Repo: `github.com/Emilianostza/site`
+- Repo: `github.com/Emilianostza/managed-capture-3d-platform`
 
-## Environment Boundaries
+## Deployment — Cloudflare Workers
 
-### Cloudflare — IGNORE COMPLETELY
+Live URL: `https://3d-empyre.emilianostza.workers.dev`
+Repo: `github.com/Emilianostza/managed-capture-3d-platform`
 
-Cloudflare is not used for this project.
-Do not touch Cloudflare config.
-Do not troubleshoot Cloudflare CI failures.
-Do not update any Cloudflare-related files.
-Only revisit if explicitly asked.
+### Worker Architecture
 
-### Netlify — DO NOT DEPLOY
+- Entry: `worker/index.ts` — routes `/api/*` to handlers, delegates static to `env.ASSETS`
+- Config: `wrangler.toml` — `[assets]` serves `dist/` with SPA fallback
+- Shared modules: `worker/shared/` (cookies, csrf, roles, types)
+- 7 API routes: auth-login, auth-session, auth-refresh, auth-logout, auth-signup, assets-signed-url, gemini-proxy
+- Static headers: `public/_headers` (immutable cache for hashed assets, security headers)
 
-Do not deploy or push to Netlify unless explicitly asked.
-Local builds only (`npm run build`) unless told otherwise.
+### Deploy Commands
+
+- `npm run worker:dev` — local Worker dev server (port 8787)
+- `npm run worker:deploy` — deploy to Cloudflare production
+- `npm run worker:build` — dry-run build
+- `npm run worker:typecheck` — typecheck Worker files only
+
+### Secrets (set via `wrangler secret put`)
+
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `GEMINI_API_KEY`
+
+### Local Testing
+
+Copy `.dev.vars.example` → `.dev.vars` and fill in real credentials.
+Run `npm run build` then `npm run worker:dev`.
 
 ## Gotchas
 
 - ESLint globals are manually listed in `eslint.config.js`; if using a new browser API (such as `getComputedStyle` or `CSS`), add it to globals or ESLint will flag `no-undef`
-- `scripts/` and `netlify/` are excluded from ESLint; they follow their own patterns
+- `scripts/` are excluded from ESLint; they follow their own patterns
 - `no-non-null-assertion` is disabled for test files; `!` is allowed in tests
 - Unused vars/functions should be prefixed with `_` rather than deleted if reserved for future use
 - In `src/`, only `console.warn` and `console.error` are allowed

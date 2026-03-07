@@ -1,5 +1,4 @@
 # Cloudflare Workers Configuration — 3D Empyre
-# Parallel migration: Netlify setup remains intact until cutover.
 
 name = "3d-empyre"
 main = "worker/index.ts"

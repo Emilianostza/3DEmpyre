@@ -2,7 +2,7 @@
  * Authentication Context - PHASE 3
  *
  * PHASE 3: HttpOnly cookie-based auth via server-side proxy.
- * Auth operations go through Netlify Functions that manage HttpOnly cookies.
+ * Auth operations go through server-side API routes that manage HttpOnly cookies.
  * localStorage is no longer used for token storage.
  *
  * Features:

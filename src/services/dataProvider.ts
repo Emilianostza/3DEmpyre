@@ -11,7 +11,7 @@
  * Authorization Model: RLS-first
  * - Client talks directly to Supabase; all permissions enforced via Row Level Security policies.
  * - Each table/storage bucket has RLS policies scoped to org_id and role.
- * - Netlify Functions are used ONLY for privileged server-side operations:
+ * - Server-side API routes are used ONLY for privileged operations:
  *     • gemini-proxy  — AI features (employees only, rate-limited)
  *     • assets-signed-url — private asset download URLs
  *     • publish        — future: publish/deploy workflows

@@ -2,7 +2,7 @@
  * Authentication API Service
  *
  * PHASE 2 → 3: HttpOnly cookie-based auth via server-side proxy.
- * Auth operations route through Netlify Functions that manage HttpOnly cookies.
+ * Auth operations route through server-side API routes that manage HttpOnly cookies.
  * Data queries still use the Supabase SDK directly (for RLS).
  *
  * Feature flag: VITE_USE_MOCK_DATA
