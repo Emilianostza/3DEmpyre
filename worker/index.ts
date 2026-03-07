@@ -1,9 +1,9 @@
 /**
- * Cloudflare Worker Entry Point — Managed Capture 3D Platform
+ * Cloudflare Worker Entry Point — 3D Empyre
  *
  * Routes /api/* requests to handler functions.
- * All other requests are served by the [assets] binding (static files from dist/).
- * SPA fallback is handled by `not_found_handling = "single-page-application"` in wrangler.toml.
+ * Static files are served by the [assets] binding (dist/).
+ * Cache + security headers for static assets are set via public/_headers.
  */
 
 import type { Env } from './shared/types';
@@ -15,13 +15,36 @@ import { handleSignup } from './routes/auth-signup';
 import { handleAssetsSignedUrl } from './routes/assets-signed-url';
 import { handleGeminiProxy } from './routes/gemini-proxy';
 
-/** Security headers applied to all /api/* responses. */
-function withSecurityHeaders(response: Response): Response {
-  const headers = new Headers(response.headers);
-  headers.set('X-Content-Type-Options', 'nosniff');
-  headers.set('X-Frame-Options', 'DENY');
-  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+// ---------------------------------------------------------------------------
+// Route map — O(1) lookup instead of if/else chain
+// ---------------------------------------------------------------------------
+type RouteHandler = (request: Request, env: Env) => Promise<Response>;
 
+const routes: Record<string, RouteHandler> = {
+  '/api/auth/login': handleLogin,
+  '/api/auth/session': handleSession,
+  '/api/auth/refresh': handleRefresh,
+  '/api/auth/logout': handleLogout,
+  '/api/auth/signup': handleSignup,
+  '/api/assets/signed-url': handleAssetsSignedUrl,
+  '/api/gemini': handleGeminiProxy,
+};
+
+// ---------------------------------------------------------------------------
+// Security headers for API responses
+// ---------------------------------------------------------------------------
+const API_HEADERS: Record<string, string> = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+};
+
+function withApiHeaders(response: Response): Response {
+  const headers = new Headers(response.headers);
+  for (const [k, v] of Object.entries(API_HEADERS)) {
+    headers.set(k, v);
+  }
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -29,47 +52,41 @@ function withSecurityHeaders(response: Response): Response {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Fetch handler
+// ---------------------------------------------------------------------------
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const path = url.pathname;
 
-    // Only handle /api/* routes — everything else is served by the static-asset binding
+    // Static assets — delegate to Cloudflare asset binding
+    // Headers set via public/_headers file
     if (!path.startsWith('/api/')) {
       return env.ASSETS.fetch(request);
     }
 
-    let response: Response;
-
-    try {
-      if (path === '/api/auth/login') {
-        response = await handleLogin(request, env);
-      } else if (path === '/api/auth/session') {
-        response = await handleSession(request, env);
-      } else if (path === '/api/auth/refresh') {
-        response = await handleRefresh(request, env);
-      } else if (path === '/api/auth/logout') {
-        response = await handleLogout(request, env);
-      } else if (path === '/api/auth/signup') {
-        response = await handleSignup(request, env);
-      } else if (path === '/api/assets/signed-url') {
-        response = await handleAssetsSignedUrl(request, env);
-      } else if (path === '/api/gemini') {
-        response = await handleGeminiProxy(request, env);
-      } else {
-        response = new Response(JSON.stringify({ error: 'Not found' }), {
+    // API routing
+    const handler = routes[path];
+    if (!handler) {
+      return withApiHeaders(
+        new Response(JSON.stringify({ error: 'Not found' }), {
           status: 404,
           headers: { 'Content-Type': 'application/json' },
-        });
-      }
-    } catch (err) {
-      console.error('[worker] Unhandled error:', err);
-      response = new Response(JSON.stringify({ error: 'Internal server error' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+        }),
+      );
     }
 
-    return withSecurityHeaders(response);
+    try {
+      return withApiHeaders(await handler(request, env));
+    } catch (err) {
+      console.error('[worker] Unhandled error:', err);
+      return withApiHeaders(
+        new Response(JSON.stringify({ error: 'Internal server error' }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      );
+    }
   },
 } as { fetch: (request: Request, env: Env) => Promise<Response> };

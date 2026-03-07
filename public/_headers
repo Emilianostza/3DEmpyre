@@ -1,0 +1,37 @@
+# Cloudflare custom headers for static assets
+# This file is copied to dist/ during build and processed by Cloudflare.
+
+# ── All pages ──────────────────────────────────────────────────────
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# ── HTML pages — never cache (always fetch latest SPA shell) ──────
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# ── Hashed assets — immutable, cache for 1 year ──────────────────
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# ── Fonts — long cache ────────────────────────────────────────────
+/assets/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+# ── 3D models — long cache ────────────────────────────────────────
+/models/*
+  Cache-Control: public, max-age=86400
+
+# ── Translation files — short cache (may update) ─────────────────
+/locales/*
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+
+# ── Manifest, robots, sitemap — moderate cache ────────────────────
+/manifest.json
+  Cache-Control: public, max-age=3600
+/robots.txt
+  Cache-Control: public, max-age=86400
+/sitemap.xml
+  Cache-Control: public, max-age=3600

@@ -1,10 +1,15 @@
-# Cloudflare Workers Configuration — Managed Capture 3D Platform
+# Cloudflare Workers Configuration — 3D Empyre
 # Parallel migration: Netlify setup remains intact until cutover.
 
 name = "3d-empyre"
 main = "worker/index.ts"
-compatibility_date = "2025-04-01"
+compatibility_date = "2025-12-01"
 compatibility_flags = ["nodejs_compat"]
+
+# Reduce cold-start: keep Worker warm in regions with traffic
+# (free plan gets 1 instance; paid plans benefit more)
+[placement]
+mode = "smart"
 
 [assets]
 directory = "./dist"
