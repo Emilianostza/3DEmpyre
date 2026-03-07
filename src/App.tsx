@@ -17,6 +17,7 @@ import { pageVariants } from '@/components/motion/presets';
 import PageLoader from '@/components/PageLoader';
 import { PortalRole } from '@/types';
 import { queryClient } from '@/lib/queryClient';
+import { usePrefetchRoutes } from '@/hooks/usePrefetchRoutes';
 
 // Dev-only inspector — right-click any element to copy its location info
 const DevInspector = import.meta.env.DEV
@@ -292,6 +293,7 @@ const AnimatedRoutes: React.FC = () => {
 const AppContent: React.FC = () => {
   const { toasts, removeToast } = useToast();
   const { isOpen: isCmdOpen, open: openCmd, close: closeCmd } = useCommandPalette();
+  usePrefetchRoutes();
 
   return (
     <>

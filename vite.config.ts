@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       react(),
-      // Gzip pre-compression — served by Netlify/CDN automatically
+      // Gzip pre-compression — served by Cloudflare edge
       viteCompression({
         algorithm: 'gzip',
         threshold: 1024,

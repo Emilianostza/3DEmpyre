@@ -502,7 +502,7 @@ const INITIAL_ITEMS: MenuItem[] = [
     category: 'starters',
     desc: 'A5 wagyu, quail egg yolk, capers, shallots, dijon, served with crostini.',
     price: '$28',
-    image: '/images/2N2A1724.JPG',
+    image: '/images/2N2A1724.webp',
     calories: '380 kcal',
     tags: ['Raw', "Chef's Pick"],
     allergens: ['Egg', 'Gluten'],

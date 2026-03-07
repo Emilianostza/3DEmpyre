@@ -101,15 +101,18 @@ export function extractRefreshTokenFromRequest(request: Request): string | null 
 /**
  * Build a JSON Response with optional Set-Cookie headers.
  * Uses standard Headers.append() for multiple Set-Cookie values.
+ *
+ * @param cacheControl - Override Cache-Control header (default: 'no-store' for auth safety)
  */
 export function jsonResponse(
   statusCode: number,
   body: Record<string, unknown>,
   setCookies?: string[],
+  cacheControl = 'no-store',
 ): Response {
   const headers = new Headers({
     'Content-Type': 'application/json',
-    'Cache-Control': 'no-store',
+    'Cache-Control': cacheControl,
   });
 
   if (setCookies) {

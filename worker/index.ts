@@ -38,6 +38,7 @@ const API_HEADERS: Record<string, string> = {
   'X-Frame-Options': 'DENY',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+  'Vary': 'Accept, Cookie',
 };
 
 function withApiHeaders(response: Response): Response {

@@ -20,13 +20,17 @@
 /assets/*.woff2
   Cache-Control: public, max-age=31536000, immutable
 
-# ── 3D models — long cache ────────────────────────────────────────
+# ── 3D models — long cache (content rarely changes) ──────────────
 /models/*
-  Cache-Control: public, max-age=86400
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
 
-# ── Translation files — short cache (may update) ─────────────────
+# ── Translation files — 1 week cache, serve stale for 30 days ────
 /locales/*
-  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+  Cache-Control: public, max-age=604800, stale-while-revalidate=2592000
+
+# ── Images — long cache with revalidation ─────────────────────────
+/images/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
 
 # ── Manifest, robots, sitemap — moderate cache ────────────────────
 /manifest.json
@@ -35,3 +39,7 @@
   Cache-Control: public, max-age=86400
 /sitemap.xml
   Cache-Control: public, max-age=3600
+
+# ── Favicon — long cache ──────────────────────────────────────────
+/favicon.svg
+  Cache-Control: public, max-age=2592000

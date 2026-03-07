@@ -289,6 +289,31 @@ const Home: React.FC = () => {
         </div>
       </section>
 
+      {/* Brand Story — Why "3D Empyre"? */}
+      <section
+        data-section="brand-story"
+        className="py-20 bg-zinc-950 border-t border-zinc-800/40 relative overflow-hidden"
+      >
+        {/* Ambient glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[300px] bg-brand-600/8 blur-[100px] rounded-full pointer-events-none" />
+
+        <div className="relative container mx-auto px-4 max-w-2xl text-center">
+          <p className="inline-block text-xs font-bold uppercase tracking-widest text-brand-400 mb-4 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20">
+            {t('home.brandStory.badge')}
+          </p>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-6">
+            {t('home.brandStory.heading')}{' '}
+            <span className="text-gradient">{t('home.brandStory.headingHighlight')}</span>
+          </h2>
+          <p className="text-zinc-400 leading-relaxed mb-4">
+            {t('home.brandStory.p1')}
+          </p>
+          <p className="text-zinc-500 leading-relaxed text-sm">
+            {t('home.brandStory.p2')}
+          </p>
+        </div>
+      </section>
+
       {/* Before / After — interactive demo */}
       <section
         data-section="before-after"
