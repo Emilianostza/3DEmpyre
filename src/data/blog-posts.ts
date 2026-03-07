@@ -18,7 +18,7 @@ export const BLOG_POSTS: BlogPost[] = [
     category: 'Industry Trends',
     publishedAt: '2026-02-10',
     readingTime: 6,
-    author: { name: 'MC3D Team', role: 'Content Team' },
+    author: { name: '3D Empyre Team', role: 'Content Team' },
     body: `The era of flat product photography is drawing to a close. For decades, brands relied on carefully staged photo shoots to showcase their products, but consumer expectations have fundamentally shifted. Shoppers in 2026 expect to rotate, zoom, and explore items from every angle before clicking "add to cart." Studies from leading e-commerce platforms show that product listings with interactive 3D viewers see up to 94% higher conversion rates compared to those with static images alone. The gap between what a photograph can communicate and what a consumer needs to feel confident in a purchase has never been wider.
 
 Augmented reality is accelerating this shift. With AR-capable browsers now standard on both iOS and Android, shoppers can place a virtual version of a product in their living room, on their desk, or on their wrist without downloading a single app. Furniture retailers, fashion brands, and electronics manufacturers that have adopted AR-ready 3D models report significant drops in return rates because customers have a much more accurate sense of size, color, and finish before they buy. The technology that once felt futuristic is now table stakes for competitive e-commerce.
@@ -37,7 +37,7 @@ The cost and complexity that once made 3D capture prohibitive for most businesse
     category: 'Case Studies',
     publishedAt: '2026-02-05',
     readingTime: 5,
-    author: { name: 'MC3D Team', role: 'Content Team' },
+    author: { name: '3D Empyre Team', role: 'Content Team' },
     body: `The restaurant industry is in the middle of a quiet revolution. A growing number of establishments, from fast-casual chains to fine dining venues, are replacing static menu photos with interactive 3D models that diners can view in augmented reality right at their table. The results have been remarkable. Restaurants that have adopted AR menus report average order value increases of 25 to 35 percent, with dessert and appetizer orders seeing the largest gains. When guests can see a photorealistic, true-to-scale 3D rendering of a dish on their table before ordering, hesitation drops and confidence rises.
 
 The mechanics are straightforward. Each menu item is professionally captured using photogrammetry, producing a high-fidelity 3D model that accurately represents the dish's colors, textures, and proportions. These models are hosted on the web and accessed via QR codes printed on the physical menu or table tent. When a diner scans the code on their phone, the dish appears in AR on their table surface, no app download required. They can rotate it, zoom in to see details like garnish and plating, and get a genuine sense of portion size. For restaurants with complex or unfamiliar dishes, this eliminates the guesswork that often leads to disappointment or returned plates.
@@ -56,7 +56,7 @@ Implementation has become far more accessible than most restaurateurs expect. A 
     category: 'Guides',
     publishedAt: '2026-01-28',
     readingTime: 8,
-    author: { name: 'MC3D Team', role: 'Content Team' },
+    author: { name: '3D Empyre Team', role: 'Content Team' },
     body: `3D scanning for e-commerce is the process of creating accurate, interactive digital replicas of physical products that customers can explore on your website or in augmented reality. Unlike traditional product photography, which captures a single perspective, 3D scanning produces a complete three-dimensional model that can be rotated, zoomed, and viewed from any angle. For online retailers, this means bridging the gap between the tactile in-store experience and the convenience of digital shopping. The result is better-informed customers, higher conversion rates, and fewer returns.
 
 There are two primary technologies used in commercial 3D product scanning: photogrammetry and LiDAR. Photogrammetry works by taking dozens or hundreds of overlapping photographs of an object from different angles, then using specialized software to reconstruct a 3D mesh with photorealistic textures. It excels at capturing color, surface detail, and visual fidelity, making it ideal for products where appearance is paramount, such as food, fashion, jewelry, and home decor. LiDAR, on the other hand, uses laser pulses to measure precise distances and build highly accurate geometric models. It is particularly strong for objects where dimensional accuracy matters more than visual detail, such as industrial parts or architectural elements. Many professional workflows combine both approaches to get the best of both worlds.

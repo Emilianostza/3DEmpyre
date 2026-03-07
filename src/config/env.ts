@@ -25,10 +25,6 @@ interface EnvConfig {
   // Storage Configuration
   storageBucket: string;
 
-  // Auth Configuration
-  jwtExpiresIn: number;
-  jwtRefreshExpiresIn: number;
-
   // Supabase Configuration
   supabaseUrl: string;
   supabaseAnonKey: string;
@@ -57,10 +53,6 @@ function validateEnv(): EnvConfig {
 
   // Storage Configuration
   const storageBucket = import.meta.env.VITE_STORAGE_BUCKET || 's3.example.com/managed-capture';
-
-  // Auth Configuration
-  const jwtExpiresIn = parseInt(import.meta.env.VITE_JWT_EXPIRES_IN || '3600', 10);
-  const jwtRefreshExpiresIn = parseInt(import.meta.env.VITE_JWT_REFRESH_EXPIRES_IN || '604800', 10);
 
   // Supabase Configuration
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
@@ -124,8 +116,6 @@ function validateEnv(): EnvConfig {
     apiBaseUrl,
     apiTimeout,
     storageBucket,
-    jwtExpiresIn,
-    jwtRefreshExpiresIn,
     supabaseUrl,
     supabaseAnonKey,
     geminiProxyUrl,

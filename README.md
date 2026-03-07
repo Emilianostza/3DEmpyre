@@ -119,45 +119,30 @@ _Note: Any password will work for these accounts._
 
 ## 🚀 Deployment (Production)
 
-### Stage 1: Netlify + Supabase + Storage
+### Cloudflare Workers + Supabase
 
-Deploy to production using Netlify for hosting, Supabase for database & auth, and Supabase Storage for 3D assets.
+Deploy to production using Cloudflare Workers for hosting & API, Supabase for database & auth, and Supabase Storage for 3D assets.
 
-**Quick Start**:
+**Deploy Steps**:
 
-1. **Read the full guide**: [`docs/DEPLOYMENT_STAGE1.md`](docs/DEPLOYMENT_STAGE1.md)
-
-2. **TL;DR Deploy Steps**:
-
-   ```bash
-   # 1. Create Supabase project at https://app.supabase.com
-   # 2. Apply database schema (SQL file in dashboard)
-   # 3. Connect repository to Netlify at https://app.netlify.com
-   # 4. Set env vars in Netlify:
-   #    - VITE_SUPABASE_URL
-   #    - VITE_SUPABASE_ANON_KEY
-   # 5. Push to main branch → Auto-deploys
-   git add .
-   git commit -m "chore: Stage 1 deployment ready"
-   git push origin main
-   ```
-
-3. **Verify Deployment**:
-   - Check Netlify build: https://app.netlify.com → Deploys tab
-   - Test deep route refresh: `/login` → should work
-   - Sign in with real credentials
-   - Upload a 3D model to test storage
+```bash
+# 1. Create Supabase project at https://app.supabase.com
+# 2. Apply database schema (SQL file in dashboard)
+# 3. Set Worker secrets:
+wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+wrangler secret put GEMINI_API_KEY
+# 4. Deploy:
+npm run worker:deploy
+```
 
 **What's Included**:
 
-- ✅ SPA fallback for client-side routing
-- ✅ Netlify Functions for server-side logic
+- ✅ Cloudflare Workers for API & SPA hosting
+- ✅ Cookie-based auth (HttpOnly, Secure)
 - ✅ Supabase Auth (email + password)
 - ✅ Supabase Storage (3D models + thumbnails)
 - ✅ Row Level Security (RLS) policies
-- ✅ Audit logging
-
-**Status**: Production-ready for Stage 1. No real backend code needed.
+- ✅ Edge caching with aggressive static asset headers
 
 ---
 

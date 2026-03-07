@@ -1,7 +1,7 @@
 /**
  * Cloudflare Worker Route: Auth Login
  *
- * Ported from netlify/functions/auth-login.ts.
+ * Cloudflare Worker route handler.
  * Authenticates user via Supabase, sets HttpOnly cookies with tokens,
  * and returns user profile + Supabase session for client-side RLS sync.
  *

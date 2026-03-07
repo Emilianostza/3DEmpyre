@@ -1,7 +1,7 @@
 /**
  * Cloudflare Worker Route: Auth Token Refresh
  *
- * Ported from netlify/functions/auth-refresh.ts.
+ * Cloudflare Worker route handler.
  * Reads the refresh token from HttpOnly cookie, obtains new tokens
  * from Supabase, and updates cookies.
  *

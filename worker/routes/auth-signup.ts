@@ -1,7 +1,7 @@
 /**
  * Cloudflare Worker Route: Auth Sign-Up
  *
- * Ported from netlify/functions/auth-signup.ts.
+ * Cloudflare Worker route handler.
  * Handles user registration via Supabase Auth REST API.
  * Does NOT set HttpOnly cookies (this is an older-generation function;
  * aligning it with the cookie pattern is a separate task).

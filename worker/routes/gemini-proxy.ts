@@ -1,7 +1,7 @@
 /**
  * Cloudflare Worker Route: Gemini API Proxy
  *
- * Ported from netlify/functions/gemini-proxy.ts.
+ * Cloudflare Worker route handler.
  * Proxies requests to the Google Gemini API, keeping the API key server-side.
  * Auth-gated: only employee roles can access.
  *

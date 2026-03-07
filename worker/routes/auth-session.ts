@@ -1,7 +1,7 @@
 /**
  * Cloudflare Worker Route: Auth Session Check
  *
- * Ported from netlify/functions/auth-session.ts.
+ * Cloudflare Worker route handler.
  * Validates the access token cookie and returns the user profile.
  * Used for session restore on page load.
  *

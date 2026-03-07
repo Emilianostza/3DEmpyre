@@ -5,7 +5,7 @@
  * and any other site-level values that appear in SEO tags,
  * structured data, and across components.
  *
- * No component should hardcode "managedcapture3d.com" — import from here.
+ * No component should hardcode "3dempyre.com" — import from here.
  */
 
 // ── Brand ────────────────────────────────────────────────────────
@@ -13,12 +13,12 @@ export const SITE_NAME = '3D Empyre';
 export const SITE_NAME_SHORT = '3D Empyre';
 
 // ── URLs ─────────────────────────────────────────────────────────
-export const SITE_ORIGIN = 'https://managedcapture3d.com';
+export const SITE_ORIGIN = 'https://3dempyre.com';
 export const SITE_LOGO = `${SITE_ORIGIN}/logo.png`;
 export const SITE_OG_IMAGE = `${SITE_ORIGIN}/og-image.jpg`;
 
 // ── Contact ──────────────────────────────────────────────────────
-export const CONTACT_EMAIL = 'info@managedcapture.com';
+export const CONTACT_EMAIL = 'info@3dempyre.com';
 
 // ── 3D Model assets ─────────────────────────────────────────────
 const MODEL_BASE = '/models/AdvancedExport';

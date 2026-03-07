@@ -1,7 +1,7 @@
 /**
  * Cloudflare Worker Route: Asset Signed URL
  *
- * Ported from netlify/functions/assets-signed-url.ts.
+ * Cloudflare Worker route handler.
  * Generates a time-limited signed download URL for a private asset
  * stored in Supabase Storage. Validates JWT and verifies org ownership.
  *

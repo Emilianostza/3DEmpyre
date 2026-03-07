@@ -1,7 +1,7 @@
 /**
  * Cookie Helpers for Cloudflare Workers Auth Proxy
  *
- * Ported from netlify/functions/_shared/cookies.ts.
+ * Cloudflare Worker shared utility.
  * Uses standard Web APIs (Request, Response, Headers) instead of Netlify event shape.
  *
  * Cookie layout:

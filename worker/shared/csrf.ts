@@ -1,7 +1,7 @@
 /**
  * CSRF Token Helpers for Cloudflare Workers
  *
- * Ported from netlify/functions/_shared/csrf.ts.
+ * Cloudflare Worker shared utility.
  * Uses Web Crypto API (crypto.randomUUID) instead of Node.js crypto import.
  *
  * The mc_csrf cookie is non-HttpOnly so JavaScript can read it

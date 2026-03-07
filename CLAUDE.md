@@ -216,7 +216,7 @@ Add "No credit card required" reassurance near primary CTAs where appropriate.
 
 - Managed capture only; this is not self-serve capture
 - Employees can create customer accounts; customers can view and modify only content that has been provided to them
-- Use the canonical domain `managedcapture3d.com`
+- Use the canonical domain `3dempyre.com`
 - SOC 2 claim must be "SOC 2 Compliant", not "Type II"
 - Only 1 testimonial exists; use singular phrasing such as "What our client says" where needed
 

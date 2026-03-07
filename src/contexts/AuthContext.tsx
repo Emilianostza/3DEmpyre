@@ -68,14 +68,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    */
   useEffect(() => {
     const restoreSession = async () => {
-      // One-time cleanup: remove stale localStorage keys from pre-cookie auth
-      try {
-        localStorage.removeItem('managed_capture_auth_token');
-        localStorage.removeItem('managed_capture_refresh_token');
-      } catch {
-        // Ignore — localStorage may be unavailable (SSR, privacy mode)
-      }
-
       try {
         const currentUserDTO = await AuthAPI.getCurrentUser();
         const currentUser = userFromDTO(currentUserDTO);

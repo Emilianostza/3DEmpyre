@@ -21,7 +21,7 @@ import {
 import { AssetUploader } from '@/components/editor/AssetUploader';
 import { AssetsProvider } from '@/services/dataProvider';
 import { useToast } from '@/contexts/ToastContext';
-import QRCode from 'react-qr-code';
+import { QRCodeDisplay } from '@/components/common/QRCodeDisplay';
 import { SEO } from '@/components/common/SEO';
 
 const ModelEditor: React.FC = () => {
@@ -695,14 +695,7 @@ const ModelEditor: React.FC = () => {
 
               {/* QR Code */}
               <div className="flex items-center gap-4 pt-4 border-t border-stone-800/50">
-                <div className="w-16 h-16 bg-white p-1 rounded-lg flex items-center justify-center">
-                  <QRCode
-                    value={window.location.href}
-                    size={56}
-                    style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
-                    viewBox={`0 0 256 256`}
-                  />
-                </div>
+                <QRCodeDisplay url={window.location.href} size="sm" />
                 <div className="flex-1">
                   <div className="font-bold text-stone-200 text-sm mb-1">{t('editor.qrCode')}</div>
                   <p className="text-xs text-stone-500">{t('editor.scanToView')}</p>

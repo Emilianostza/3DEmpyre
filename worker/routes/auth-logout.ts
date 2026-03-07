@@ -1,7 +1,7 @@
 /**
  * Cloudflare Worker Route: Auth Logout
  *
- * Ported from netlify/functions/auth-logout.ts.
+ * Cloudflare Worker route handler.
  * Clears HttpOnly auth cookies and signs out via Supabase admin API.
  *
  * POST /api/auth/logout

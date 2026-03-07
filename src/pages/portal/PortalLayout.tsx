@@ -303,6 +303,7 @@ const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => 
                 <button
                   className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-lg text-sm font-bold transition-colors"
                   title={t('portal.help')}
+                  aria-label={t('portal.help')}
                 >
                   <LifeBuoy className="w-4 h-4" />
                   <span>{t('portal.help')}</span>
@@ -323,6 +324,7 @@ const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => 
             <button
               onClick={handleLogout}
               title={t('portal.signOut')}
+              aria-label={t('portal.signOut')}
               className="p-2 rounded-lg text-zinc-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
             >
               <svg
