@@ -1333,7 +1333,7 @@ const SuperAdmin: React.FC = () => {
                           { name: 'Database (PostgreSQL)', status: 'Operational', color: 'green' },
                           { name: 'Storage (Supabase)', status: 'Operational', color: 'green' },
                           { name: 'Auth Service', status: 'Operational', color: 'green' },
-                          { name: 'CDN (Netlify)', status: 'Operational', color: 'green' },
+                          { name: 'CDN', status: 'Operational', color: 'green' },
                           { name: 'Email Service', status: 'Operational', color: 'green' },
                           { name: 'Rendering Engine', status: 'Processing', color: 'blue' },
                           {

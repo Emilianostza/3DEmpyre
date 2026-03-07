@@ -19,6 +19,10 @@
     "knip": "knip",
     "audit": "npm audit --audit-level=high",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm run test:coverage && npm run knip && npm run audit",
+    "worker:dev": "wrangler dev",
+    "worker:build": "wrangler deploy --dry-run --outdir=.wrangler/dist",
+    "worker:deploy": "wrangler deploy",
+    "worker:typecheck": "tsc -p tsconfig.worker.json --noEmit",
     "prepare": "husky || true"
   },
   "dependencies": {
@@ -68,7 +72,8 @@
     "vite": "^6.2.0",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-compression2": "^2.4.0",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "wrangler": "^4.71.0"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

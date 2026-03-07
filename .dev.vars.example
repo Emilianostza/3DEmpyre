@@ -1,0 +1,24 @@
+# Cloudflare Worker — Local Development Secrets
+# Copy this file to .dev.vars and fill in real values.
+# .dev.vars is gitignored and never committed.
+#
+# Usage: npm run worker:dev
+# These values override [vars] in wrangler.toml during local development.
+
+# Supabase project URL (same as VITE_SUPABASE_URL)
+SUPABASE_URL=https://your-project.supabase.co
+
+# Supabase anonymous key (same as VITE_SUPABASE_ANON_KEY)
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# Supabase service role key (admin — never expose to client)
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# Google Gemini API key (server-side only)
+GEMINI_API_KEY=AIza...
+
+# Supabase storage bucket name (default: assets)
+SUPABASE_STORAGE_BUCKET=assets
+
+# Environment identifier (development | staging | production)
+ENVIRONMENT=development

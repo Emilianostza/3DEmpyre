@@ -19,6 +19,20 @@
   status = 200
   force = true
 
+# Asset signed-url proxy — route /api/assets/signed-url to Netlify Function
+[[redirects]]
+  from = "/api/assets/signed-url"
+  to = "/.netlify/functions/assets-signed-url"
+  status = 200
+  force = true
+
+# Gemini proxy — route /api/gemini to Netlify Function
+[[redirects]]
+  from = "/api/gemini"
+  to = "/.netlify/functions/gemini-proxy"
+  status = 200
+  force = true
+
 # SPA fallback - all routes redirect to index.html for client-side routing
 [[redirects]]
   from = "/*"

@@ -271,7 +271,7 @@ export async function getAssetDownloadUrl(assetId: string): Promise<string> {
   try {
     const asset = await getAsset(assetId);
 
-    const response = await fetch('/.netlify/functions/assets-signed-url', {
+    const response = await fetch('/api/assets/signed-url', {
       method: 'POST',
       credentials: 'include',
       headers: {

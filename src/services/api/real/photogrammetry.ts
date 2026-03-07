@@ -489,37 +489,6 @@ export async function validatePhotos(files: File[]): Promise<PhotoValidationResu
 }
 
 // ============================================================================
-// AI PREVIEW
-// ============================================================================
-
-/**
- * Request SAM 3D quick preview for a photo asset
- */
-export async function requestAIPreview(photoAssetId: string): Promise<{ previewUrl: string }> {
-  try {
-    const response = await fetch('/.netlify/functions/sam3d-preview', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ photoAssetId }),
-    });
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.error ?? `Preview request failed (${response.status})`);
-    }
-
-    const data = await response.json();
-    return { previewUrl: data.previewUrl };
-  } catch (err) {
-    if (import.meta.env.DEV) console.error('[PhotogrammetryAPI] Request AI preview failed:', err);
-    throw err;
-  }
-}
-
-// ============================================================================
 // PROJECT STATISTICS
 // ============================================================================
 

@@ -8,6 +8,7 @@ dist/
 .env
 .env.local
 .env.*.local
+.dev.vars
 
 # IDE
 .vscode/
@@ -25,5 +26,9 @@ coverage/
 # Vite
 *.local
 
+# Wrangler
+.wrangler/
+
 # Claude worktrees
 .claude/worktrees/
+.wrangler-build-test/

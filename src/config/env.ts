@@ -34,7 +34,7 @@ interface EnvConfig {
   supabaseAnonKey: string;
 
   // Gemini API (server-side only via proxy)
-  // Never expose in client code - accessed via /.netlify/functions/gemini-proxy
+  // Never expose in client code - accessed via /api/gemini
   geminiProxyUrl: string;
 }
 
@@ -67,7 +67,7 @@ function validateEnv(): EnvConfig {
   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
   // Gemini Proxy
-  const geminiProxyUrl = '/.netlify/functions/gemini-proxy';
+  const geminiProxyUrl = '/api/gemini';
 
   // ============================================================================
   // VALIDATION RULES (fail-fast in dev)

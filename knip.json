@@ -20,7 +20,8 @@
     "@types/eslint__js",
     "lint-staged",
     "vite-plugin-compression2",
-    "@vitest/coverage-v8"
+    "@vitest/coverage-v8",
+    "wrangler"
   ],
   "ignoreExportsUsedInFile": true,
   "rules": {
