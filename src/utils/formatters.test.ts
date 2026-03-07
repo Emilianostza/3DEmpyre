@@ -94,16 +94,16 @@ describe('timeAgo', () => {
 
   // --- days ----------------------------------------------------------------
   describe('returns days ago', () => {
-    it('returns "1d ago" for exactly 24 hours ago', () => {
-      expect(timeAgo('2026-02-21T12:00:00.000Z')).toBe('1d ago');
+    it('returns "1 day ago" for exactly 24 hours ago', () => {
+      expect(timeAgo('2026-02-21T12:00:00.000Z')).toBe('1 day ago');
     });
 
-    it('returns "7d ago" for 7 days ago', () => {
-      expect(timeAgo('2026-02-15T12:00:00.000Z')).toBe('7d ago');
+    it('returns "7 days ago" for 7 days ago', () => {
+      expect(timeAgo('2026-02-15T12:00:00.000Z')).toBe('7 days ago');
     });
 
-    it('returns "30d ago" for exactly 30 days ago', () => {
-      expect(timeAgo('2026-01-23T12:00:00.000Z')).toBe('30d ago');
+    it('returns "30 days ago" for exactly 30 days ago', () => {
+      expect(timeAgo('2026-01-23T12:00:00.000Z')).toBe('30 days ago');
     });
   });
 
@@ -149,15 +149,15 @@ describe('timeAgo', () => {
       const almostOneDay = new Date(NOW - 86_399_000).toISOString();
       expect(timeAgo(almostOneDay)).toBe('23h ago');
 
-      // exactly 1 day → 1d ago
+      // exactly 1 day → 1 day ago
       const exactlyOneDay = new Date(NOW - 86_400_000).toISOString();
-      expect(timeAgo(exactlyOneDay)).toBe('1d ago');
+      expect(timeAgo(exactlyOneDay)).toBe('1 day ago');
     });
 
     it('transitions from days to months at >30 days', () => {
-      // exactly 30 days → 30d ago
+      // exactly 30 days → 30 days ago
       const exactly30Days = new Date(NOW - 30 * 86_400_000).toISOString();
-      expect(timeAgo(exactly30Days)).toBe('30d ago');
+      expect(timeAgo(exactly30Days)).toBe('30 days ago');
 
       // 31 days → 1mo ago
       const exactly31Days = new Date(NOW - 31 * 86_400_000).toISOString();

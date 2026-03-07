@@ -10,6 +10,18 @@ import { Permission } from '@/types/auth';
 // Mocks
 // --------------------------------------------------------------------------
 
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, fallback?: string | Record<string, unknown>) => {
+      if (typeof fallback === 'string') return fallback;
+      if (typeof fallback === 'object' && 'defaultValue' in fallback)
+        return fallback.defaultValue as string;
+      return key;
+    },
+    i18n: { changeLanguage: vi.fn(), language: 'en' },
+  }),
+}));
+
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
@@ -68,7 +80,7 @@ describe('ProtectedRoute', () => {
     });
 
     renderProtectedRoute(<div>Protected content</div>);
-    expect(screen.getByText('Authenticating...')).toBeInTheDocument();
+    expect(screen.getByText('common.loading')).toBeInTheDocument();
   });
 
   it('redirects to /app/login when user is not authenticated', () => {

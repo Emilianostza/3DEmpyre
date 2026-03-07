@@ -112,6 +112,10 @@ vi.mock('@/constants', () => ({
       desc: 'Second step description',
     },
   ],
+  PLATFORM_CAPABILITIES: [
+    { id: 'web-ar', color: 'brand', icon: '🌐' },
+    { id: 'multi-format', color: 'purple', icon: '📦' },
+  ],
 }));
 
 // --------------------------------------------------------------------------
