@@ -144,6 +144,41 @@ export const BreadcrumbSchema: React.FC<{ items: BreadcrumbItem[] }> = ({ items 
   );
 };
 
+// ── BlogPosting Schema ───────────────────────────────────────
+
+interface BlogPostingSchemaProps {
+  headline: string;
+  description: string;
+  datePublished: string;
+  authorName: string;
+}
+
+export const BlogPostingSchema: React.FC<BlogPostingSchemaProps> = ({
+  headline,
+  description,
+  datePublished,
+  authorName,
+}) => {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline,
+    description,
+    datePublished,
+    author: { '@type': 'Person', name: authorName },
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_NAME,
+      logo: { '@type': 'ImageObject', url: SITE_LOGO },
+    },
+    mainEntityOfPage: { '@type': 'WebPage' },
+  };
+
+  return (
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+  );
+};
+
 // ── LocalBusiness Schema ──────────────────────────────────────
 
 export const LocalBusinessSchema: React.FC = () => {

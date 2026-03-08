@@ -40,7 +40,7 @@ const PLAN_META: PlanMeta[] = [
     monthlyPrice: 18,
     annualPrice: 180,
     qualityLevel: 'A',
-    storage: '2 GB',
+    storage: '1 GB',
     includedViews: 1000,
     featureCount: 5,
   },
@@ -49,7 +49,7 @@ const PLAN_META: PlanMeta[] = [
     monthlyPrice: 35,
     annualPrice: 350,
     qualityLevel: 'B',
-    storage: '8 GB',
+    storage: '3 GB',
     includedViews: 2000,
     featureCount: 6,
     highlighted: true,
@@ -59,8 +59,8 @@ const PLAN_META: PlanMeta[] = [
     monthlyPrice: 48,
     annualPrice: 480,
     qualityLevel: 'C',
-    storage: '25 GB',
-    includedViews: 5000,
+    storage: '8 GB',
+    includedViews: 3000,
     featureCount: 6,
   },
 ];
@@ -89,19 +89,14 @@ interface AddonMeta {
 }
 
 const ADDON_META: AddonMeta[] = [
-  { key: 'a1', setup: 30, monthly: 2 },
   { key: 'a2', setup: 30, monthly: 2 },
-  { key: 'a3', setup: 40, monthly: 2 },
-  { key: 'a4', setup: 20, monthly: 2 },
   { key: 'a5', setup: 30, monthly: 5 },
   { key: 'a6', setup: 30, monthly: 5 },
   { key: 'a7', setup: 50, monthly: 5 },
-  { key: 'a8', setup: 50, monthly: 5 },
   { key: 'a9', setup: 20, monthly: 2 },
   { key: 'a10', setup: 20, monthly: 2 },
   { key: 'a11', setup: 50, monthly: 10 },
   { key: 'a12', setup: 40, monthly: 2 },
-  { key: 'a13', setup: 60, monthly: 5 },
 ];
 
 // ─── FAQ META ────────────────────────────────────────────────────────────────
@@ -130,9 +125,9 @@ const QUALITY_META = [
 // ─── Production examples META ────────────────────────────────────────────────
 
 const PRODUCTION_EXAMPLES = [
-  { key: 'ex1', formula: '€100 + 10 × €20', total: 300 },
-  { key: 'ex2', formula: '€100 + 20 × €20', total: 500 },
-  { key: 'ex3', formula: '€100 + 40 × €20', total: 900 },
+  { key: 'ex1', formula: '€100 + 10 × €20', total: 300, discount: 0, discountedTotal: 300, discountedFormula: '' },
+  { key: 'ex2', formula: '€100 + 20 × €20', total: 500, discount: 10, discountedTotal: 460, discountedFormula: '€100 + 20 × €18' },
+  { key: 'ex3', formula: '€100 + 40 × €20', total: 900, discount: 20, discountedTotal: 740, discountedFormula: '€100 + 40 × €16' },
 ] as const;
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -464,7 +459,7 @@ const RestaurantPricing: React.FC = () => {
                     2,000
                   </td>
                   <td className="text-center px-4 py-3 text-xs font-mono font-semibold text-zinc-300">
-                    5,000
+                    3,000
                   </td>
                 </tr>
               </thead>
@@ -563,13 +558,27 @@ const RestaurantPricing: React.FC = () => {
               {t('restPricing.production.exampleHeading')}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {productionExamples.map(({ key, label, formula, total }) => (
-                <div key={key} className="rounded-xl bg-zinc-800 p-4 text-center">
+              {productionExamples.map(({ key, label, formula, total, discount, discountedTotal, discountedFormula }) => (
+                <div key={key} className={`relative rounded-xl p-4 text-center ${discount > 0 ? 'bg-zinc-800 ring-1 ring-amber-500/30' : 'bg-zinc-800'}`}>
+                  {discount > 0 && (
+                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wide px-2.5 py-0.5 rounded-full bg-amber-500 text-zinc-950 whitespace-nowrap">
+                      {discount}% off per item
+                    </span>
+                  )}
                   <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-2">
                     {label}
                   </p>
-                  <p className="text-2xl font-bold text-white mb-1">€{total}</p>
-                  <p className="text-[11px] font-mono text-zinc-400">{formula}</p>
+                  {discount > 0 ? (
+                    <div className="mb-1">
+                      <span className="text-sm font-medium text-zinc-500 line-through mr-2">€{total}</span>
+                      <span className="text-2xl font-bold text-amber-400">€{discountedTotal}</span>
+                    </div>
+                  ) : (
+                    <p className="text-2xl font-bold text-white mb-1">€{total}</p>
+                  )}
+                  <p className="text-[11px] font-mono text-zinc-400">
+                    {discount > 0 ? discountedFormula : formula}
+                  </p>
                 </div>
               ))}
             </div>

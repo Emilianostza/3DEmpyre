@@ -194,29 +194,13 @@ export default {
     },
   },
   plugins: [
+    // WebKit scrollbar styles are in index.css (global).
+    // This plugin provides .scrollbar-thin for explicit opt-in (Firefox support).
     function({ addUtilities }) {
       addUtilities({
         '.scrollbar-thin': {
           'scrollbar-width': 'thin',
           'scrollbar-color': '#3f3f46 #09090b',
-
-          '&::-webkit-scrollbar': {
-            width: '6px',
-            height: '6px',
-          },
-
-          '&::-webkit-scrollbar-track': {
-            background: '#09090b',
-          },
-
-          '&::-webkit-scrollbar-thumb': {
-            background: '#3f3f46',
-            'border-radius': '3px',
-
-            '&:hover': {
-              background: '#52525b',
-            },
-          },
         },
       });
     },

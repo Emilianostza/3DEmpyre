@@ -263,7 +263,7 @@ const About: React.FC = () => {
               {t('about.cta.caseStudies')}
             </Link>
           </div>
-          <p className="text-xs text-zinc-600 mt-6">{t('cta.reassurance')}</p>
+          <p className="text-xs text-zinc-500 mt-6">{t('cta.reassurance')}</p>
         </div>
       </section>
     </div>

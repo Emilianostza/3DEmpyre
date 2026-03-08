@@ -9,6 +9,7 @@ interface CardProps {
   hover?: boolean;
   onClick?: () => void;
   padding?: 'none' | 'sm' | 'md' | 'lg';
+  'aria-label'?: string;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -18,6 +19,7 @@ const Card: React.FC<CardProps> = ({
   hover = true,
   onClick,
   padding = 'none',
+  'aria-label': ariaLabel,
 }) => {
   const base = 'rounded-2xl transition-all duration-200 ease-spring will-change-transform';
 
@@ -73,7 +75,7 @@ const Card: React.FC<CardProps> = ({
     <div
       className={`${base} ${variants[variant]} ${hoverClass} ${clickableClass} ${paddings[padding]} ${className}`}
       onClick={onClick}
-      {...(onClick ? { role: 'button', tabIndex: 0, onKeyDown: handleKeyDown } : {})}
+      {...(onClick ? { role: 'button', tabIndex: 0, onKeyDown: handleKeyDown, 'aria-label': ariaLabel } : {})}
     >
       {children}
     </div>

@@ -8,6 +8,8 @@ import { LocalizedLink as Link } from '@/components/LocalizedLink';
 import { Menu, X, Box, ShieldCheck, ArrowRight, ChevronDown, Github, Twitter, Linkedin } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useLocale } from '@/contexts/LocaleContext';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -19,6 +21,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const { t } = useTranslation();
+  const mobileMenuRef = useFocusTrap<HTMLDivElement>(isMobileMenuOpen);
+  useEscapeKey(() => setIsMobileMenuOpen(false), isMobileMenuOpen);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -188,7 +192,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 className="fixed inset-0 z-50 md:hidden bg-gradient-to-b from-zinc-950 to-zinc-950/95"
               >
-                <div className="px-6 py-6 flex flex-col h-full">
+                <div ref={mobileMenuRef} className="px-6 py-6 flex flex-col h-full">
                   {/* Header with logo and close button */}
                   <div className="flex items-center justify-between mb-8">
                     <Link
@@ -408,7 +412,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           <div className="border-t border-zinc-800/60 pt-8 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-xs text-zinc-500">{t('footer.copyright')}</p>
-            <p className="text-xs text-zinc-600">{t('footer.tagline')}</p>
+            <p className="text-xs text-zinc-500">{t('footer.tagline')}</p>
           </div>
         </div>
       </footer>

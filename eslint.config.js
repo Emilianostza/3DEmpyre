@@ -5,7 +5,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 
 export default [
   {
-    ignores: ['dist', 'node_modules', 'coverage', 'build', 'scripts'],
+    ignores: ['dist', 'node_modules', 'coverage', 'build', 'scripts', '.wrangler', '.wrangler-build-test'],
   },
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
@@ -88,6 +88,11 @@ export default [
         CSS: 'readonly',
         getComputedStyle: 'readonly',
         ImageData: 'readonly',
+        requestIdleCallback: 'readonly',
+        cancelIdleCallback: 'readonly',
+        TextEncoder: 'readonly',
+        TextDecoder: 'readonly',
+        ReadableStream: 'readonly',
       },
       parser: tseslint.parser,
       parserOptions: {

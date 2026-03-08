@@ -39,8 +39,10 @@ const Library: React.FC = () => {
   useEscapeKey(() => setSelectedAsset(null), Boolean(selectedAsset));
 
   useEffect(() => {
-    import('@google/model-viewer');
-  }, []);
+    if (selectedAsset) {
+      import('@google/model-viewer');
+    }
+  }, [selectedAsset]);
 
   const fetchAssets = useCallback(async () => {
     try {
@@ -70,12 +72,14 @@ const Library: React.FC = () => {
     return ['All', ...Array.from(cats).sort()];
   }, [assets]);
 
-  const filteredAssets = assets.filter((asset) => {
-    const matchesSearch = asset.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const assetCategory = isForSale(asset) ? asset.marketplace_category : asset.type;
-    const matchesFilter = filter === 'All' || assetCategory === filter;
-    return matchesSearch && matchesFilter;
-  });
+  const filteredAssets = useMemo(() => {
+    return assets.filter((asset) => {
+      const matchesSearch = asset.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const assetCategory = isForSale(asset) ? asset.marketplace_category : asset.type;
+      const matchesFilter = filter === 'All' || assetCategory === filter;
+      return matchesSearch && matchesFilter;
+    });
+  }, [assets, searchTerm, filter]);
 
   return (
     <div

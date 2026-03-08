@@ -64,6 +64,7 @@ const PortalLayout = lazy(() => import('./pages/portal/PortalLayout'));
 const CustomerDashboardPage = lazy(() => import('./pages/portal/CustomerDashboardPage'));
 const EmployeeDashboardPage = lazy(() => import('./pages/portal/EmployeeDashboardPage'));
 const ProjectsPage = lazy(() => import('./pages/portal/ProjectsPage'));
+const AssetsPage = lazy(() => import('./pages/portal/AssetsPage'));
 
 const BillingPage = lazy(() => import('./pages/portal/BillingPage'));
 const SettingsLayout = lazy(() => import('./pages/portal/SettingsLayout'));
@@ -233,9 +234,10 @@ const AnimatedRoutes: React.FC = () => {
             >
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<EmployeeDashboardPage />} />
+              <Route path="assets" element={<AssetsPage />} />
               <Route path="projects" element={<ProjectsPage />} />
               <Route path="projects/:id" element={<ProjectDetailPage />} />
-              <Route path="customers" element={<Navigate to="/app/projects" replace />} />
+              <Route path="customers" element={<Navigate to="/app/assets" replace />} />
               <Route path="pipeline" element={<PhotoPipelinePage />} />
               <Route path="settings" element={<SettingsLayout role="employee" />}>
                 <Route index element={<Navigate to="profile" replace />} />
@@ -258,6 +260,7 @@ const AnimatedRoutes: React.FC = () => {
             >
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<CustomerDashboardPage />} />
+              <Route path="assets" element={<AssetsPage />} />
               <Route path="projects" element={<ProjectsPage />} />
               <Route path="projects/:id" element={<ProjectDetailPage />} />
               <Route path="billing" element={<BillingPage />} />

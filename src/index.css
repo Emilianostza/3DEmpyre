@@ -25,6 +25,12 @@
   background: #52525b;
 }
 
+/* Firefox scrollbar */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #3f3f46 #09090b;
+}
+
 /* Scrollbar-hiding utility (used across template pages) */
 @layer utilities {
   .scrollbar-none {
@@ -310,6 +316,11 @@ p {
   mask-composite: exclude;
   pointer-events: none;
   animation: borderRotate 4s linear infinite;
+  animation-play-state: paused;
+}
+
+.animated-border:hover::before {
+  animation-play-state: running;
 }
 
 @keyframes borderRotate {

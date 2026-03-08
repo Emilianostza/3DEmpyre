@@ -341,7 +341,6 @@ export const PortalBillingTab: React.FC<PortalBillingTabProps> = ({
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className="text-sm font-bold font-mono text-zinc-900 dark:text-white">€{addon.monthly}/mo</p>
-                    <p className="text-[11px] text-zinc-500 dark:text-zinc-500 font-medium">€{addon.setup} setup</p>
                   </div>
                 </button>
               ))}

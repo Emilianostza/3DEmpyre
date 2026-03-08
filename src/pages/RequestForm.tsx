@@ -51,15 +51,15 @@ import { ProjectsProvider } from '@/services/dataProvider';
 /* ─── Pricing Engine ─────────────────────────────────────────────────────── */
 const QTY_RANGES: Record<string, [number, number]> = {
   '1-10': [1, 10],
-  '11-50': [11, 50],
-  '51-200': [51, 200],
-  '200+': [200, 500],
+  '11-20': [11, 20],
+  '21-40': [21, 40],
+  '40+': [40, 100],
 };
 
 const RESTAURANT_PLANS = [
-  { name: 'Standard', monthly: 18, views: '1,000', storage: '2 GB' },
-  { name: 'Pro', monthly: 35, views: '2,000', storage: '8 GB' },
-  { name: 'Ultra', monthly: 48, views: '5,000', storage: '25 GB' },
+  { name: 'Standard', monthly: 18, views: '1,000', storage: '1 GB', quality: 'Optimized quality' },
+  { name: 'Pro', monthly: 35, views: '2,000', storage: '3 GB', quality: 'High quality' },
+  { name: 'Ultra', monthly: 48, views: '3,000', storage: '8 GB', quality: 'Premium quality' },
 ];
 
 const CAPTURE_RATES = {
@@ -146,8 +146,8 @@ const AI_SCRIPT: AIScriptedQuestion[] = [
     aiMessage: "Got it! And roughly how many items or spaces do you need captured in 3D?",
     options: [
       { label: 'Just a few (1–10)', value: '1-10' },
-      { label: 'A collection (11–50)', value: '11-50' },
-      { label: 'Large catalog (50+)', value: '51-200' },
+      { label: 'A collection (11–20)', value: '11-20' },
+      { label: 'Large catalog (21–40+)', value: '21-40' },
       { label: "Not sure yet", value: 'unsure' },
     ],
   },
@@ -271,7 +271,7 @@ const RequestForm: React.FC = () => {
       General: Industry.General,
     };
     const industry = industryMap[chatAnswers.industry] ?? '';
-    const qtyMap: Record<string, string> = { '1-10': '1-10', '11-50': '11-50', '51-200': '51-200', unsure: '' };
+    const qtyMap: Record<string, string> = { '1-10': '1-10', '11-20': '11-20', '21-40': '21-40', unsure: '' };
     const qty = qtyMap[chatAnswers.scope] ?? '';
 
     setFormData((prev) => ({
@@ -412,7 +412,7 @@ const RequestForm: React.FC = () => {
   const [qtyLo, qtyHi] = qtyRange ?? [0, 0];
   const qtyMid = qtyRange ? Math.round((qtyLo + qtyHi) / 2) : 0;
   const hasQty = Boolean(qtyRange);
-  const isCustomQty = formData.quantity_range === '200+';
+  const isCustomQty = formData.quantity_range === '40+';
   const isRestaurant = formData.industry === Industry.Restaurant;
   const isGeneral = formData.industry === Industry.General;
   const isComplex = ['large', 'oversized'].includes(formData.object_size_range);
@@ -424,8 +424,10 @@ const RequestForm: React.FC = () => {
       ? CAPTURE_RATES.general.complex
       : CAPTURE_RATES.general.standard;
 
-  const captureLo = hasQty ? Math.round(qtyLo * captureRate * (1 - batchDiscount(qtyLo))) : 0;
-  const captureHi = hasQty ? Math.round(qtyHi * captureRate * (1 - batchDiscount(qtyHi))) : 0;
+  const captureLoFull = hasQty ? Math.round(qtyLo * captureRate) : 0;
+  const captureHiFull = hasQty ? Math.round(qtyHi * captureRate) : 0;
+  const captureLo = hasQty ? Math.round(captureLoFull * (1 - batchDiscount(qtyLo))) : 0;
+  const captureHi = hasQty ? Math.round(captureHiFull * (1 - batchDiscount(qtyHi))) : 0;
   const captureDiscountPct = hasQty ? Math.round(batchDiscount(qtyMid) * 100) : 0;
 
   const onSiteLo = isRestaurant
@@ -441,6 +443,7 @@ const RequestForm: React.FC = () => {
 
   const totalLo = captureLo + (isOnSite && hasQty ? onSiteLo : 0);
   const totalHi = captureHi + (isOnSite && hasQty ? onSiteHi : 0);
+  const totalLoFull = captureLoFull + (isOnSite && hasQty ? onSiteLo : 0);
   const hasEstimate = (isRestaurant || isGeneral) && hasQty;
 
   /* ─── Success State ─────────────────────────────────────────────────────── */
@@ -739,6 +742,10 @@ const RequestForm: React.FC = () => {
                             <div className="space-y-1.5 mt-3 pt-3 border-t border-zinc-800/60">
                               <p className="text-[11px] text-zinc-500 flex items-center gap-1.5">
                                 <Check className="w-3 h-3 text-emerald-500 flex-shrink-0" />
+                                {p.quality}
+                              </p>
+                              <p className="text-[11px] text-zinc-500 flex items-center gap-1.5">
+                                <Check className="w-3 h-3 text-emerald-500 flex-shrink-0" />
                                 {p.views} views/mo
                               </p>
                               <p className="text-[11px] text-zinc-500 flex items-center gap-1.5">
@@ -763,20 +770,36 @@ const RequestForm: React.FC = () => {
                       {t('requestForm.step1.quantityLabel')}
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {['1-10', '11-50', '51-200', '200+'].map((opt) => (
-                        <button
-                          key={opt}
-                          type="button"
-                          onClick={() => updateField('quantity_range', opt)}
-                          className={`py-3 px-4 rounded-xl border text-sm font-semibold transition-all ${
-                            formData.quantity_range === opt
-                              ? 'bg-brand-600/15 text-brand-400 border-brand-500/40'
-                              : 'bg-zinc-900/40 text-zinc-400 border-zinc-800 hover:border-zinc-700'
-                          }`}
-                        >
-                          {opt}
-                        </button>
-                      ))}
+                      {(['1-10', '11-20', '21-40', '40+'] as const).map((opt) => {
+                        const selected = formData.quantity_range === opt;
+                        const isCustom = opt === '40+';
+                        const range = QTY_RANGES[opt];
+                        const midQty = range ? Math.round((range[0] + range[1]) / 2) : 0;
+                        const discount = isCustom ? 0 : Math.round(batchDiscount(midQty) * 100);
+                        return (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() => updateField('quantity_range', opt)}
+                            className={`py-3 px-4 rounded-xl border text-sm font-semibold transition-all ${
+                              selected
+                                ? 'bg-brand-600/15 text-brand-400 border-brand-500/40'
+                                : 'bg-zinc-900/40 text-zinc-400 border-zinc-800 hover:border-zinc-700'
+                            }`}
+                          >
+                            {opt}
+                            {isCustom ? (
+                              <span className="block text-[10px] font-bold text-amber-400 mt-0.5">
+                                Custom discount
+                              </span>
+                            ) : discount > 0 ? (
+                              <span className="block text-[10px] font-bold text-emerald-400 mt-0.5">
+                                -{discount}%
+                              </span>
+                            ) : null}
+                          </button>
+                        );
+                      })}
                     </div>
                     <FieldError field="quantity_range" />
                   </div>
@@ -1317,6 +1340,11 @@ const RequestForm: React.FC = () => {
                 {hasEstimate && !isCustomQty ? (
                   <>
                     <p className="font-display text-2xl font-bold text-white">
+                      {captureDiscountPct > 0 && (
+                        <span className="text-base font-medium text-zinc-500 line-through mr-2">
+                          {fmtEur(totalLoFull)}
+                        </span>
+                      )}
                       {fmtEur(totalLo)}
                       {totalHi > totalLo && (
                         <span className="text-lg font-medium text-zinc-500">
@@ -1325,6 +1353,11 @@ const RequestForm: React.FC = () => {
                         </span>
                       )}
                     </p>
+                    {captureDiscountPct > 0 && (
+                      <p className="text-[11px] font-bold text-emerald-400 mt-0.5">
+                        {captureDiscountPct}% volume discount applied
+                      </p>
+                    )}
                     <p className="text-xs text-zinc-600 mt-0.5">
                       {t('requestForm.estimate.oneTimeCapture')}
                     </p>
@@ -1377,12 +1410,22 @@ const RequestForm: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  <span className="text-sm font-bold text-white flex-shrink-0 pt-0.5">
-                    {hasEstimate && !isCustomQty
-                      ? `${fmtEur(captureLo)}${captureHi > captureLo ? ` \u2013 ${fmtEur(captureHi)}` : ''}`
-                      : hasEstimate
-                        ? 'Custom'
-                        : '\u2014'}
+                  <span className="text-sm font-bold flex-shrink-0 pt-0.5">
+                    {hasEstimate && !isCustomQty ? (
+                      <>
+                        {captureDiscountPct > 0 && (
+                          <span className="text-xs font-medium text-zinc-500 line-through mr-1.5">
+                            {fmtEur(captureLoFull)}
+                          </span>
+                        )}
+                        <span className={captureDiscountPct > 0 ? 'text-emerald-400' : 'text-white'}>
+                          {fmtEur(captureLo)}
+                          {captureHi > captureLo ? ` \u2013 ${fmtEur(captureHi)}` : ''}
+                        </span>
+                      </>
+                    ) : hasEstimate
+                      ? 'Custom'
+                      : '\u2014'}
                   </span>
                 </div>
 
@@ -1455,7 +1498,16 @@ const RequestForm: React.FC = () => {
                     <span className="font-display text-lg font-bold text-white">
                       {isCustomQty
                         ? t('requestForm.estimate.getAQuote')
-                        : `from ${fmtEur(totalLo)}`}
+                        : (
+                          <>
+                            {captureDiscountPct > 0 && (
+                              <span className="text-sm font-medium text-zinc-500 line-through mr-2">
+                                {fmtEur(totalLoFull)}
+                              </span>
+                            )}
+                            from {fmtEur(totalLo)}
+                          </>
+                        )}
                     </span>
                   </div>
                   {plan && (

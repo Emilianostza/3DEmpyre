@@ -372,7 +372,7 @@ const CompareMenus: React.FC = () => {
               {t('compareMenus.cta.pricing')}
             </Link>
           </div>
-          <p className="text-xs text-zinc-600 mt-6">{t('cta.reassurance')}</p>
+          <p className="text-xs text-zinc-500 mt-6">{t('cta.reassurance')}</p>
         </div>
       </section>
     </div>

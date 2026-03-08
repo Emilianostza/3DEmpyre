@@ -170,7 +170,7 @@ const Blog: React.FC = () => {
             {t('cta.getQuote')}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
-          <p className="text-xs text-zinc-600 mt-6">{t('cta.reassurance')}</p>
+          <p className="text-xs text-zinc-500 mt-6">{t('cta.reassurance')}</p>
         </div>
       </section>
     </div>

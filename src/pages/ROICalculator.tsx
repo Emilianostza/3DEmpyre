@@ -337,7 +337,7 @@ const ROICalculator: React.FC = () => {
               </div>
 
               {/* Disclaimer */}
-              <p className="text-[11px] text-zinc-600 mt-6 leading-relaxed">
+              <p className="text-[11px] text-zinc-500 mt-6 leading-relaxed">
                 {t('roi.calculator.disclaimer', { amount: formatCurrency(TYPICAL_INVESTMENT) })}
               </p>
             </div>
@@ -478,7 +478,7 @@ const ROICalculator: React.FC = () => {
               {t('roi.cta.viewPricing')}
             </Link>
           </div>
-          <p className="text-xs text-zinc-600 mt-6">{t('cta.reassurance')}</p>
+          <p className="text-xs text-zinc-500 mt-6">{t('cta.reassurance')}</p>
         </div>
       </section>
     </div>

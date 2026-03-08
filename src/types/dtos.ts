@@ -101,9 +101,16 @@ export interface MenuConfigDTO {
   project_id: string;
   title: string;
   brand_color: string;
+  theme_preset?: string;
+  custom_brand_color?: string;
   font: string;
   show_prices: boolean;
   currency: string;
+  enableTimeBasedMenu?: boolean;
+  breakfastEndTime?: string;
+  lunchEndTime?: string;
+  lunchMenuId?: string;
+  dinnerMenuId?: string;
   field_visibility: Record<string, boolean>;
   categories: MenuCategoryDTO[];
   items: MenuItemDTO[];

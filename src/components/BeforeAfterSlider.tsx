@@ -27,8 +27,19 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
   className = '',
 }) => {
   const [position, setPosition] = useState(50); // 0-100
+  const [containerWidth, setContainerWidth] = useState<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setContainerWidth(entry.contentRect.width);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   /* ── Update position from pointer X ─────────────────── */
   const updatePosition = useCallback((clientX: number) => {
@@ -116,7 +127,7 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
           src={beforeSrc}
           alt={beforeAlt}
           className="h-full object-cover"
-          style={{ width: containerRef.current?.offsetWidth ?? '100%' }}
+          style={{ width: containerWidth || '100%' }}
           loading="lazy"
           width={800}
           height={500}

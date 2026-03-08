@@ -7,7 +7,6 @@ import {
   ChevronDown,
   ChevronUp,
   UserCheck,
-  Archive,
   Eye,
   FileSearch,
   UserPlus,
@@ -325,17 +324,6 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
                                     </button>
                                   )}
 
-                                  <button
-                                    role="menuitem"
-                                    onClick={() => {
-                                      setActiveDropdown(null);
-                                      // TODO: wire up archive action
-                                    }}
-                                    className="w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2 transition-colors border-t border-zinc-100 dark:border-white/5"
-                                  >
-                                    <Archive className="w-4 h-4" />
-                                    {t('projectTable.archive', 'Archive Project')}
-                                  </button>
                                 </div>
                               </div>
                             )}

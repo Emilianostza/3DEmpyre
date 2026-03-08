@@ -32,7 +32,7 @@ export const ProjectCards: React.FC<Props> = ({ projects, assets, onEditProject 
   const [menuSettings, setMenuSettings] = useState<
     Record<
       string,
-      { title: string; brandColor: string; font: string; showPrices: boolean; currency: string }
+      { title: string; brandColor: string; font: string; showPrices: boolean; currency: string; enableTimeBasedMenu?: boolean; breakfastEndTime?: string; lunchEndTime?: string; lunchMenuId?: string; dinnerMenuId?: string; themePreset?: string; customBrandColor?: string; }
     >
   >({});
 
@@ -204,6 +204,8 @@ export const ProjectCards: React.FC<Props> = ({ projects, assets, onEditProject 
             title: proj?.name || '',
             brandColor: '#d97706',
             font: 'Inter',
+            themePreset: 'amber',
+            customBrandColor: '',
             showPrices: true,
             currency: '$',
           };
@@ -212,6 +214,7 @@ export const ProjectCards: React.FC<Props> = ({ projects, assets, onEditProject 
               isOpen={true}
               onClose={() => setSettingsProjectId(null)}
               currentSettings={currentSettings}
+              projects={projects}
               onSave={(s) => {
                 setMenuSettings((prev) => ({ ...prev, [settingsProjectId]: s }));
                 setSettingsProjectId(null);
@@ -376,11 +379,10 @@ export const ProjectCards: React.FC<Props> = ({ projects, assets, onEditProject 
                           key={opt.value}
                           type="button"
                           onClick={() => setQrDotType(opt.value)}
-                          className={`flex-1 px-1.5 py-1.5 text-[10px] font-semibold rounded-lg border transition-all ${
-                            qrDotType === opt.value
-                              ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white'
-                              : 'bg-zinc-50 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500'
-                          }`}
+                          className={`flex-1 px-1.5 py-1.5 text-[10px] font-semibold rounded-lg border transition-all ${qrDotType === opt.value
+                            ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white'
+                            : 'bg-zinc-50 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500'
+                            }`}
                         >
                           {opt.label}
                         </button>
@@ -403,11 +405,10 @@ export const ProjectCards: React.FC<Props> = ({ projects, assets, onEditProject 
                           key={opt.value}
                           type="button"
                           onClick={() => setQrCornerType(opt.value)}
-                          className={`flex-1 px-2 py-1.5 text-[10px] font-semibold rounded-lg border transition-all ${
-                            qrCornerType === opt.value
-                              ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white'
-                              : 'bg-zinc-50 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500'
-                          }`}
+                          className={`flex-1 px-2 py-1.5 text-[10px] font-semibold rounded-lg border transition-all ${qrCornerType === opt.value
+                            ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white'
+                            : 'bg-zinc-50 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500'
+                            }`}
                         >
                           {opt.label}
                         </button>

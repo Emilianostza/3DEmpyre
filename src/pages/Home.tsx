@@ -202,7 +202,7 @@ const Home: React.FC = () => {
                 src={DEMO_MODELS.astronaut.glb}
                 ios-src={DEMO_MODELS.astronaut.usdz}
                 poster={DEMO_MODELS.astronaut.poster}
-                alt="Interactive 3D model — rotate to explore"
+                alt="3D astronaut statue showcase — rotate to explore"
                 shadow-intensity="1"
                 camera-controls
                 disable-zoom
@@ -396,7 +396,7 @@ const Home: React.FC = () => {
                   <model-viewer
                     src={DEMO_MODELS.materialSuite.glb}
                     poster={DEMO_MODELS.materialSuite.poster}
-                    alt="Interactive 3D product demo — rotate to explore all angles"
+                    alt="3D material suite product render — interactive viewer with AR"
                     shadow-intensity="1.2"
                     camera-controls
                     disable-zoom

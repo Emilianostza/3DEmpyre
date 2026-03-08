@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { X, Loader2, Palette } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 import { useEscapeKey } from '@/hooks/useEscapeKey';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useToast } from '@/contexts/ToastContext';
@@ -285,31 +285,7 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
             </div>
           </div>
 
-          {/* Menu Settings — only when editing an existing project */}
-          {project && (
-            <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
-              <h3 className="text-xs font-bold text-zinc-700 dark:text-zinc-400 uppercase tracking-wide flex items-center gap-2">
-                <Palette className="w-3.5 h-3.5" /> {t('portal.menuSettings.title', 'Menu Settings')}
-              </h3>
-
-              <div>
-                <label className="block text-sm font-medium text-zinc-800 dark:text-zinc-300 mb-1.5">
-                  {t('portal.menuSettings.currency', 'Currency')}
-                </label>
-                <select
-                  value={mSettings.currency}
-                  onChange={(e) => setMSettings({ ...mSettings, currency: e.target.value })}
-                  className="w-full p-3 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
-                >
-                  <option value="$">USD ($)</option>
-                  <option value="€">EUR (€)</option>
-                  <option value="£">GBP (£)</option>
-                  <option value="¥">JPY (¥)</option>
-                </select>
-              </div>
-
-            </div>
-          )}
+          {/* Menu Settings removed — currency is managed in Menu Settings modal */}
 
           <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800 flex justify-end gap-3">
             <button

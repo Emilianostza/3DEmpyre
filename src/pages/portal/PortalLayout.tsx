@@ -132,10 +132,10 @@ const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => 
     navigate('/app/login');
   };
 
-  // Navigation items with route paths
   const navItems = [
-    { path: 'dashboard', label: t('portal.tab.dashboard') },
-    { path: 'projects', label: t('portal.tab.projects') },
+    { path: 'dashboard', label: t('portal.tab.menus', 'Menus') },
+    ...(role === 'employee' ? [{ path: 'projects', label: t('portal.tab.projects') }] : []),
+    { path: 'assets', label: t('portal.tab.dishes', 'Dishes') },
     ...(role === 'employee' ? [{ path: 'pipeline', label: t('portal.tab.pipeline', '3D Pipeline') }] : []),
     ...(role === 'customer' ? [{ path: 'billing', label: t('portal.tab.billing') }] : []),
     { path: 'settings', label: t('portal.tab.settings') },
@@ -274,10 +274,10 @@ const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => 
                 className={() => {
                   const active = isNavActive(item.path);
                   return `px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-brand-400 focus:outline-none ${active
-                      ? role === 'customer'
-                        ? `${portalConfig.theme.accentBg} ${portalConfig.theme.accentBgDark} ${portalConfig.theme.accentText} ${portalConfig.theme.accentTextDark}`
-                        : 'bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300'
-                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                    ? role === 'customer'
+                      ? `${portalConfig.theme.accentBg} ${portalConfig.theme.accentBgDark} ${portalConfig.theme.accentText} ${portalConfig.theme.accentTextDark}`
+                      : 'bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'
                     }`;
                 }}
                 {...(isNavActive(item.path) ? { 'aria-current': 'page' as const } : {})}
@@ -412,11 +412,10 @@ const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => 
                 key={item.path}
                 to={item.path}
                 end={item.path === 'dashboard'}
-                className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg text-[10px] font-medium transition-colors ${
-                  active
-                    ? 'text-brand-600 dark:text-brand-400'
-                    : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300'
-                }`}
+                className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg text-[10px] font-medium transition-colors ${active
+                  ? 'text-brand-600 dark:text-brand-400'
+                  : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300'
+                  }`}
                 {...(active ? { 'aria-current': 'page' as const } : {})}
               >
                 <Icon className="w-5 h-5" />

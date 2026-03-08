@@ -36,7 +36,7 @@ import {
   ExternalLink as _ExternalLink,
   MoreVertical,
   Edit3,
-  SlidersHorizontal,
+  SlidersHorizontal as _SlidersHorizontal,
   Paintbrush,
   LayoutGrid,
   Bookmark,
@@ -51,7 +51,7 @@ import {
   ChevronDown,
   ImagePlus,
   Sparkles,
-  Upload,
+  Upload as _Upload,
   Wand2,
   Loader2,
   Pencil,
@@ -86,6 +86,7 @@ interface MenuItem {
   allergens: string[];
   modelUrl: string;
   pairsWell: string[];
+  spiceLevel?: number;
   hidden?: boolean;
   reviewStatus?: 'pending' | 'approved' | 'rejected';
   viewCount?: number;
@@ -108,6 +109,7 @@ interface FieldVisibility {
   tags: boolean;
   allergens: boolean;
   pairsWell: boolean;
+  spiceLevel: boolean;
 }
 
 const DEFAULT_FIELD_VISIBILITY: FieldVisibility = {
@@ -118,6 +120,7 @@ const DEFAULT_FIELD_VISIBILITY: FieldVisibility = {
   tags: true,
   allergens: true,
   pairsWell: true,
+  spiceLevel: true,
 };
 
 interface MenuSettings {
@@ -128,6 +131,13 @@ interface MenuSettings {
   currency: string;
   fieldVisibility: FieldVisibility;
   hours: string;
+  enableTimeBasedMenu?: boolean;
+  breakfastEndTime?: string;
+  lunchEndTime?: string;
+  lunchMenuId?: string;
+  dinnerMenuId?: string;
+  themePreset?: string;
+  customBrandColor?: string;
 }
 
 /** Draft version of MenuItem where array fields are comma-separated strings for editing */
@@ -1049,34 +1059,6 @@ const MenuHero: React.FC<MenuHeroProps> = React.memo(
                 e.target.value = '';
               }}
             />
-            <div ref={imageMenuRef} className="absolute top-4 left-4 z-20">
-              <button
-                onClick={() => setShowImageMenu((v) => !v)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-white bg-black/50 backdrop-blur-md border border-white/10 hover:bg-black/70 transition-all"
-              >
-                <ImagePlus className="w-4 h-4" />
-                {t('tpl.menu.changeHeroImage', 'Change Image')}
-                <ChevronDown className={`w-3 h-3 transition-transform ${showImageMenu ? 'rotate-180' : ''}`} />
-              </button>
-              {showImageMenu && (
-                <div className="absolute top-full left-0 mt-1.5 w-56 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl shadow-black/60 overflow-hidden">
-                  <button
-                    onClick={() => { heroFileInputRef.current?.click(); setShowImageMenu(false); }}
-                    className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-xs font-medium text-zinc-300 hover:bg-white/5 hover:text-white transition-colors"
-                  >
-                    <Upload className="w-4 h-4" />
-                    {t('tpl.menu.uploadImage', 'Upload Image')}
-                  </button>
-                  <button
-                    onClick={() => { setShowAIGenerator(true); setShowImageMenu(false); }}
-                    className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-xs font-medium text-zinc-300 hover:bg-white/5 hover:text-white transition-colors"
-                  >
-                    <Sparkles className="w-4 h-4 text-amber-400" />
-                    {t('tpl.menu.generateWithAI', 'Generate with AI')}
-                  </button>
-                </div>
-              )}
-            </div>
 
             {/* AI Image Generator Modal */}
             <BaseModal isOpen={showAIGenerator} onClose={() => { setShowAIGenerator(false); setAiPrompt(''); setAiPreviewUrl(null); setAiGenerating(false); }} maxWidth="max-w-lg">
@@ -1120,11 +1102,10 @@ const MenuHero: React.FC<MenuHeroProps> = React.memo(
                         type="button"
                         onClick={() => setAiPrompt(preset)}
                         disabled={aiGenerating}
-                        className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium border transition-all ${
-                          aiPrompt === preset
-                            ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
-                            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500'
-                        } disabled:opacity-50`}
+                        className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium border transition-all ${aiPrompt === preset
+                          ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500'
+                          } disabled:opacity-50`}
                       >
                         {preset}
                       </button>
@@ -1234,180 +1215,290 @@ const MenuHero: React.FC<MenuHeroProps> = React.memo(
                 </span>
                 <div className="relative">
                   <span
-                    className={`text-xs md:text-sm font-medium text-white/60 flex items-center gap-2 ${isEditMode ? 'cursor-pointer hover:text-white/80 transition-colors' : ''}`}
+                    className={`text-xs md:text-sm font-medium text-white/50 flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md border border-white/[0.06] ${isEditMode ? 'cursor-pointer hover:text-white/80 hover:border-white/15 hover:bg-white/[0.04] transition-all' : ''}`}
                     onClick={isEditMode ? () => setEditingHours(!editingHours) : undefined}
                     title={isEditMode ? 'Click to edit hours' : undefined}
                   >
                     <Clock className="w-3.5 h-3.5" />
                     {hours || RESTAURANT_INFO.hours}
-                    {isEditMode && <Pencil className="w-3 h-3 opacity-50" />}
+                    {isEditMode && <Pencil className="w-3 h-3 opacity-40" />}
                   </span>
 
-                  {isEditMode && editingHours && (
-                    <div className="absolute top-full left-0 mt-3 z-30 w-[540px] bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/60 p-5" onClick={(e) => e.stopPropagation()}>
+                  {isEditMode && editingHours && createPortal(
+                    <div className="fixed inset-0 z-[9999] flex flex-col bg-zinc-950 overflow-hidden">
+
                       {/* Header */}
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: brandColor + '20' }}>
+                      <div className="flex items-center justify-between px-8 py-4 border-b border-white/[0.06] flex-shrink-0">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: brandColor + '18' }}>
                             <Clock className="w-4 h-4" style={{ color: brandColor }} />
                           </div>
                           <div>
-                            <h4 className="text-sm font-bold text-white">Opening Hours</h4>
-                            <p className="text-[10px] text-white/40">Set weekly schedule & close specific dates</p>
+                            <h3 className="text-base font-bold text-white tracking-tight">Opening Hours</h3>
+                            <p className="text-xs text-white/40">Manage schedule, closed dates & presets</p>
                           </div>
                         </div>
-                        <button onClick={() => setEditingHours(false)} className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/5 transition-colors">
-                          <X className="w-4 h-4" />
+                        <button onClick={() => setEditingHours(false)} className="p-2 rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 transition-colors">
+                          <X className="w-5 h-5" />
                         </button>
                       </div>
 
-                      <div className="flex gap-4">
-                        {/* Left: Weekly Schedule */}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Weekly Schedule</p>
-                          <div className="space-y-1">
-                            {schedule.map((entry, idx) => (
-                              <div
-                                key={entry.day}
-                                className={`flex items-center gap-2 px-2.5 py-2 rounded-xl transition-all ${entry.open ? 'bg-white/5 hover:bg-white/[0.07]' : 'bg-transparent opacity-40'}`}
-                              >
-                                <button
-                                  type="button"
-                                  onClick={() => setSchedule((s) => s.map((d, i) => i === idx ? { ...d, open: !d.open } : d))}
-                                  className={`w-8 h-[18px] rounded-full transition-colors flex-shrink-0 relative ${entry.open ? 'bg-emerald-500' : 'bg-white/10'}`}
-                                >
-                                  <span className={`absolute top-[2px] w-[14px] h-[14px] rounded-full bg-white shadow-sm transition-transform ${entry.open ? 'left-[16px]' : 'left-[2px]'}`} />
-                                </button>
-                                <span className={`text-[11px] font-bold w-7 ${entry.open ? 'text-white' : 'text-white/40'}`}>{entry.day}</span>
-                                {entry.open ? (
-                                  <div className="flex items-center gap-1 flex-1 min-w-0">
-                                    <input
-                                      type="time"
-                                      value={entry.from}
-                                      onChange={(e) => setSchedule((s) => s.map((d, i) => i === idx ? { ...d, from: e.target.value } : d))}
-                                      className="bg-white/10 border border-white/10 rounded-lg px-1.5 py-0.5 text-[10px] text-white font-mono outline-none focus:border-white/30 w-[4.8rem]"
-                                    />
-                                    <span className="text-white/20 text-[9px]">–</span>
-                                    <input
-                                      type="time"
-                                      value={entry.to}
-                                      onChange={(e) => setSchedule((s) => s.map((d, i) => i === idx ? { ...d, to: e.target.value } : d))}
-                                      className="bg-white/10 border border-white/10 rounded-lg px-1.5 py-0.5 text-[10px] text-white font-mono outline-none focus:border-white/30 w-[4.8rem]"
-                                    />
-                                  </div>
-                                ) : (
-                                  <span className="text-[10px] text-white/20 italic">Closed</span>
-                                )}
-                              </div>
-                            ))}
-                          </div>
+                      {/* Body — scrollable */}
+                      <div className="flex-1 min-h-0 overflow-y-auto px-12 py-10">
+                        {/* Quick actions row */}
+                        <div className="flex flex-wrap gap-3 mb-10">
+                          <button
+                            type="button"
+                            onClick={() => setSchedule(DAYS.map((d) => ({ day: d, open: true, from: '09:00', to: '17:00' })))}
+                            className="flex items-center gap-3 px-6 py-3.5 rounded-2xl text-sm font-semibold bg-white/5 border border-white/[0.06] text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                          >
+                            <Clock className="w-4 h-4" />
+                            9 AM – 5 PM
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSchedule(DAYS.map((d) => ({ day: d, open: true, from: '12:00', to: '23:00' })))}
+                            className="flex items-center gap-3 px-6 py-3.5 rounded-2xl text-sm font-semibold bg-white/5 border border-white/[0.06] text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                          >
+                            <Clock className="w-4 h-4" />
+                            12 PM – 11 PM
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSchedule(DAYS.map((d) => ({ day: d, open: true, from: '00:00', to: '23:59' })))}
+                            className="flex items-center gap-3 px-6 py-3.5 rounded-2xl text-sm font-semibold bg-white/5 border border-white/[0.06] text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                          >
+                            <Clock className="w-4 h-4" />
+                            24 Hours
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSchedule((s) => s.map((d) => ['Sat', 'Sun'].includes(d.day) ? { ...d, open: false } : d))}
+                            className="flex items-center gap-3 px-6 py-3.5 rounded-2xl text-sm font-semibold bg-white/5 border border-white/[0.06] text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                          >
+                            <X className="w-4 h-4" />
+                            Close Weekends
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSchedule((s) => s.map((d) => ({ ...d, open: true })))}
+                            className="flex items-center gap-3 px-6 py-3.5 rounded-2xl text-sm font-semibold bg-white/5 border border-white/[0.06] text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                          >
+                            <Check className="w-4 h-4" />
+                            Open All Days
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setSchedule(defaultSchedule); setClosedDates([]); }}
+                            className="flex items-center gap-3 px-6 py-3.5 rounded-2xl text-sm font-semibold bg-white/5 border border-white/[0.06] text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                          >
+                            <RotateCcw className="w-4 h-4" />
+                            Reset Defaults
+                          </button>
                         </div>
 
-                        {/* Right: Calendar */}
-                        <div className="w-[220px] flex-shrink-0">
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Close Specific Dates</p>
-                          <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                            {/* Month nav */}
-                            <div className="flex items-center justify-between mb-2">
-                              <button
-                                type="button"
-                                onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1))}
-                                className="p-1 rounded-md text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
-                              >
-                                <ChevronLeft className="w-3.5 h-3.5" />
-                              </button>
-                              <span className="text-[11px] font-bold text-white/70">{calMonthLabel}</span>
-                              <button
-                                type="button"
-                                onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1))}
-                                className="p-1 rounded-md text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
-                              >
-                                <ChevronRight className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                            {/* Day headers */}
-                            <div className="grid grid-cols-7 gap-0.5 mb-1">
-                              {DAYS.map((d) => (
-                                <div key={d} className="text-[8px] font-bold text-white/25 text-center py-0.5">{d.charAt(0)}</div>
+                        {/* Main content: 3 columns */}
+                        <div className="flex gap-10">
+                          {/* Left: Weekly Schedule */}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-4">Weekly Schedule</p>
+                            <div className="space-y-2">
+                              {schedule.map((entry, idx) => (
+                                <div
+                                  key={entry.day}
+                                  className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all ${entry.open ? 'bg-white/[0.04] hover:bg-white/[0.07]' : 'bg-transparent opacity-40'}`}
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() => setSchedule((s) => s.map((d, i) => i === idx ? { ...d, open: !d.open } : d))}
+                                    className={`w-12 h-7 rounded-full transition-colors flex-shrink-0 relative ${entry.open ? 'bg-emerald-500' : 'bg-white/10'}`}
+                                  >
+                                    <span className={`absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white shadow-sm transition-transform ${entry.open ? 'left-[25px]' : 'left-[3px]'}`} />
+                                  </button>
+                                  <span className={`text-base font-bold w-12 ${entry.open ? 'text-white' : 'text-white/40'}`}>{entry.day}</span>
+                                  {entry.open ? (
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                      <input
+                                        type="time"
+                                        value={entry.from}
+                                        onChange={(e) => setSchedule((s) => s.map((d, i) => i === idx ? { ...d, from: e.target.value } : d))}
+                                        className="bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-sm text-white font-mono outline-none focus:border-white/30 w-[7rem]"
+                                      />
+                                      <span className="text-white/20 text-base">–</span>
+                                      <input
+                                        type="time"
+                                        value={entry.to}
+                                        onChange={(e) => setSchedule((s) => s.map((d, i) => i === idx ? { ...d, to: e.target.value } : d))}
+                                        className="bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-sm text-white font-mono outline-none focus:border-white/30 w-[7rem]"
+                                      />
+                                    </div>
+                                  ) : (
+                                    <span className="text-sm text-white/20 italic">Closed</span>
+                                  )}
+                                </div>
                               ))}
                             </div>
-                            {/* Date cells */}
-                            <div className="grid grid-cols-7 gap-0.5">
-                              {calendarCells.map((day, i) => {
-                                if (day === null) return <div key={`empty-${i}`} className="w-full aspect-square" />;
-                                const past = isDayInPast(day);
-                                const closed = isDateClosed(day);
-                                const today = new Date();
-                                const isToday = day === today.getDate() && calMonth.getMonth() === today.getMonth() && calMonth.getFullYear() === today.getFullYear();
-                                return (
-                                  <button
-                                    key={day}
-                                    type="button"
-                                    disabled={past}
-                                    onClick={() => toggleClosedDate(day)}
-                                    className={`w-full aspect-square rounded-md text-[10px] font-medium transition-all flex items-center justify-center ${
-                                      past ? 'text-white/10 cursor-not-allowed' :
-                                      closed ? 'bg-red-500/80 text-white font-bold ring-1 ring-red-400/30' :
-                                      isToday ? 'bg-white/15 text-white font-bold ring-1 ring-white/20' :
-                                      'text-white/60 hover:bg-white/10 hover:text-white'
-                                    }`}
-                                    title={closed ? `${day} — marked closed` : `Click to close ${day}`}
-                                  >
-                                    {day}
-                                  </button>
-                                );
-                              })}
+                          </div>
+
+                          {/* Middle: Calendar */}
+                          <div className="w-[340px] flex-shrink-0">
+                            <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-4">Close Specific Dates</p>
+                            <div className="bg-white/[0.03] rounded-2xl p-6 border border-white/[0.06]">
+                              {/* Month nav */}
+                              <div className="flex items-center justify-between mb-4">
+                                <button
+                                  type="button"
+                                  onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1))}
+                                  className="p-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
+                                >
+                                  <ChevronLeft className="w-5 h-5" />
+                                </button>
+                                <span className="text-lg font-bold text-white/80">{calMonthLabel}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1))}
+                                  className="p-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
+                                >
+                                  <ChevronRight className="w-5 h-5" />
+                                </button>
+                              </div>
+                              {/* Day headers */}
+                              <div className="grid grid-cols-7 gap-1.5 mb-2">
+                                {DAYS.map((d) => (
+                                  <div key={d} className="text-xs font-bold text-white/25 text-center py-1">{d}</div>
+                                ))}
+                              </div>
+                              {/* Date cells */}
+                              <div className="grid grid-cols-7 gap-1.5">
+                                {calendarCells.map((day, i) => {
+                                  if (day === null) return <div key={`empty-${i}`} className="w-full aspect-square" />;
+                                  const past = isDayInPast(day);
+                                  const closed = isDateClosed(day);
+                                  const today = new Date();
+                                  const isToday = day === today.getDate() && calMonth.getMonth() === today.getMonth() && calMonth.getFullYear() === today.getFullYear();
+                                  return (
+                                    <button
+                                      key={day}
+                                      type="button"
+                                      disabled={past}
+                                      onClick={() => toggleClosedDate(day)}
+                                      className={`w-full aspect-square rounded-xl text-sm font-medium transition-all flex items-center justify-center ${past ? 'text-white/10 cursor-not-allowed' :
+                                        closed ? 'bg-red-500/80 text-white font-bold ring-2 ring-red-400/30' :
+                                          isToday ? 'bg-white/15 text-white font-bold ring-2 ring-white/20' :
+                                            'text-white/60 hover:bg-white/10 hover:text-white'
+                                        }`}
+                                      title={closed ? `${day} — marked closed` : `Click to close ${day}`}
+                                    >
+                                      {day}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                              {/* Closed dates list */}
+                              {closedDates.length > 0 && (
+                                <div className="mt-4 pt-4 border-t border-white/[0.06]">
+                                  <p className="text-xs font-bold text-red-400/70 uppercase tracking-wider mb-2">Closed dates ({closedDates.length})</p>
+                                  <div className="flex flex-wrap gap-2">
+                                    {closedDates.sort().map((ds) => {
+                                      const d = new Date(ds + 'T00:00:00');
+                                      return (
+                                        <span key={ds} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/15 text-xs text-red-400 font-medium">
+                                          {d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                          <button type="button" onClick={() => setClosedDates((p) => p.filter((x) => x !== ds))} className="hover:text-red-300 transition-colors">
+                                            <X className="w-3.5 h-3.5" />
+                                          </button>
+                                        </span>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
                             </div>
-                            {/* Closed dates list */}
-                            {closedDates.length > 0 && (
-                              <div className="mt-2.5 pt-2 border-t border-white/5">
-                                <p className="text-[9px] font-bold text-red-400/70 uppercase tracking-wider mb-1">Closed dates ({closedDates.length})</p>
-                                <div className="flex flex-wrap gap-1">
-                                  {closedDates.sort().map((ds) => {
-                                    const d = new Date(ds + 'T00:00:00');
-                                    return (
-                                      <span key={ds} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-500/15 text-[9px] text-red-400 font-medium">
-                                        {d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                        <button type="button" onClick={() => setClosedDates((p) => p.filter((x) => x !== ds))} className="hover:text-red-300 transition-colors">
-                                          <X className="w-2.5 h-2.5" />
-                                        </button>
-                                      </span>
-                                    );
-                                  })}
+                          </div>
+
+                          {/* Right: Summary & Options */}
+                          <div className="w-[240px] flex-shrink-0 space-y-6">
+                            <div>
+                              <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-4">Summary</p>
+                              <div className="bg-white/[0.03] rounded-2xl p-6 border border-white/[0.06] space-y-5">
+                                <div>
+                                  <p className="text-xs text-white/40 mb-1">Open days</p>
+                                  <p className="text-2xl font-bold text-white">{schedule.filter((d) => d.open).length} <span className="text-base text-white/30">/ 7</span></p>
+                                </div>
+                                <div className="border-t border-white/[0.06] pt-4">
+                                  <p className="text-xs text-white/40 mb-1">Closed dates</p>
+                                  <p className="text-2xl font-bold text-white">{closedDates.length}</p>
+                                </div>
+                                <div className="border-t border-white/[0.06] pt-4">
+                                  <p className="text-xs text-white/40 mb-1">Preview</p>
+                                  <p className="text-sm font-medium text-white/70 leading-relaxed">{formatSchedule(schedule) || '—'}</p>
                                 </div>
                               </div>
-                            )}
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-4">Actions</p>
+                              <div className="space-y-3">
+                                <button
+                                  type="button"
+                                  onClick={() => { setSchedule(defaultSchedule); setClosedDates([]); }}
+                                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold bg-white/5 border border-white/[0.06] text-white/50 hover:text-white hover:bg-white/10 transition-all"
+                                >
+                                  <RotateCcw className="w-4 h-4" />
+                                  Reset All
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setSchedule((s) => s.map((d) => ({ ...d, open: false })))}
+                                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold bg-red-500/5 border border-red-500/10 text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                                >
+                                  <X className="w-4 h-4" />
+                                  Close All Days
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setSchedule((s) => s.map((d) => ({ ...d, open: true })))}
+                                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold bg-emerald-500/5 border border-emerald-500/10 text-emerald-400/60 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all"
+                                >
+                                  <Check className="w-4 h-4" />
+                                  Open All Days
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
 
-                      {/* Footer actions */}
-                      <div className="flex gap-2 pt-4 mt-4 border-t border-white/5">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const result = formatSchedule(schedule);
-                            const suffix = closedDates.length > 0
-                              ? ` (closed ${closedDates.sort().map((ds) => { const d = new Date(ds + 'T00:00:00'); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }).join(', ')})`
-                              : '';
-                            onHoursChange?.(result + suffix);
-                            setEditingHours(false);
-                          }}
-                          className="flex-1 py-2.5 rounded-xl text-xs font-bold text-white transition-all hover:brightness-110 flex items-center justify-center gap-2"
-                          style={{ backgroundColor: brandColor }}
-                        >
-                          <Check className="w-3.5 h-3.5" />
-                          Save Hours
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => { setSchedule(defaultSchedule); setClosedDates([]); setEditingHours(false); }}
-                          className="px-5 py-2.5 rounded-xl text-xs font-bold text-white/40 hover:text-white/70 bg-white/5 hover:bg-white/10 transition-all"
-                        >
-                          Cancel
-                        </button>
+                      {/* Footer */}
+                      <div className="flex items-center justify-between px-12 py-6 border-t border-white/[0.06] flex-shrink-0 bg-zinc-950/80">
+                        <p className="text-sm text-white/30">{schedule.filter((d) => d.open).length} days open{closedDates.length > 0 ? ` · ${closedDates.length} date${closedDates.length > 1 ? 's' : ''} closed` : ''}</p>
+                        <div className="flex gap-4">
+                          <button
+                            type="button"
+                            onClick={() => { setSchedule(defaultSchedule); setClosedDates([]); setEditingHours(false); }}
+                            className="px-8 py-3.5 rounded-2xl text-base font-semibold text-white/40 hover:text-white/70 bg-white/5 hover:bg-white/10 transition-all"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const result = formatSchedule(schedule);
+                              const suffix = closedDates.length > 0
+                                ? ` (closed ${closedDates.sort().map((ds) => { const d = new Date(ds + 'T00:00:00'); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }).join(', ')})`
+                                : '';
+                              onHoursChange?.(result + suffix);
+                              setEditingHours(false);
+                            }}
+                            className="px-10 py-3.5 rounded-2xl text-base font-bold text-white transition-all hover:brightness-110 flex items-center gap-2.5"
+                            style={{ backgroundColor: brandColor }}
+                          >
+                            <Check className="w-5 h-5" />
+                            Save Hours
+                          </button>
+                        </div>
                       </div>
-                    </div>
+
+                    </div>, document.body
                   )}
                 </div>
               </div>
@@ -1507,11 +1598,10 @@ const MenuHero: React.FC<MenuHeroProps> = React.memo(
                               onLoadPreset(preset.id);
                               setShowPresets(false);
                             }}
-                            className={`w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs transition-colors ${
-                              isActive
-                                ? 'bg-white/10 text-white'
-                                : 'text-zinc-300 hover:bg-white/5 hover:text-white'
-                            }`}
+                            className={`w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs transition-colors ${isActive
+                              ? 'bg-white/10 text-white'
+                              : 'text-zinc-300 hover:bg-white/5 hover:text-white'
+                              }`}
                           >
                             {isActive && (
                               <div
@@ -1605,50 +1695,51 @@ const CategoryTabs: React.FC<CategoryTabsProps> = React.memo(
           <div className="relative flex-1 min-w-0">
             {/* Right fade to indicate scrollable tabs */}
             <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-zinc-950/80 to-transparent pointer-events-none z-10 md:hidden" />
-          <div
-            ref={tabsRef}
-            className="flex-1 flex gap-1 overflow-x-auto scrollbar-none py-3"
-            role="tablist"
-          >
-            {categories.filter((cat) => items.some((i) => i.category === cat.id)).map((cat) => {
-              const count = items.filter((i) => i.category === cat.id).length;
-              const isActive = active === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  data-cat={cat.id}
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => onSelect(cat.id)}
-                  className="relative flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 group/tab"
-                  style={{
-                    color: isActive ? '#fff' : 'rgba(255,255,255,0.4)',
-                    backgroundColor: isActive ? 'rgba(255,255,255,0.05)' : 'transparent',
-                  }}
-                >
-                  <span className="font-sans-premium tracking-tight">{cat.label}</span>
-                  <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded-lg font-black ${isActive ? 'bg-white/10 text-white/50' : 'text-white/20 group-hover/tab:text-white/40'}`}
+            <div
+              ref={tabsRef}
+              className="flex-1 flex gap-1 overflow-x-auto scrollbar-none py-3"
+              role="tablist"
+            >
+              {categories.filter((cat) => items.some((i) => i.category === cat.id)).map((cat) => {
+                const count = items.filter((i) => i.category === cat.id).length;
+                const isActive = active === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    data-cat={cat.id}
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => onSelect(cat.id)}
+                    className="relative flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 group/tab"
+                    style={{
+                      color: isActive ? '#fff' : 'rgba(255,255,255,0.4)',
+                      backgroundColor: isActive ? 'rgba(255,255,255,0.05)' : 'transparent',
+                    }}
                   >
-                    {count}
-                  </span>
-                  {isActive && (
+                    <span className="font-sans-premium tracking-tight">{cat.label}</span>
                     <span
-                      className="absolute bottom-0 left-4 right-4 h-0.5 rounded-t-full shadow-[0_-2px_8px_rgba(255,255,255,0.3)]"
-                      style={{ backgroundColor: brandColor }}
-                    />
-                  )}
-                </button>
-              );
-            })}
+                      className={`text-[10px] px-1.5 py-0.5 rounded-lg font-black ${isActive ? 'bg-white/10 text-white/50' : 'text-white/20 group-hover/tab:text-white/40'}`}
+                    >
+                      {count}
+                    </span>
+                    {isActive && (
+                      <span
+                        className="absolute bottom-0 left-4 right-4 h-0.5 rounded-t-full shadow-[0_-2px_8px_rgba(255,255,255,0.3)]"
+                        style={{ backgroundColor: brandColor }}
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          </div>
-          <div className="flex items-center gap-1 flex-shrink-0 py-3 ml-2 border-l border-white/5 pl-2">
+          <div className="flex items-center gap-1.5 flex-shrink-0 py-2 ml-3 border-l border-white/10 pl-3">
             {isEditMode && onAddFromLibrary && (
               <div className="relative" ref={libraryRef}>
                 <button
                   onClick={() => setShowLibrary((v) => !v)}
-                  className="p-2.5 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+                  className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/10 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+                  style={{ backgroundColor: showLibrary ? `${brandColor}15` : undefined, color: showLibrary ? brandColor : undefined }}
                   aria-label="Add dish from library"
                   title="Add from library"
                 >
@@ -1735,7 +1826,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = React.memo(
             )}
             <button
               onClick={onSearchToggle}
-              className="p-2.5 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+              className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/10 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
               aria-label={t('tpl.menu.searchMenu')}
             >
               <Search className="w-4 h-4" />
@@ -1889,11 +1980,11 @@ const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(
     // Live preview: derive display values from draftItem when editing
     const displayItem: MenuItem = activePanel === 'edit'
       ? {
-          ...draftItem,
-          tags: draftItem.tags.split(',').map((s) => s.trim()).filter(Boolean),
-          allergens: draftItem.allergens.split(',').map((s) => s.trim()).filter(Boolean),
-          pairsWell: pairsNamesToIds(draftItem.pairsWell),
-        }
+        ...draftItem,
+        tags: draftItem.tags.split(',').map((s) => s.trim()).filter(Boolean),
+        allergens: draftItem.allergens.split(',').map((s) => s.trim()).filter(Boolean),
+        pairsWell: pairsNamesToIds(draftItem.pairsWell),
+      }
       : item;
 
     const isHidden = item.hidden ?? false;
@@ -2044,13 +2135,12 @@ const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(
 
           {/* ── Image with Interactive 3D Preview ── */}
           <div
-            className={`relative w-full ${cardStyle === 'stacked' ? 'h-56 sm:h-64' : 'h-56 sm:h-64 lg:w-48 xl:w-56 lg:h-auto'} flex-shrink-0 bg-zinc-800 overflow-hidden ${
-              cardRadius === 'sharp'
-                ? (cardStyle === 'stacked' ? 'rounded-t-md' : 'rounded-t-md lg:rounded-t-none lg:rounded-l-md')
-                : cardRadius === 'pill'
+            className={`relative w-full ${cardStyle === 'stacked' ? 'h-56 sm:h-64' : 'h-56 sm:h-64 lg:w-48 xl:w-56 lg:h-auto'} flex-shrink-0 bg-zinc-800 overflow-hidden ${cardRadius === 'sharp'
+              ? (cardStyle === 'stacked' ? 'rounded-t-md' : 'rounded-t-md lg:rounded-t-none lg:rounded-l-md')
+              : cardRadius === 'pill'
                 ? (cardStyle === 'stacked' ? 'rounded-t-[1.75rem]' : 'rounded-t-[1.75rem] lg:rounded-t-none lg:rounded-l-[1.75rem]')
                 : (cardStyle === 'stacked' ? 'rounded-t-2xl' : 'rounded-t-2xl lg:rounded-t-none lg:rounded-l-2xl')
-            } ${has3D && !isEditMode ? 'cursor-pointer' : ''} transition-all duration-500`}
+              } ${has3D && !isEditMode ? 'cursor-pointer' : ''} transition-all duration-500`}
             onClick={(e) => {
               // Only open full viewer if not interacting with inline 3D preview
               const target = e.target as HTMLElement;
@@ -2167,6 +2257,25 @@ const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(
                   </span>
                   <span className="text-xs font-semibold text-white bg-zinc-800/80 px-2 py-0.5 rounded-md border border-zinc-700/50">
                     {displayItem.calories}
+                  </span>
+                </div>
+              )}
+
+              {/* Spice Level */}
+              {fieldVisibility.spiceLevel && (displayItem.spiceLevel ?? 0) > 0 && (
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-[11px] md:text-xs font-bold uppercase tracking-widest text-zinc-500">
+                    {t('tpl.menu.spiceLevel', 'Spice')}
+                  </span>
+                  <span className="flex gap-0.5">
+                    {Array.from({ length: 3 }, (_, i) => (
+                      <span
+                        key={i}
+                        className={`text-sm ${i < (displayItem.spiceLevel ?? 0) ? 'opacity-100' : 'opacity-20'}`}
+                      >
+                        🌶
+                      </span>
+                    ))}
                   </span>
                 </div>
               )}
@@ -2867,31 +2976,6 @@ function AssetManagementModal({
                     />
                   </div>
 
-                  {/* Image URL */}
-                  <div className={!fieldVisibility.image ? 'opacity-50' : ''}>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-medium text-stone-400">
-                        {t('tpl.menu.imageUrl', 'Image URL')}
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => onToggleFieldVisibility('image')}
-                        className="p-1 rounded-md text-stone-500 hover:text-white hover:bg-stone-700/50 transition-colors"
-                        title={fieldVisibility.image ? 'Hide on menu' : 'Show on menu'}
-                      >
-                        {fieldVisibility.image ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
-                    <input
-                      type="text"
-                      value={draftItem.image}
-                      onChange={(e) => setDraftItem((prev) => ({ ...prev, image: e.target.value }))}
-                      className={`${INPUT_CLASS} font-mono`}
-                      style={{ '--tw-ring-color': brandColor } as React.CSSProperties}
-                      placeholder="https://..."
-                    />
-                  </div>
-
                   {/* Tags */}
                   <div className={!fieldVisibility.tags ? 'opacity-50' : ''}>
                     <div className="flex items-center justify-between mb-1.5">
@@ -2974,15 +3058,13 @@ function AssetManagementModal({
                                     tags: updated.join(', '),
                                   }));
                                 }}
-                                className={`flex items-center gap-2 w-full px-3 py-2 text-xs transition-colors ${
-                                  selected
-                                    ? 'bg-brand-500/10 text-brand-400'
-                                    : 'text-stone-400 hover:bg-stone-800 hover:text-white'
-                                }`}
+                                className={`flex items-center gap-2 w-full px-3 py-2 text-xs transition-colors ${selected
+                                  ? 'bg-brand-500/10 text-brand-400'
+                                  : 'text-stone-400 hover:bg-stone-800 hover:text-white'
+                                  }`}
                               >
-                                <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center flex-shrink-0 ${
-                                  selected ? 'border-brand-500 bg-brand-500' : 'border-stone-600'
-                                }`}>
+                                <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center flex-shrink-0 ${selected ? 'border-brand-500 bg-brand-500' : 'border-stone-600'
+                                  }`}>
                                   {selected && <Check className="w-2.5 h-2.5 text-white" />}
                                 </div>
                                 {tag}
@@ -3076,17 +3158,15 @@ function AssetManagementModal({
                                     allergens: updated.join(', '),
                                   }));
                                 }}
-                                className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors ${
-                                  selected
-                                    ? 'text-red-400 bg-red-500/5'
-                                    : 'text-stone-300 hover:bg-stone-800/80'
-                                }`}
+                                className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors ${selected
+                                  ? 'text-red-400 bg-red-500/5'
+                                  : 'text-stone-300 hover:bg-stone-800/80'
+                                  }`}
                               >
-                                <span className={`w-3.5 h-3.5 rounded border flex-shrink-0 flex items-center justify-center transition-all ${
-                                  selected
-                                    ? 'bg-red-500/20 border-red-500/40'
-                                    : 'border-stone-600 bg-stone-800/60'
-                                }`}>
+                                <span className={`w-3.5 h-3.5 rounded border flex-shrink-0 flex items-center justify-center transition-all ${selected
+                                  ? 'bg-red-500/20 border-red-500/40'
+                                  : 'border-stone-600 bg-stone-800/60'
+                                  }`}>
                                   {selected && <Check className="w-2.5 h-2.5" />}
                                 </span>
                                 {allergen}
@@ -3147,11 +3227,10 @@ function AssetManagementModal({
                                   className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs hover:bg-white/5 transition-colors"
                                 >
                                   <div
-                                    className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-colors ${
-                                      isChecked
-                                        ? 'border-transparent'
-                                        : 'border-stone-600 bg-stone-700/50'
-                                    }`}
+                                    className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-colors ${isChecked
+                                      ? 'border-transparent'
+                                      : 'border-stone-600 bg-stone-700/50'
+                                      }`}
                                     style={isChecked ? { backgroundColor: brandColor } : undefined}
                                   >
                                     {isChecked && <Check className="w-3 h-3 text-white" />}
@@ -3801,7 +3880,10 @@ const ModelViewerOverlay: React.FC<ModelViewerOverlayProps> = ({
 
   // Scroll to top when the overlay opens or item changes
   useEffect(() => {
-    overlayRef.current?.scrollTo(0, 0);
+    requestAnimationFrame(() => {
+      overlayRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+    });
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, [item.id]);
 
   // ── 3D Settings state ──
@@ -4052,11 +4134,11 @@ const ModelViewerOverlay: React.FC<ModelViewerOverlayProps> = ({
   // Live preview: when editing, derive display values from draftItem so the detail panel updates in real-time
   const displayItem: MenuItem = activePanel === 'edit'
     ? {
-        ...draftItem,
-        tags: draftItem.tags.split(',').map((s) => s.trim()).filter(Boolean),
-        allergens: draftItem.allergens.split(',').map((s) => s.trim()).filter(Boolean),
-        pairsWell: pairsNamesToIds(draftItem.pairsWell),
-      }
+      ...draftItem,
+      tags: draftItem.tags.split(',').map((s) => s.trim()).filter(Boolean),
+      allergens: draftItem.allergens.split(',').map((s) => s.trim()).filter(Boolean),
+      pairsWell: pairsNamesToIds(draftItem.pairsWell),
+    }
     : item;
 
   const relatedItems = displayItem.pairsWell
@@ -4508,13 +4590,11 @@ const ModelViewerOverlay: React.FC<ModelViewerOverlayProps> = ({
                                         const updated = selected ? current.filter((a) => a !== allergen) : [...current, allergen];
                                         setDraftItem((prev) => ({ ...prev, allergens: updated.join(', ') }));
                                       }}
-                                      className={`w-full flex items-center gap-2 px-2.5 py-1.5 text-[11px] transition-colors ${
-                                        selected ? 'text-red-400 bg-red-500/5' : 'text-zinc-300 hover:bg-zinc-800/80'
-                                      }`}
+                                      className={`w-full flex items-center gap-2 px-2.5 py-1.5 text-[11px] transition-colors ${selected ? 'text-red-400 bg-red-500/5' : 'text-zinc-300 hover:bg-zinc-800/80'
+                                        }`}
                                     >
-                                      <span className={`w-3 h-3 rounded border flex-shrink-0 flex items-center justify-center ${
-                                        selected ? 'bg-red-500/20 border-red-500/40' : 'border-zinc-600 bg-zinc-800/60'
-                                      }`}>
+                                      <span className={`w-3 h-3 rounded border flex-shrink-0 flex items-center justify-center ${selected ? 'bg-red-500/20 border-red-500/40' : 'border-zinc-600 bg-zinc-800/60'
+                                        }`}>
                                         {selected && <Check className="w-2 h-2" />}
                                       </span>
                                       {allergen}
@@ -4587,11 +4667,10 @@ const ModelViewerOverlay: React.FC<ModelViewerOverlayProps> = ({
                                       className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs hover:bg-white/5 transition-colors"
                                     >
                                       <div
-                                        className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-colors ${
-                                          isChecked
-                                            ? 'border-transparent'
-                                            : 'border-zinc-600 bg-zinc-700/50'
-                                        }`}
+                                        className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-colors ${isChecked
+                                          ? 'border-transparent'
+                                          : 'border-zinc-600 bg-zinc-700/50'
+                                          }`}
                                         style={isChecked ? { backgroundColor: brandColor } : undefined}
                                       >
                                         {isChecked && <Check className="w-3 h-3 text-white" />}
@@ -4681,132 +4760,132 @@ const ModelViewerOverlay: React.FC<ModelViewerOverlayProps> = ({
 
         {/* ── Right: Item Details (live preview from draftItem when editing) ── */}
         <div className="lg:w-[360px] xl:w-[400px] flex-shrink-0 bg-zinc-950 lg:border-l border-t lg:border-t-0 border-white/5 overflow-y-auto lg:h-[calc(100dvh-57px)]">
-            <>
-              {/* Name + Price header */}
-              <div className="px-5 pt-5 pb-3">
-                <div className="flex items-start justify-between gap-3 mb-2">
-                  <h2 className="text-lg font-bold text-white font-serif leading-snug">
-                    {displayItem.name}
-                  </h2>
-                  {showPrices && fieldVisibility.price && (
-                    <span
-                      className="text-xl font-black font-sans-premium flex-shrink-0 tracking-tighter"
-                      style={{ color: brandColor }}
-                    >
-                      {displayItem.price.replace('$', currency)}
-                    </span>
-                  )}
-                </div>
-                {fieldVisibility.tags && displayItem.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {displayItem.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className={`text-[9px] px-2.5 py-0.5 rounded-md border font-black uppercase tracking-widest ${tagStyle(tag)}`}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Description */}
-              {fieldVisibility.description && (
-                <p className="px-5 text-sm text-zinc-400 leading-relaxed">{displayItem.desc}</p>
-              )}
-
-              {/* Calories */}
-              {fieldVisibility.calories && (
-                <div className="flex items-center justify-between text-sm mx-5 mt-3 py-2.5 border-y border-zinc-800/60 font-medium">
-                  <span className="text-zinc-500 uppercase tracking-widest text-[9px] font-bold">
-                    {t('tpl.menu.calories', 'Calories')}
+          <>
+            {/* Name + Price header */}
+            <div className="px-5 pt-5 pb-3">
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <h2 className="text-lg font-bold text-white font-serif leading-snug">
+                  {displayItem.name}
+                </h2>
+                {showPrices && fieldVisibility.price && (
+                  <span
+                    className="text-xl font-black font-sans-premium flex-shrink-0 tracking-tighter"
+                    style={{ color: brandColor }}
+                  >
+                    {displayItem.price.replace('$', currency)}
                   </span>
-                  <span className="text-white font-mono text-xs bg-zinc-900 px-2.5 py-0.5 rounded-md border border-zinc-800">{displayItem.calories}</span>
-                </div>
-              )}
-
-              {/* Allergens */}
-              {fieldVisibility.allergens && displayItem.allergens.length > 0 && (
-                <div className="px-5 mt-3">
-                  <h3 className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 mb-2">
-                    {t('tpl.menu.allergens')}
-                  </h3>
-                  <div className="flex flex-wrap gap-1.5">
-                    {displayItem.allergens.map((a) => (
-                      <span
-                        key={a}
-                        className="text-[11px] px-2.5 py-1 rounded-lg bg-zinc-900 text-zinc-300 border border-zinc-800 font-medium"
-                      >
-                        {a}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Pairs well with */}
-              {fieldVisibility.pairsWell && relatedItems.length > 0 && (
-                <div className="px-5 mt-3">
-                  <h3 className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 mb-2">
-                    {t('tpl.menu.pairsWellWith')}
-                  </h3>
-                  <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none snap-x">
-                    {relatedItems.map((rel) => (
-                      <button
-                        key={rel.id}
-                        onClick={() => onSelectItem(rel)}
-                        className="flex-shrink-0 flex flex-col gap-1.5 w-20 group/rel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded-xl snap-start text-left"
-                      >
-                        <div className="w-20 h-20 rounded-xl overflow-hidden border border-white/5 bg-zinc-900 shadow-lg relative">
-                          <img
-                            src={rel.image}
-                            alt={rel.name}
-                            className="w-full h-full object-cover group-hover/rel:scale-105 transition-transform duration-500"
-                            loading="lazy"
-                          />
-                        </div>
-                        <span className="text-[10px] font-bold text-zinc-400 group-hover/rel:text-white transition-colors line-clamp-2 leading-tight">
-                          {rel.name}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Action buttons */}
-              <div className="px-5 pt-3 pb-5 mt-3 border-t border-white/5 space-y-2">
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleAR}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white transition-all hover:brightness-110 active:scale-95 shadow-xl shadow-brand-500/20 group/btn"
-                    style={{ backgroundColor: brandColor }}
-                  >
-                    <Smartphone className="w-4 h-4 group-hover/btn:rotate-12 transition-transform" />
-                    {t('tpl.menu.ar')}
-                  </button>
-                  <button
-                    onClick={handleShare}
-                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold text-zinc-300 bg-zinc-900 border border-white/10 hover:bg-zinc-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
-                  >
-                    <Share2 className="w-4 h-4" />
-                    {t('tpl.menu.share')}
-                  </button>
-                </div>
-
-                {isEditMode && (
-                  <OverlayMoreMenu
-                    item={item}
-                    brandColor={brandColor}
-                    onSetActivePanel={setActivePanel}
-                    onDuplicate={onDuplicate}
-                    onToggleHidden={onToggleHidden}
-                    onDelete={() => { onDelete?.(); onClose(); }}
-                  />
                 )}
               </div>
-            </>
+              {fieldVisibility.tags && displayItem.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {displayItem.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className={`text-[9px] px-2.5 py-0.5 rounded-md border font-black uppercase tracking-widest ${tagStyle(tag)}`}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Description */}
+            {fieldVisibility.description && (
+              <p className="px-5 text-sm text-zinc-400 leading-relaxed">{displayItem.desc}</p>
+            )}
+
+            {/* Calories */}
+            {fieldVisibility.calories && (
+              <div className="flex items-center justify-between text-sm mx-5 mt-3 py-2.5 border-y border-zinc-800/60 font-medium">
+                <span className="text-zinc-500 uppercase tracking-widest text-[9px] font-bold">
+                  {t('tpl.menu.calories', 'Calories')}
+                </span>
+                <span className="text-white font-mono text-xs bg-zinc-900 px-2.5 py-0.5 rounded-md border border-zinc-800">{displayItem.calories}</span>
+              </div>
+            )}
+
+            {/* Allergens */}
+            {fieldVisibility.allergens && displayItem.allergens.length > 0 && (
+              <div className="px-5 mt-3">
+                <h3 className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 mb-2">
+                  {t('tpl.menu.allergens')}
+                </h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {displayItem.allergens.map((a) => (
+                    <span
+                      key={a}
+                      className="text-[11px] px-2.5 py-1 rounded-lg bg-zinc-900 text-zinc-300 border border-zinc-800 font-medium"
+                    >
+                      {a}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Pairs well with */}
+            {fieldVisibility.pairsWell && relatedItems.length > 0 && (
+              <div className="px-5 mt-3">
+                <h3 className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 mb-2">
+                  {t('tpl.menu.pairsWellWith')}
+                </h3>
+                <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none snap-x">
+                  {relatedItems.map((rel) => (
+                    <button
+                      key={rel.id}
+                      onClick={() => onSelectItem(rel)}
+                      className="flex-shrink-0 flex flex-col gap-1.5 w-20 group/rel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded-xl snap-start text-left"
+                    >
+                      <div className="w-20 h-20 rounded-xl overflow-hidden border border-white/5 bg-zinc-900 shadow-lg relative">
+                        <img
+                          src={rel.image}
+                          alt={rel.name}
+                          className="w-full h-full object-cover group-hover/rel:scale-105 transition-transform duration-500"
+                          loading="lazy"
+                        />
+                      </div>
+                      <span className="text-[10px] font-bold text-zinc-400 group-hover/rel:text-white transition-colors line-clamp-2 leading-tight">
+                        {rel.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Action buttons */}
+            <div className="px-5 pt-3 pb-5 mt-3 border-t border-white/5 space-y-2">
+              <div className="flex gap-2">
+                <button
+                  onClick={handleAR}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white transition-all hover:brightness-110 active:scale-95 shadow-xl shadow-brand-500/20 group/btn"
+                  style={{ backgroundColor: brandColor }}
+                >
+                  <Smartphone className="w-4 h-4 group-hover/btn:rotate-12 transition-transform" />
+                  {t('tpl.menu.ar')}
+                </button>
+                <button
+                  onClick={handleShare}
+                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold text-zinc-300 bg-zinc-900 border border-white/10 hover:bg-zinc-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                >
+                  <Share2 className="w-4 h-4" />
+                  {t('tpl.menu.share')}
+                </button>
+              </div>
+
+              {isEditMode && (
+                <OverlayMoreMenu
+                  item={item}
+                  brandColor={brandColor}
+                  onSetActivePanel={setActivePanel}
+                  onDuplicate={onDuplicate}
+                  onToggleHidden={onToggleHidden}
+                  onDelete={() => { onDelete?.(); onClose(); }}
+                />
+              )}
+            </div>
+          </>
         </div>
       </div>
     </div>
@@ -4932,7 +5011,7 @@ interface CustomizationPanelProps {
 
 const CustomizationPanel: React.FC<CustomizationPanelProps> = React.memo(({ state, onChange, isOpen, onClose, presets, activePresetId, onSavePreset, onLoadPreset, onDeletePreset, onUpdatePreset }) => {
   const [isMinimized, setIsMinimized] = useState(false);
-  const [hoveredTheme, setHoveredTheme] = useState<string | null>(null);
+  const [hoveredTheme, _setHoveredTheme] = useState<string | null>(null);
   const [newPresetName, setNewPresetName] = useState('');
   const [autoStyling, setAutoStyling] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -4946,7 +5025,23 @@ const CustomizationPanel: React.FC<CustomizationPanelProps> = React.memo(({ stat
     return () => window.removeEventListener('keydown', handler);
   }, [isOpen, onClose]);
 
-  const currentTheme = THEME_PRESETS.find((t) => t.id === state.themePreset) ?? THEME_PRESETS[0];
+  const currentTheme = (() => {
+    const base = THEME_PRESETS.find((t) => t.id === state.themePreset) ?? THEME_PRESETS[0];
+    if (state.customBrandColor) {
+      const rgb = hexToRgb(state.customBrandColor);
+      const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+      const h = Math.round(hsl.h);
+      const s = Math.round(hsl.s * 100);
+      return {
+        ...base,
+        brandColor: state.customBrandColor,
+        bg: `hsl(${h}, ${Math.min(s, 30)}%, 4%)`,
+        surface: `hsl(${h}, ${Math.min(s, 25)}%, 10%)`,
+        accent: state.customBrandColor,
+      };
+    }
+    return base;
+  })();
   const previewTheme = hoveredTheme ? (THEME_PRESETS.find((t) => t.id === hoveredTheme) ?? currentTheme) : currentTheme;
 
   const isDefault = JSON.stringify(state) === JSON.stringify(DEFAULT_CUSTOMIZATION);
@@ -4965,11 +5060,10 @@ const CustomizationPanel: React.FC<CustomizationPanelProps> = React.memo(({ stat
     <button
       onClick={onClick}
       title={title}
-      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${
-        active
-          ? 'text-white shadow-lg'
-          : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/5'
-      }`}
+      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${active
+        ? 'text-white shadow-lg'
+        : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/5'
+        }`}
       style={active ? { backgroundColor: currentTheme.brandColor, boxShadow: `0 4px 14px -3px ${currentTheme.brandColor}50` } : undefined}
     >
       {children}
@@ -5121,46 +5215,6 @@ const CustomizationPanel: React.FC<CustomizationPanelProps> = React.memo(({ stat
                   3D
                 </div>
               </div>
-            </div>
-
-            <div className="flex gap-2">
-              {THEME_PRESETS.map((preset) => {
-                const isActive = state.themePreset === preset.id;
-                return (
-                  <button
-                    key={preset.id}
-                    onClick={() => onChange({ themePreset: preset.id })}
-                    onMouseEnter={() => setHoveredTheme(preset.id)}
-                    onMouseLeave={() => setHoveredTheme(null)}
-                    className={`relative flex-1 h-12 rounded-xl border-2 transition-all duration-300 hover:scale-[1.08] active:scale-95 ${
-                      isActive
-                        ? 'border-white/80 shadow-lg'
-                        : 'border-white/5 hover:border-white/20'
-                    }`}
-                    style={{
-                      background: `linear-gradient(145deg, ${preset.bg} 30%, ${preset.brandColor}50)`,
-                      boxShadow: isActive ? `0 6px 24px -4px ${preset.brandColor}50` : undefined,
-                    }}
-                    title={preset.label}
-                    aria-label={`${preset.label} theme`}
-                    aria-pressed={isActive}
-                  >
-                    {/* Accent stripe */}
-                    <div
-                      className="absolute inset-x-1 bottom-1 h-1 rounded-full transition-opacity duration-300"
-                      style={{ backgroundColor: preset.accent, opacity: isActive ? 1 : 0.4 }}
-                    />
-                    {/* Check */}
-                    {isActive && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-5 h-5 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                          <Check className="w-3 h-3 text-white" />
-                        </div>
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
             </div>
 
             {/* Custom Color Picker */}
@@ -5409,11 +5463,10 @@ const CustomizationPanel: React.FC<CustomizationPanelProps> = React.memo(({ stat
                   return (
                     <div
                       key={preset.id}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition-all ${
-                        isActive
-                          ? 'bg-white/10 border border-white/10'
-                          : 'bg-white/[0.03] border border-transparent hover:border-white/5'
-                      }`}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition-all ${isActive
+                        ? 'bg-white/10 border border-white/10'
+                        : 'bg-white/[0.03] border border-transparent hover:border-white/5'
+                        }`}
                     >
                       {isActive && (
                         <div
@@ -5524,6 +5577,23 @@ const RestaurantMenu: React.FC = () => {
   const [pendingPanel, setPendingPanel] = useState<{ itemId: string; panel: ModalPanel } | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
+  const [menuSettings, setMenuSettings] = useState<MenuSettings>(() => savedMenu?.menuSettings ?? {
+    title: 'Restaurant Menu',
+    brandColor: '#d97706',
+    font: 'serif',
+    showPrices: true,
+    currency: '$',
+    fieldVisibility: { ...DEFAULT_FIELD_VISIBILITY },
+    hours: RESTAURANT_INFO.hours,
+    enableTimeBasedMenu: false,
+    breakfastEndTime: '11:00',
+    lunchEndTime: '16:00',
+    lunchMenuId: '',
+    dinnerMenuId: '',
+    themePreset: 'amber',
+    customBrandColor: '',
+  });
+
   const [customization, setCustomization] = useState<CustomizationState>(() => savedMenu?.customization ?? { ...DEFAULT_CUSTOMIZATION });
   const [isCustomizePanelOpen, setIsCustomizePanelOpen] = useState(false);
   const handleCustomizationChange = useCallback((patch: Partial<CustomizationState>) => {
@@ -5545,7 +5615,24 @@ const RestaurantMenu: React.FC = () => {
     });
   }, []);
 
-  const activeTheme = THEME_PRESETS.find((t) => t.id === customization.themePreset) ?? THEME_PRESETS[0];
+  const activeTheme = (() => {
+    const base = THEME_PRESETS.find((t) => t.id === menuSettings.themePreset) ?? THEME_PRESETS[0];
+    if (menuSettings.customBrandColor) {
+      // Derive bg/surface/accent from the custom color
+      const rgb = hexToRgb(menuSettings.customBrandColor);
+      const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+      const h = Math.round(hsl.h);
+      const s = Math.round(hsl.s * 100);
+      return {
+        ...base,
+        brandColor: menuSettings.customBrandColor,
+        bg: `hsl(${h}, ${Math.min(s, 30)}%, 4%)`,
+        surface: `hsl(${h}, ${Math.min(s, 25)}%, 10%)`,
+        accent: menuSettings.customBrandColor,
+      };
+    }
+    return base;
+  })();
   const customizeChangedCount = (Object.keys(DEFAULT_CUSTOMIZATION) as Array<keyof CustomizationState>).filter(
     (k) => customization[k] !== DEFAULT_CUSTOMIZATION[k]
   ).length;
@@ -5559,16 +5646,6 @@ const RestaurantMenu: React.FC = () => {
     deletePreset,
     updatePreset,
   } = useLayoutPresets(orgId, id);
-
-  const [menuSettings, setMenuSettings] = useState<MenuSettings>(() => savedMenu?.menuSettings ?? {
-    title: 'Restaurant Menu',
-    brandColor: '#d97706',
-    font: 'serif',
-    showPrices: true,
-    currency: '$',
-    fieldVisibility: { ...DEFAULT_FIELD_VISIBILITY },
-    hours: RESTAURANT_INFO.hours,
-  });
 
   // Auto-save all customer state to localStorage on every change
   const menuStateRef = useRef({ menuItems, menuSettings, customization });
@@ -5606,7 +5683,7 @@ const RestaurantMenu: React.FC = () => {
         if (found) setProject(found);
 
         // Skip API menu loading if we already have localStorage data (customer-specific)
-        const hasLocalData = id ? !!loadMenuFromStorage(orgId, id) : false;
+        const hasLocalData = id ? Boolean(loadMenuFromStorage(orgId, id)) : false;
         if (!hasLocalData && id) {
           const config = await MenusProvider.get(id);
           if (config) {
@@ -5620,6 +5697,20 @@ const RestaurantMenu: React.FC = () => {
               fieldVisibility: config.field_visibility as unknown as FieldVisibility,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any -- hours may not exist in older DTOs
               hours: ((config as any).hours as string) ?? '',
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              enableTimeBasedMenu: ((config as any).enableTimeBasedMenu as boolean) ?? false,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              breakfastEndTime: ((config as any).breakfastEndTime as string) ?? '11:00',
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              lunchEndTime: ((config as any).lunchEndTime as string) ?? '16:00',
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              lunchMenuId: ((config as any).lunchMenuId as string) ?? '',
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              dinnerMenuId: ((config as any).dinnerMenuId as string) ?? '',
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              themePreset: ((config as any).theme_preset as string) ?? 'amber',
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              customBrandColor: ((config as any).custom_brand_color as string) ?? '',
             });
           } else if (found) {
             // No saved config yet — use defaults but set title from project
@@ -5861,6 +5952,13 @@ const RestaurantMenu: React.FC = () => {
         font: menuSettings.font,
         show_prices: menuSettings.showPrices,
         currency: menuSettings.currency,
+        enableTimeBasedMenu: menuSettings.enableTimeBasedMenu,
+        breakfastEndTime: menuSettings.breakfastEndTime,
+        lunchEndTime: menuSettings.lunchEndTime,
+        lunchMenuId: menuSettings.lunchMenuId,
+        dinnerMenuId: menuSettings.dinnerMenuId,
+        theme_preset: menuSettings.themePreset,
+        custom_brand_color: menuSettings.customBrandColor,
         field_visibility: menuSettings.fieldVisibility as unknown as Record<string, boolean>,
         categories: CATEGORIES,
         items: menuItems.map(toDTO),
@@ -5925,11 +6023,48 @@ const RestaurantMenu: React.FC = () => {
     [viewerItem, menuItems]
   );
 
+  const overrideMenu = new URLSearchParams(location.search).get('override');
+
+  // Time-based smart redirection logic
+  useEffect(() => {
+    if (isEditMode || !menuSettings.enableTimeBasedMenu) return;
+    if (overrideMenu) return; // Wait until overriden is disabled
+
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinutes = now.getMinutes();
+
+    const [bHour, bMin] = (menuSettings.breakfastEndTime || '11:00').split(':').map(Number);
+    const [lHour, lMin] = (menuSettings.lunchEndTime || '16:00').split(':').map(Number);
+
+    const isBreakfastTime = currentHour < bHour || (currentHour === bHour && currentMinutes < bMin);
+    const isLunchTime = !isBreakfastTime && (currentHour < lHour || (currentHour === lHour && currentMinutes < lMin));
+
+    // Redirect to configured menus if the target is NOT the current page
+    if (isLunchTime && menuSettings.lunchMenuId && menuSettings.lunchMenuId !== id) {
+      navigate(`/project/${menuSettings.lunchMenuId}/menu`);
+    } else if (!isBreakfastTime && !isLunchTime && menuSettings.dinnerMenuId && menuSettings.dinnerMenuId !== id) {
+      navigate(`/project/${menuSettings.dinnerMenuId}/menu`);
+    }
+  }, [
+    isEditMode,
+    menuSettings.enableTimeBasedMenu,
+    menuSettings.breakfastEndTime,
+    menuSettings.lunchEndTime,
+    menuSettings.lunchMenuId,
+    menuSettings.dinnerMenuId,
+    id,
+    navigate,
+    overrideMenu,
+    location.search
+  ]);
+
   const filteredItems = useMemo(
     () =>
       menuItems.filter((i) => {
         // In public view, hide items marked as hidden
         if (!isEditMode && i.hidden) return false;
+
         if (activeFilters.length > 0 && !activeFilters.some((f) => i.tags.includes(f))) {
           return false;
         }
@@ -6122,13 +6257,12 @@ const RestaurantMenu: React.FC = () => {
 
         {/* Main content */}
         <main
-          className={`px-4 md:px-8 max-w-7xl mx-auto transition-all duration-500 ${
-            customization.spacing === 'compact'
-              ? 'py-8 md:py-12 space-y-10 md:space-y-16'
-              : customization.spacing === 'spacious'
+          className={`px-4 md:px-8 max-w-7xl mx-auto transition-all duration-500 ${customization.spacing === 'compact'
+            ? 'py-8 md:py-12 space-y-10 md:space-y-16'
+            : customization.spacing === 'spacious'
               ? 'py-16 md:py-28 space-y-24 md:space-y-36'
               : 'py-12 md:py-20 space-y-16 md:space-y-24'
-          }`}
+            }`}
           id="menu-content"
         >
           {searchQuery.trim() ? (

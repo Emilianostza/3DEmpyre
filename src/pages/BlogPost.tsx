@@ -4,6 +4,7 @@ import { LocalizedLink as Link } from '@/components/LocalizedLink';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Clock, ChevronRight } from 'lucide-react';
 import { SEO } from '@/components/common/SEO';
+import { BlogPostingSchema } from '@/components/common/StructuredData';
 import { placeholder } from '@/config/site';
 import { BLOG_POSTS } from '@/data/blog-posts';
 import { i18nToLocale } from '@/utils/formatters';
@@ -46,6 +47,12 @@ const BlogPost: React.FC = () => {
       })}
     >
       <SEO title={post.title} description={post.excerpt} />
+      <BlogPostingSchema
+        headline={post.title}
+        description={post.excerpt}
+        datePublished={post.publishedAt}
+        authorName={post.author.name}
+      />
 
       {/* ── Article ───────────────────────────────────────── */}
       <article className="relative bg-zinc-950 pt-24 pb-20">
@@ -173,7 +180,7 @@ const BlogPost: React.FC = () => {
             {t('cta.getQuote')}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
-          <p className="text-xs text-zinc-600 mt-6">{t('cta.reassurance')}</p>
+          <p className="text-xs text-zinc-500 mt-6">{t('cta.reassurance')}</p>
         </div>
       </section>
     </div>

@@ -9,22 +9,39 @@ interface MenuSettings {
   title: string;
   brandColor: string;
   font: string;
+  themePreset?: string;
+  customBrandColor?: string;
   showPrices: boolean;
   currency: string;
   hours?: string;
+  enableTimeBasedMenu?: boolean;
+  breakfastEndTime?: string;
+  lunchEndTime?: string;
+  lunchMenuId?: string;
+  dinnerMenuId?: string;
 }
 
 interface MenuSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentSettings: MenuSettings;
+  projects?: { id: string; name: string }[];
   onSave: (settings: MenuSettings) => void;
 }
+
+const THEME_PRESETS = [
+  { id: 'amber', label: 'Warm Amber', brandColor: '#d97706', bg: '#09090b', surface: '#18181b', accent: '#fbbf24' },
+  { id: 'slate', label: 'Cool Slate', brandColor: '#6366f1', bg: '#0f172a', surface: '#1e293b', accent: '#818cf8' },
+  { id: 'emerald', label: 'Emerald', brandColor: '#059669', bg: '#022c22', surface: '#064e3b', accent: '#34d399' },
+  { id: 'rose', label: 'Rose', brandColor: '#e11d48', bg: '#0c0a09', surface: '#1c1917', accent: '#fb7185' },
+  { id: 'purple', label: 'Royal', brandColor: '#7c3aed', bg: '#0a0015', surface: '#1a0a2e', accent: '#a78bfa' },
+];
 
 export const MenuSettingsModal: React.FC<MenuSettingsModalProps> = ({
   isOpen,
   onClose,
   currentSettings,
+  projects = [],
   onSave,
 }) => {
   const { t } = useTranslation();
@@ -98,49 +115,48 @@ export const MenuSettingsModal: React.FC<MenuSettingsModalProps> = ({
             </div>
           </div>
 
-          {/* Opening Hours */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
-              <Clock className="w-3.5 h-3.5" /> {t('portal.menuSettings.openingHours', 'Opening Hours')}
-            </h3>
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-                {t('portal.menuSettings.hoursLabel', 'Days & Hours')}
-              </label>
-              <input
-                type="text"
-                value={settings.hours || ''}
-                onChange={(e) => setSettings({ ...settings, hours: e.target.value })}
-                placeholder="Mon–Sun 12:00–23:00"
-                className="w-full px-3.5 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
-              />
-              <p className="text-xs text-zinc-500 mt-1.5">{t('portal.menuSettings.hoursHint', 'Displayed on the menu hero section')}</p>
-            </div>
-          </div>
-
           {/* Appearance */}
           <div className="space-y-3">
             <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
-              <Palette className="w-3.5 h-3.5" /> {t('portal.menuSettings.appearance')}
+              <Palette className="w-3.5 h-3.5" /> {t('portal.menuSettings.appearance', 'Appearance')}
             </h3>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-                  {t('portal.menuSettings.brandColor')}
+                  {t('portal.menuSettings.themePreset', 'Theme Preset')}
                 </label>
-                <div className="flex items-center gap-2.5 bg-zinc-50 dark:bg-zinc-800 px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700">
-                  <input
-                    type="color"
-                    value={settings.brandColor}
-                    onChange={(e) => setSettings({ ...settings, brandColor: e.target.value })}
-                    className="w-7 h-7 rounded cursor-pointer bg-transparent border-none"
-                  />
-                  <span className="text-zinc-500 dark:text-zinc-400 font-mono text-xs">
-                    {settings.brandColor}
-                  </span>
-                </div>
+                <select
+                  value={settings.themePreset || 'amber'}
+                  onChange={(e) => setSettings({ ...settings, themePreset: e.target.value })}
+                  className="w-full px-3.5 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
+                >
+                  {THEME_PRESETS.map((t) => (
+                    <option key={t.id} value={t.id}>{t.label}</option>
+                  ))}
+                </select>
               </div>
               <div>
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  {t('portal.menuSettings.brandColor', 'Custom Brand Color')}
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={settings.customBrandColor || settings.brandColor || '#d97706'}
+                    onChange={(e) => setSettings({ ...settings, customBrandColor: e.target.value, brandColor: e.target.value })}
+                    className="w-10 h-10 p-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl cursor-pointer shrink-0"
+                  />
+                  <input
+                    type="text"
+                    value={settings.customBrandColor || settings.brandColor || '#d97706'}
+                    onChange={(e) => setSettings({ ...settings, customBrandColor: e.target.value, brandColor: e.target.value })}
+                    placeholder="#HEX"
+                    className="w-full px-3.5 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all uppercase"
+                  />
+                </div>
+              </div>
+              <div className="col-span-2">
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
                   {t('portal.menuSettings.currency')}
                 </label>
@@ -156,6 +172,96 @@ export const MenuSettingsModal: React.FC<MenuSettingsModalProps> = ({
                 </select>
               </div>
             </div>
+          </div>
+
+          {/* Time-Based Menu Settings */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
+              <Clock className="w-3.5 h-3.5" /> {t('portal.menuSettings.timeBasedMenu', 'Time-Based Menu')}
+            </h3>
+            <div className="flex items-center justify-between p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800">
+              <div className="flex flex-col pr-4">
+                <span className="text-sm font-medium text-zinc-900 dark:text-white">
+                  {t('portal.menuSettings.enableTimeBased', 'Enable Breakfast / Dinner Switch')}
+                </span>
+                <span className="text-zinc-500 dark:text-zinc-400 text-xs mt-0.5">
+                  Automatically switch menu based on tags. Use ?override=breakfast to bypass.
+                </span>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                <input
+                  type="checkbox"
+                  checked={settings.enableTimeBasedMenu || false}
+                  onChange={(e) => setSettings({ ...settings, enableTimeBasedMenu: e.target.checked })}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-zinc-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+              </label>
+            </div>
+            {settings.enableTimeBasedMenu && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5 mt-2">
+                    {t('portal.menuSettings.breakfastEnd', 'Breakfast Ends At')}
+                  </label>
+                  <input
+                    type="time"
+                    value={settings.breakfastEndTime || '11:00'}
+                    onChange={(e) => setSettings({ ...settings, breakfastEndTime: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5 mt-2">
+                    {t('portal.menuSettings.lunchEnd', 'Lunch Ends At')}
+                  </label>
+                  <input
+                    type="time"
+                    value={settings.lunchEndTime || '16:00'}
+                    onChange={(e) => setSettings({ ...settings, lunchEndTime: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
+                  />
+                </div>
+                <div className="col-span-2 text-xs text-zinc-500 mt-1 mb-2">
+                  Dinner begins automatically after Lunch ends.
+                </div>
+
+                {projects.length > 0 && (
+                  <>
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5 mt-2">
+                        {t('portal.menuSettings.lunchRedirect', 'Forward to Lunch Menu')}
+                      </label>
+                      <select
+                        value={settings.lunchMenuId || ''}
+                        onChange={(e) => setSettings({ ...settings, lunchMenuId: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white"
+                      >
+                        <option value="">{t('portal.menuSettings.noRedirect', '-- Do not forward --')}</option>
+                        {projects.map(p => (
+                          <option key={p.id} value={p.id}>{p.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5 mt-2">
+                        {t('portal.menuSettings.dinnerRedirect', 'Forward to Dinner Menu')}
+                      </label>
+                      <select
+                        value={settings.dinnerMenuId || ''}
+                        onChange={(e) => setSettings({ ...settings, dinnerMenuId: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white"
+                      >
+                        <option value="">{t('portal.menuSettings.noRedirect', '-- Do not forward --')}</option>
+                        {projects.map(p => (
+                          <option key={p.id} value={p.id}>{p.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Toggles */}
