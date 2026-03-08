@@ -318,7 +318,7 @@ const Pricing: React.FC = () => {
                       {plan.name}
                     </h3>
                     <p
-                      className={`text-xs ${plan.enterpriseCustom ? 'text-zinc-400' : 'text-zinc-400'}`}
+                      className="text-xs text-zinc-400"
                     >
                       {plan.tagline}
                     </p>

@@ -24,7 +24,7 @@ import { announceToScreenReader } from '@/utils/a11y';
 const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => {
   const { logout, organization } = useAuth();
   const portalConfig = getPortalConfig(organization?.industry);
-  const { success } = useToast();
+  const { success, error: showError } = useToast();
   const { theme } = useTheme();
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -64,9 +64,11 @@ const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => 
         await ProjectsProvider.create({ ...data, type: 'standard' });
         const projData = await ProjectsProvider.list();
         setProjects(projData as Project[]);
+        success(t('portal.toast.projectCreated', { defaultValue: 'Project created' }));
         navigate('projects');
       } catch (err) {
         if (import.meta.env.DEV) console.error('Failed to create project', err);
+        showError(t('portal.toast.projectCreateFailed', { defaultValue: 'Failed to create project' }));
       }
     },
     [navigate]
@@ -77,10 +79,12 @@ const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => 
       await ProjectsProvider.update(id, data);
       const projData = await ProjectsProvider.list();
       setProjects(projData as Project[]);
+      success(t('portal.toast.projectUpdated', { defaultValue: 'Project updated' }));
     } catch (err) {
       if (import.meta.env.DEV) console.error('Failed to update project', err);
+      showError(t('portal.toast.projectUpdateFailed', { defaultValue: 'Failed to update project' }));
     }
-  }, []);
+  }, [success, showError, t]);
 
   const refreshData = useCallback(async () => {
     try {

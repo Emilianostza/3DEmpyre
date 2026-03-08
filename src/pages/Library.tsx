@@ -347,21 +347,20 @@ const Library: React.FC = () => {
 
             {/* Viewer */}
             <div className="flex-1 bg-zinc-800 relative">
-              <model-viewer
-                src={
-                  selectedAsset.file_key?.startsWith('http') ? selectedAsset.file_key : undefined
-                }
-                poster={selectedAsset.thumb}
-                alt={selectedAsset.name}
-                auto-rotate
-                camera-controls
-                shadow-intensity="1"
-                ar
-                loading="eager"
-                reveal="auto"
-                style={{ width: '100%', height: '100%' }}
-              />
-              {!selectedAsset.file_key?.startsWith('http') && (
+              {selectedAsset.file_key?.startsWith('http') ? (
+                <model-viewer
+                  src={selectedAsset.file_key}
+                  poster={selectedAsset.thumb}
+                  alt={selectedAsset.name}
+                  auto-rotate
+                  camera-controls
+                  shadow-intensity="1"
+                  ar
+                  loading="eager"
+                  reveal="auto"
+                  style={{ width: '100%', height: '100%' }}
+                />
+              ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <img
                     src={selectedAsset.thumb}

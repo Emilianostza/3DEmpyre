@@ -69,15 +69,13 @@ export const usePhotogrammetryPipeline = () => {
             : job
         )
       );
-      if (activeJob?.id === id) {
-        setActiveJob(null);
-      }
+      setActiveJob((prev) => (prev?.id === id ? null : prev));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to cancel job';
       setError(message);
       if (import.meta.env.DEV) console.error('[usePhotogrammetryPipeline] Cancel failed:', err);
     }
-  }, [activeJob]);
+  }, []);
 
   /**
    * Select a job as the active job
@@ -98,13 +96,11 @@ export const usePhotogrammetryPipeline = () => {
       setJobs((prev) =>
         prev.map((job) => (job.id === id ? updatedJob : job))
       );
-      if (activeJob?.id === id) {
-        setActiveJob(updatedJob);
-      }
+      setActiveJob((prev) => (prev?.id === id ? updatedJob : prev));
     } catch (err) {
       if (import.meta.env.DEV) console.error('[usePhotogrammetryPipeline] Refresh failed:', err);
     }
-  }, [activeJob]);
+  }, []);
 
   /**
    * Auto-polling: polls the active job every 5 seconds if it is in an active state

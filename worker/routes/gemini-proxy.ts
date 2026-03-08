@@ -119,13 +119,17 @@ export async function handleGeminiProxy(request: Request, env: Env): Promise<Res
   }
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15_000);
     const response = await fetch(`${GEMINI_API_ENDPOINT}?key=${env.GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
       }),
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       console.error('[gemini-proxy] Gemini API returned', response.status);

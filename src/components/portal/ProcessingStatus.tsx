@@ -108,7 +108,9 @@ export const ProcessingStatus: React.FC<ProcessingStatusProps> = ({
   // Estimate remaining time
   const estimatedTimeRemaining = useMemo(() => {
     if (job.estimated_duration_seconds && job.processing_started_at) {
-      const elapsed = (Date.now() - new Date(job.processing_started_at).getTime()) / 1000;
+      const startedAt = new Date(job.processing_started_at).getTime();
+      if (Number.isNaN(startedAt)) return null;
+      const elapsed = (Date.now() - startedAt) / 1000;
       const remaining = job.estimated_duration_seconds - elapsed;
       if (remaining > 0) {
         return Math.ceil(remaining / 60);

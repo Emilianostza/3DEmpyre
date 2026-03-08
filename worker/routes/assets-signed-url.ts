@@ -59,6 +59,11 @@ export async function handleAssetsSignedUrl(request: Request, env: Env): Promise
     return jsonResponse(400, { error: 'fileKey is required' });
   }
 
+  // Prevent path traversal attacks
+  if (fileKey.includes('..') || fileKey.startsWith('/')) {
+    return jsonResponse(400, { error: 'Invalid fileKey' });
+  }
+
   // ── Ownership check ──────────────────────────────────────────────────────────
   const { data: profile } = await supabase
     .from('user_profiles')
