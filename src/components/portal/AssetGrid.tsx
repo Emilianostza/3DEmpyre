@@ -142,7 +142,7 @@ export const AssetGrid: React.FC<AssetGridProps> = ({ assets, role, onUploadComp
           </div>
 
           {/* Category Filters */}
-          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar w-full md:w-auto p-1">
+          <div className="flex items-center gap-1 overflow-x-auto scrollbar-none w-full md:w-auto p-1">
             {categories.map((category) => (
               <button
                 key={category}

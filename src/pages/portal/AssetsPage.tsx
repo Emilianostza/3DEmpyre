@@ -485,7 +485,7 @@ const AssetsPage: React.FC = () => {
 
       {/* Category tabs */}
       {categories.length > 1 && (
-        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar border-b" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+        <div className="flex items-center gap-1 overflow-x-auto scrollbar-none border-b" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
           {categories.map((cat) => (
             <button
               key={cat}

@@ -219,7 +219,7 @@ const SceneDashboard: React.FC = () => {
               `}
             >
               {/* Categories */}
-              <div className="p-2 border-b border-zinc-800 overflow-x-auto no-scrollbar flex gap-2">
+              <div className="p-2 border-b border-zinc-800 overflow-x-auto scrollbar-none flex gap-2">
                 {categories.map((cat) => (
                   <button
                     key={cat}

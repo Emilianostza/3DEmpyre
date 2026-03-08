@@ -167,7 +167,7 @@ const Library: React.FC = () => {
         <div className="container mx-auto px-4">
           {/* Filter + Search */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12">
-            <div className="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto no-scrollbar">
+            <div className="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto scrollbar-none">
               {categories.map((cat) => (
                 <button
                   key={cat}

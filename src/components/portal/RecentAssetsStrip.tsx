@@ -45,7 +45,7 @@ export const RecentAssetsStrip: React.FC<RecentAssetsStripProps> = ({ assets }) 
         </Link>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+      <div className="flex gap-3 overflow-x-auto scrollbar-none pb-1">
         {recentAssets.map((asset) => (
           <Link
             key={asset.id}

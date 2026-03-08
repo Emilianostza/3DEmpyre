@@ -269,7 +269,7 @@ const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => 
           </div>
 
           {/* Nav Tabs — now use NavLink for URL-based routing */}
-          <nav className="hidden sm:flex items-center gap-1 flex-1 justify-center overflow-x-auto no-scrollbar">
+          <nav className="hidden sm:flex items-center gap-1 flex-1 justify-center overflow-x-auto scrollbar-none">
             {navItems.map((item) => (
               <NavLink
                 key={item.path}
