@@ -127,7 +127,9 @@ const PhotoPipelinePage: React.FC = () => {
   );
 
   useEffect(() => {
-    if (projectId) fetchJobs(projectId);
+    if (projectId && projectId.trim().length > 0) {
+      fetchJobs(projectId);
+    }
   }, [projectId, fetchJobs]);
 
   const handleJobCreated = useCallback(

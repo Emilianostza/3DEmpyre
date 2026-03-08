@@ -64,16 +64,17 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
-  // Close dropdown when clicking outside (simple hack using a window listener or just on scroll)
+  // Close dropdown when clicking outside or scrolling
   React.useEffect(() => {
+    if (!activeDropdown) return;
     const handleClose = () => setActiveDropdown(null);
     window.addEventListener('click', handleClose);
-    window.addEventListener('scroll', handleClose);
+    window.addEventListener('scroll', handleClose, { passive: true });
     return () => {
       window.removeEventListener('click', handleClose);
       window.removeEventListener('scroll', handleClose);
     };
-  }, []);
+  }, [activeDropdown]);
 
   // Filter projects
   const filteredProjects = projects.filter((p) => {

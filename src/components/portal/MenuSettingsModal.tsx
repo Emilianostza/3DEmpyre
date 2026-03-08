@@ -47,9 +47,12 @@ export const MenuSettingsModal: React.FC<MenuSettingsModalProps> = ({
   const { t } = useTranslation();
   const [settings, setSettings] = useState<MenuSettings>(currentSettings);
 
+  // Reset form state only when the modal opens, not on every currentSettings change
   useEffect(() => {
-    setSettings(currentSettings);
-  }, [currentSettings, isOpen]);
+    if (isOpen) {
+      setSettings(currentSettings);
+    }
+  }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const trapRef = useFocusTrap<HTMLDivElement>(isOpen);
 

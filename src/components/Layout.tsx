@@ -32,8 +32,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   // Track scroll for header shadow
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 8);
+    onScroll(); // sync initial state
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll, { passive: true } as EventListenerOptions);
   }, []);
 
   const { stripLocalePath } = useLocale();

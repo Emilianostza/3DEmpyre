@@ -81,11 +81,12 @@ export const usePhotogrammetryPipeline = () => {
    * Select a job as the active job
    */
   const selectJob = useCallback((id: string) => {
-    const job = jobs.find((j) => j.id === id);
-    if (job) {
-      setActiveJob(job);
-    }
-  }, [jobs]);
+    setJobs((prev) => {
+      const job = prev.find((j) => j.id === id);
+      if (job) setActiveJob(job);
+      return prev; // no mutation, just reading
+    });
+  }, []);
 
   /**
    * Refresh the status of a specific job

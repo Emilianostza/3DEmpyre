@@ -51,8 +51,8 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
     setPosition(pct);
   }, []);
 
-  /* ── Mouse ──────────────────────────────────────────── */
-  const onMouseDown = useCallback(() => {
+  /* ── Mouse & Touch (single effect to avoid shared-ref race) ── */
+  const onPointerStart = useCallback(() => {
     isDragging.current = true;
   }, []);
 
@@ -62,35 +62,22 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
       e.preventDefault();
       updatePosition(e.clientX);
     };
-    const onMouseUp = () => {
-      isDragging.current = false;
-    };
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
-    };
-  }, [updatePosition]);
-
-  /* ── Touch ──────────────────────────────────────────── */
-  const onTouchStart = useCallback(() => {
-    isDragging.current = true;
-  }, []);
-
-  useEffect(() => {
     const onTouchMove = (e: TouchEvent) => {
       if (!isDragging.current) return;
       updatePosition(e.touches[0].clientX);
     };
-    const onTouchEnd = () => {
+    const onPointerEnd = () => {
       isDragging.current = false;
     };
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onPointerEnd);
     window.addEventListener('touchmove', onTouchMove, { passive: true });
-    window.addEventListener('touchend', onTouchEnd);
+    window.addEventListener('touchend', onPointerEnd);
     return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onPointerEnd);
       window.removeEventListener('touchmove', onTouchMove);
-      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('touchend', onPointerEnd);
     };
   }, [updatePosition]);
 
@@ -154,8 +141,8 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
         {/* Draggable grip */}
         <button
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg shadow-black/30 flex items-center justify-center cursor-grab active:cursor-grabbing hover:scale-110 transition-transform focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 focus:ring-offset-zinc-950"
-          onMouseDown={onMouseDown}
-          onTouchStart={onTouchStart}
+          onMouseDown={onPointerStart}
+          onTouchStart={onPointerStart}
           onKeyDown={onKeyDown}
           aria-label="Drag to compare before and after"
           aria-valuenow={Math.round(position)}
