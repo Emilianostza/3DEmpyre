@@ -8,6 +8,17 @@
 import React from 'react';
 import { SITE_NAME, SITE_ORIGIN, SITE_LOGO, CONTACT_EMAIL } from '@/config/site';
 
+/**
+ * Safely serialize data for embedding in a <script> tag.
+ * Escapes sequences that could break out of the JSON-LD script context.
+ */
+function safeJsonLd(data: unknown): string {
+  return JSON.stringify(data)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026');
+}
+
 // ── Organization Schema ───────────────────────────────────────
 
 export const OrganizationSchema: React.FC = () => {
@@ -33,7 +44,7 @@ export const OrganizationSchema: React.FC = () => {
   };
 
   return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(data) }} />
   );
 };
 
@@ -50,7 +61,7 @@ export const WebSiteSchema: React.FC = () => {
   };
 
   return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(data) }} />
   );
 };
 
@@ -76,7 +87,7 @@ export const FAQSchema: React.FC<{ items: FAQItem[] }> = ({ items }) => {
   };
 
   return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(data) }} />
   );
 };
 
@@ -116,7 +127,7 @@ export const ServiceSchema: React.FC<ServiceSchemaProps> = ({
   }
 
   return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(data) }} />
   );
 };
 
@@ -140,7 +151,7 @@ export const BreadcrumbSchema: React.FC<{ items: BreadcrumbItem[] }> = ({ items 
   };
 
   return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(data) }} />
   );
 };
 
@@ -175,7 +186,7 @@ export const BlogPostingSchema: React.FC<BlogPostingSchemaProps> = ({
   };
 
   return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(data) }} />
   );
 };
 
@@ -213,6 +224,6 @@ export const LocalBusinessSchema: React.FC = () => {
   };
 
   return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(data) }} />
   );
 };

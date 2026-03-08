@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -23,8 +23,15 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const timerMapRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const removeToast = useCallback((id: string) => {
+    // Clear any pending auto-dismiss timer for this toast
+    const timerId = timerMapRef.current.get(id);
+    if (timerId) {
+      clearTimeout(timerId);
+      timerMapRef.current.delete(id);
+    }
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
@@ -36,9 +43,11 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setToasts((prev) => [...prev, newToast]);
 
       if (duration > 0) {
-        setTimeout(() => {
+        const timerId = setTimeout(() => {
+          timerMapRef.current.delete(id);
           removeToast(id);
         }, duration);
+        timerMapRef.current.set(id, timerId);
         return id;
       }
 

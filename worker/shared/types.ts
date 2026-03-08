@@ -25,4 +25,7 @@ export interface Env {
 
   /** Google Gemini API key — SECRET */
   GEMINI_API_KEY: string;
+
+  /** Production site origin for CORS (e.g. https://3d-empyre.com) — optional */
+  SITE_ORIGIN?: string;
 }

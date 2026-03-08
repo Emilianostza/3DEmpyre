@@ -1,3 +1,5 @@
+import { useState, useCallback } from 'react';
+
 interface RateLimiterState {
   attemptCount: number;
   lastAttemptTime: number;
@@ -42,62 +44,66 @@ function clearState(): void {
   }
 }
 
-export function useLoginRateLimiter() {
-  let state = getStoredState();
+/**
+ * Resolves the effective state — clears lockout if expired.
+ * Returns a fresh RateLimiterState without side-effects on storage.
+ */
+function resolveState(): RateLimiterState {
+  const state = getStoredState();
   const now = Date.now();
 
-  // Check if lockout period has expired
   if (state.lockoutUntilTime > 0 && now >= state.lockoutUntilTime) {
-    if (import.meta.env.DEV) {
-      console.warn('[useLoginRateLimiter] Lockout period expired, resetting state');
-    }
     clearState();
-    state = {
-      attemptCount: 0,
-      lastAttemptTime: 0,
-      lockoutUntilTime: 0,
-    };
+    return { attemptCount: 0, lastAttemptTime: 0, lockoutUntilTime: 0 };
   }
 
+  return state;
+}
+
+export function useLoginRateLimiter() {
+  // React state so the component re-renders when rate-limit changes
+  const [state, setState] = useState<RateLimiterState>(resolveState);
+
+  const now = Date.now();
   const canAttempt = state.lockoutUntilTime === 0 || now >= state.lockoutUntilTime;
   const remainingLockoutMs = Math.max(0, state.lockoutUntilTime - now);
   const attemptsRemaining = Math.max(0, FIRST_THRESHOLD - state.attemptCount);
 
-  const recordFailure = () => {
-    state.attemptCount += 1;
-    state.lastAttemptTime = Date.now();
+  const recordFailure = useCallback(() => {
+    setState((prev) => {
+      const next = { ...prev };
+      next.attemptCount += 1;
+      next.lastAttemptTime = Date.now();
 
-    // Determine lockout duration based on attempt count
-    if (state.attemptCount >= SECOND_THRESHOLD) {
-      state.lockoutUntilTime = Date.now() + EXTENDED_LOCKOUT_MS;
-      if (import.meta.env.DEV) {
-        console.warn(
-          `[useLoginRateLimiter] Lockout triggered after ${state.attemptCount} attempts (5 minutes)`
-        );
+      // Determine lockout duration based on attempt count
+      if (next.attemptCount >= SECOND_THRESHOLD) {
+        next.lockoutUntilTime = Date.now() + EXTENDED_LOCKOUT_MS;
+        if (import.meta.env.DEV) {
+          console.warn(
+            `[useLoginRateLimiter] Lockout triggered after ${next.attemptCount} attempts (5 minutes)`
+          );
+        }
+      } else if (next.attemptCount >= FIRST_THRESHOLD) {
+        next.lockoutUntilTime = Date.now() + INITIAL_LOCKOUT_MS;
+        if (import.meta.env.DEV) {
+          console.warn(
+            `[useLoginRateLimiter] Lockout triggered after ${next.attemptCount} attempts (30 seconds)`
+          );
+        }
       }
-    } else if (state.attemptCount >= FIRST_THRESHOLD) {
-      state.lockoutUntilTime = Date.now() + INITIAL_LOCKOUT_MS;
-      if (import.meta.env.DEV) {
-        console.warn(
-          `[useLoginRateLimiter] Lockout triggered after ${state.attemptCount} attempts (30 seconds)`
-        );
-      }
-    }
 
-    saveState(state);
-  };
+      saveState(next);
+      return next;
+    });
+  }, []);
 
-  const recordSuccess = () => {
+  const recordSuccess = useCallback(() => {
     if (import.meta.env.DEV) {
       console.warn('[useLoginRateLimiter] Login successful, resetting rate limiter');
     }
     clearState();
-    state = {
-      attemptCount: 0,
-      lastAttemptTime: 0,
-      lockoutUntilTime: 0,
-    };
-  };
+    setState({ attemptCount: 0, lastAttemptTime: 0, lockoutUntilTime: 0 });
+  }, []);
 
   return {
     canAttempt,

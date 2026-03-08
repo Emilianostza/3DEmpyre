@@ -107,6 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.warn(`[Auth] Token refresh scheduled in ${Math.round(delayMs / 1000)}s`);
       }
 
+      let cancelled = false;
       const id = setTimeout(async () => {
         // Rate-limit: stop trying after MAX_REFRESH_ATTEMPTS consecutive failures
         if (refreshFailCountRef.current >= MAX_REFRESH_ATTEMPTS) {
@@ -122,9 +123,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           // refresh_token param is ignored by proxy (reads HttpOnly cookie)
           const response = await AuthAPI.refreshToken({ refresh_token: '' });
+          if (cancelled) return; // component unmounted during await
           setTokenState(response.token || 'cookie-managed');
           refreshFailCountRef.current = 0;
         } catch (err) {
+          if (cancelled) return; // component unmounted during await
           refreshFailCountRef.current += 1;
           const backoff = REFRESH_BACKOFF_BASE_MS * Math.pow(2, refreshFailCountRef.current - 1);
           if (import.meta.env.DEV) {
@@ -137,7 +140,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }, delayMs);
 
       setRefreshIntervalId(id);
-      return () => clearTimeout(id);
+      return () => {
+        cancelled = true;
+        clearTimeout(id);
+      };
     }
   }, [user, token]);
 

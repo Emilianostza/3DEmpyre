@@ -31,6 +31,33 @@ const routes: Record<string, RouteHandler> = {
 };
 
 // ---------------------------------------------------------------------------
+// CORS configuration
+// ---------------------------------------------------------------------------
+const ALLOWED_ORIGINS = new Set([
+  'http://localhost:5173',
+  'http://localhost:4173',
+]);
+
+function getCorsOrigin(request: Request, env: Env): string | null {
+  const origin = request.headers.get('Origin');
+  if (!origin) return null;
+  // Allow configured origins + production domain from env
+  if (ALLOWED_ORIGINS.has(origin)) return origin;
+  if (env.SITE_ORIGIN && origin === env.SITE_ORIGIN) return origin;
+  return null;
+}
+
+function corsHeaders(origin: string): Record<string, string> {
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-CSRF-Token',
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Max-Age': '86400',
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Security headers for API responses
 // ---------------------------------------------------------------------------
 const API_HEADERS: Record<string, string> = {
@@ -38,13 +65,18 @@ const API_HEADERS: Record<string, string> = {
   'X-Frame-Options': 'DENY',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-  'Vary': 'Accept, Cookie',
+  'Vary': 'Accept, Cookie, Origin',
 };
 
-function withApiHeaders(response: Response): Response {
+function withApiHeaders(response: Response, extraHeaders?: Record<string, string>): Response {
   const headers = new Headers(response.headers);
   for (const [k, v] of Object.entries(API_HEADERS)) {
     headers.set(k, v);
+  }
+  if (extraHeaders) {
+    for (const [k, v] of Object.entries(extraHeaders)) {
+      headers.set(k, v);
+    }
   }
   return new Response(response.body, {
     status: response.status,
@@ -67,6 +99,15 @@ export default {
       return env.ASSETS.fetch(request);
     }
 
+    // Resolve CORS origin once for this request
+    const allowedOrigin = getCorsOrigin(request, env);
+    const cors = allowedOrigin ? corsHeaders(allowedOrigin) : {};
+
+    // CORS preflight
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: cors });
+    }
+
     // API routing
     const handler = routes[path];
     if (!handler) {
@@ -75,11 +116,12 @@ export default {
           status: 404,
           headers: { 'Content-Type': 'application/json' },
         }),
+        cors,
       );
     }
 
     try {
-      return withApiHeaders(await handler(request, env));
+      return withApiHeaders(await handler(request, env), cors);
     } catch (err) {
       console.error('[worker] Unhandled error:', err);
       return withApiHeaders(
@@ -87,6 +129,7 @@ export default {
           status: 500,
           headers: { 'Content-Type': 'application/json' },
         }),
+        cors,
       );
     }
   },
