@@ -30,6 +30,10 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
   const [containerWidth, setContainerWidth] = useState<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
+  const cleanupRef = useRef<(() => void) | null>(null);
+
+  // Remove any active drag listeners if the component unmounts mid-drag
+  useEffect(() => () => { cleanupRef.current?.(); }, []);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -51,34 +55,31 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
     setPosition(pct);
   }, []);
 
-  /* ── Mouse & Touch (single effect to avoid shared-ref race) ── */
-  const onPointerStart = useCallback(() => {
+  /* ── Mouse & Touch — attach global listeners only while dragging ── */
+  const onPointerStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     isDragging.current = true;
-  }, []);
 
-  useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      if (!isDragging.current) return;
-      e.preventDefault();
-      updatePosition(e.clientX);
+    const onMouseMove = (ev: MouseEvent) => {
+      ev.preventDefault();
+      updatePosition(ev.clientX);
     };
-    const onTouchMove = (e: TouchEvent) => {
-      if (!isDragging.current) return;
-      updatePosition(e.touches[0].clientX);
+    const onTouchMove = (ev: TouchEvent) => {
+      updatePosition(ev.touches[0].clientX);
     };
     const onPointerEnd = () => {
       isDragging.current = false;
-    };
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onPointerEnd);
-    window.addEventListener('touchmove', onTouchMove, { passive: true });
-    window.addEventListener('touchend', onPointerEnd);
-    return () => {
+      cleanupRef.current = null;
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onPointerEnd);
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onPointerEnd);
     };
+
+    cleanupRef.current = onPointerEnd;
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onPointerEnd);
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchend', onPointerEnd);
   }, [updatePosition]);
 
   /* ── Keyboard (a11y) ────────────────────────────────── */

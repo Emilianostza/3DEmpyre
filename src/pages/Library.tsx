@@ -367,6 +367,8 @@ const Library: React.FC = () => {
                     alt={selectedAsset.name}
                     className="w-full h-full object-cover"
                     loading="lazy"
+                    width={800}
+                    height={800}
                   />
                 </div>
               )}

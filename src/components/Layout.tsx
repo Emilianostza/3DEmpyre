@@ -181,7 +181,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] md:hidden"
                 onClick={() => setIsMobileMenuOpen(false)}
               />
 
@@ -191,7 +191,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 300 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                className="fixed inset-0 z-50 md:hidden bg-gradient-to-b from-zinc-950 to-zinc-950/95"
+                className="fixed inset-0 z-[70] md:hidden bg-gradient-to-b from-zinc-950 to-zinc-950/95"
               >
                 <div ref={mobileMenuRef} className="px-6 py-6 flex flex-col h-full">
                   {/* Header with logo and close button */}

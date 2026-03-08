@@ -35,7 +35,7 @@ const BlogPost: React.FC = () => {
     return <Navigate to="/blog" replace />;
   }
 
-  const relatedPosts = BLOG_POSTS.filter((p) => p.slug !== post.slug);
+  const relatedPosts = BLOG_POSTS.filter((p) => p.slug !== post.slug).slice(0, 4);
   const paragraphs = post.body.split('\n\n').filter(Boolean);
 
   return (
@@ -140,6 +140,8 @@ const BlogPost: React.FC = () => {
                     alt=""
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
+                    width={800}
+                    height={450}
                   />
                 </div>
                 <div className="p-6">
