@@ -9,7 +9,7 @@
  *
  * Hold Shift + right-click to get the normal browser context menu.
  */
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -281,6 +281,7 @@ export default function DevInspector() {
     rect: null,
     visible: false,
   });
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const handleContextMenu = useCallback((e: MouseEvent) => {
     // Shift + right-click = normal browser menu
@@ -303,8 +304,11 @@ export default function DevInspector() {
       const shortMsg = shortSummary(target);
       setToast({ message: shortMsg, visible: true });
 
+      // Clear any previous hide timer so rapid clicks don't conflict
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+
       // Hide after 2 seconds
-      setTimeout(() => {
+      hideTimerRef.current = setTimeout(() => {
         setToast((prev) => ({ ...prev, visible: false }));
         setHighlight((prev) => ({ ...prev, visible: false }));
       }, 2000);

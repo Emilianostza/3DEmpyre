@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Download, Copy, ExternalLink, QrCode, Palette, Grid3x3, RefreshCw, Box, Code2, Check } from 'lucide-react';
 import { Asset } from '@/types';
@@ -37,6 +37,14 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({ isOpen, onClose, asset
   const [logoEnabled, setLogoEnabled] = useState(false);
   const [qrInstance, setQrInstance] = useState<QRCodeStyling | null>(null);
   const [embedCopied, setEmbedCopied] = useState(false);
+  const embedCopyTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  // Clean up copy-feedback timer on unmount
+  useEffect(() => {
+    return () => {
+      if (embedCopyTimerRef.current) clearTimeout(embedCopyTimerRef.current);
+    };
+  }, []);
 
   if (!isOpen || !asset) return null;
 
@@ -61,7 +69,8 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({ isOpen, onClose, asset
   const handleCopyEmbed = () => {
     navigator.clipboard.writeText(embedCode).then(() => {
       setEmbedCopied(true);
-      setTimeout(() => setEmbedCopied(false), 2000);
+      if (embedCopyTimerRef.current) clearTimeout(embedCopyTimerRef.current);
+      embedCopyTimerRef.current = setTimeout(() => setEmbedCopied(false), 2000);
     });
   };
 

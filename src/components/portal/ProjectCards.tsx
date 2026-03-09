@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -28,13 +28,21 @@ export const ProjectCards: React.FC<Props> = ({ projects, assets, onEditProject 
   const [qrArtImage, setQrArtImage] = useState<string | null>(null);
   const [qrInstance, setQrInstance] = useState<QRCodeStyling | null>(null);
   const [embedCopied, setEmbedCopied] = useState(false);
-  const qrFileInputRef = React.useRef<HTMLInputElement>(null);
+  const embedCopyTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const qrFileInputRef = useRef<HTMLInputElement>(null);
   const [menuSettings, setMenuSettings] = useState<
     Record<
       string,
       { title: string; brandColor: string; font: string; showPrices: boolean; currency: string; enableTimeBasedMenu?: boolean; breakfastEndTime?: string; lunchEndTime?: string; lunchMenuId?: string; dinnerMenuId?: string; themePreset?: string; customBrandColor?: string; }
     >
   >({});
+
+  // Clean up copy-feedback timer on unmount
+  useEffect(() => {
+    return () => {
+      if (embedCopyTimerRef.current) clearTimeout(embedCopyTimerRef.current);
+    };
+  }, []);
 
   return (
     <section>
@@ -502,7 +510,8 @@ export const ProjectCards: React.FC<Props> = ({ projects, assets, onEditProject 
                           `<iframe src="${menuUrl}" width="400" height="600" frameborder="0" allowfullscreen></iframe>`
                         );
                         setEmbedCopied(true);
-                        setTimeout(() => setEmbedCopied(false), 2000);
+                        if (embedCopyTimerRef.current) clearTimeout(embedCopyTimerRef.current);
+                        embedCopyTimerRef.current = setTimeout(() => setEmbedCopied(false), 2000);
                       }}
                       className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 border border-zinc-200 dark:border-zinc-700 transition-colors"
                     >

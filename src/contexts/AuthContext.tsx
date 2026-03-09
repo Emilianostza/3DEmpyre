@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setTokenState] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [refreshIntervalId, setRefreshIntervalId] = useState<NodeJS.Timeout | null>(null);
+  const refreshTimerRef = React.useRef<NodeJS.Timeout | null>(null);
   const refreshFailCountRef = React.useRef(0);
   const userRef = React.useRef(user);
   userRef.current = user;
@@ -139,10 +139,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }, delayMs);
 
-      setRefreshIntervalId(id);
+      refreshTimerRef.current = id;
       return () => {
         cancelled = true;
         clearTimeout(id);
+        refreshTimerRef.current = null;
       };
     }
   }, [user, token]);
@@ -217,9 +218,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setTokenState(null);
       setError(null);
 
-      if (refreshIntervalId) {
-        clearTimeout(refreshIntervalId);
-        setRefreshIntervalId(null);
+      if (refreshTimerRef.current) {
+        clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = null;
       }
     }
   };

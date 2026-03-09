@@ -13,7 +13,8 @@ describe('announceToScreenReader', () => {
   });
 
   afterEach(() => {
-    // Clean up any temporary announcers left in the DOM
+    // Clean up any announcer elements left in the DOM
+    document.getElementById('_a11y-fallback-announcer')?.remove();
     document.querySelectorAll('[role="status"]').forEach((el) => el.remove());
     document.getElementById('portal-status-announcer')?.remove();
     vi.restoreAllMocks();
@@ -78,18 +79,20 @@ describe('announceToScreenReader', () => {
     expect(temp!.textContent).toBe('Hello screen reader');
   });
 
-  it('temporary announcer auto-removes after timeout', () => {
-    vi.useFakeTimers();
+  it('fallback announcer is reused across multiple calls', () => {
+    announceToScreenReader('First message');
+    rafCallbacks.forEach((cb) => cb(0));
+    rafCallbacks = [];
 
-    announceToScreenReader('Will disappear');
+    const first = document.getElementById('_a11y-fallback-announcer');
+    expect(first).not.toBeNull();
+    expect(first!.textContent).toBe('First message');
+
+    announceToScreenReader('Second message');
     rafCallbacks.forEach((cb) => cb(0));
 
-    const temp = document.querySelector('[role="status"]');
-    expect(temp).not.toBeNull();
-
-    vi.advanceTimersByTime(3000);
-    expect(document.querySelector('[role="status"]')).toBeNull();
-
-    vi.useRealTimers();
+    const second = document.getElementById('_a11y-fallback-announcer');
+    expect(second).toBe(first); // same element reused
+    expect(second!.textContent).toBe('Second message');
   });
 });

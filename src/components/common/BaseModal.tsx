@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useRef } from 'react';
+import React, { ReactNode, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEscapeKey } from '@/hooks/useEscapeKey';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
@@ -21,10 +21,7 @@ export const BaseModal: React.FC<BaseModalProps> = ({
   'aria-labelledby': ariaLabelledBy,
 }) => {
   const trapRef = useFocusTrap<HTMLDivElement>(isOpen);
-  useEscapeKey(
-    useCallback(() => onClose(), [onClose]),
-    isOpen
-  );
+  useEscapeKey(onClose, isOpen);
 
   const backdropRef = useRef<HTMLDivElement>(null);
 

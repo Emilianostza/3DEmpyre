@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -83,6 +83,15 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     },
     [addToast]
   );
+
+  // Clear all pending auto-dismiss timers on unmount
+  useEffect(() => {
+    const timers = timerMapRef.current;
+    return () => {
+      timers.forEach((id) => clearTimeout(id));
+      timers.clear();
+    };
+  }, []);
 
   const value = useMemo(
     () => ({

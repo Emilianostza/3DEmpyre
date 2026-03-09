@@ -24,15 +24,20 @@ export function announceToScreenReader(
     return;
   }
 
-  // Fallback: create a temporary announcer
-  const temp = document.createElement('div');
-  temp.setAttribute('role', 'status');
-  temp.setAttribute('aria-live', priority);
-  temp.setAttribute('aria-atomic', 'true');
-  temp.className = 'sr-only';
-  document.body.appendChild(temp);
+  // Fallback: reuse a single announcer element to avoid DOM accumulation
+  let fallback = document.getElementById('_a11y-fallback-announcer');
+  if (!fallback) {
+    fallback = document.createElement('div');
+    fallback.id = '_a11y-fallback-announcer';
+    fallback.setAttribute('role', 'status');
+    fallback.setAttribute('aria-atomic', 'true');
+    fallback.className = 'sr-only';
+    document.body.appendChild(fallback);
+  }
+  fallback.setAttribute('aria-live', priority);
+  // Clear first to force re-announcement of identical messages
+  fallback.textContent = '';
   requestAnimationFrame(() => {
-    temp.textContent = message;
-    setTimeout(() => temp.remove(), 3000);
+    fallback!.textContent = message;
   });
 }

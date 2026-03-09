@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, X } from 'lucide-react';
 import { buttonInteraction } from '@/components/motion/presets';
@@ -19,6 +19,14 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ context }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const typingTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  // Clean up typing-simulation timer on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
+    };
+  }, []);
 
   const open = useCallback(() => {
     setIsOpen(true);
@@ -56,7 +64,8 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ context }) => {
 
       // Simulate AI typing delay
       const delay = 600 + Math.random() * 600;
-      setTimeout(() => {
+      if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
+      typingTimerRef.current = setTimeout(() => {
         const response = getResponse(text, context);
         const assistantMsg: ChatMessage = {
           id: nextId(),

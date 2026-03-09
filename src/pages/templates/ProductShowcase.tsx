@@ -577,7 +577,15 @@ interface ProductDetailsPanelProps {
 const ProductDetailsPanel: React.FC<ProductDetailsPanelProps> = ({ product, onShare }) => {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
+  const copiedTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const [showEmbed, setShowEmbed] = useState(false);
+
+  // Clean up copy-feedback timer on unmount
+  useEffect(() => {
+    return () => {
+      if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+    };
+  }, []);
 
   const embedCode = useMemo(
     () =>
@@ -589,7 +597,8 @@ const ProductDetailsPanel: React.FC<ProductDetailsPanelProps> = ({ product, onSh
     try {
       navigator.clipboard.writeText(window.location.href);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+      copiedTimerRef.current = setTimeout(() => setCopied(false), 2000);
     } catch (err: unknown) {
       if (import.meta.env.DEV) {
         const message = err instanceof Error ? err.message : 'Unknown error';

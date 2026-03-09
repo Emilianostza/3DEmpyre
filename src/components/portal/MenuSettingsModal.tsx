@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useEscapeKey } from '@/hooks/useEscapeKey';
@@ -56,10 +56,7 @@ export const MenuSettingsModal: React.FC<MenuSettingsModalProps> = ({
 
   const trapRef = useFocusTrap<HTMLDivElement>(isOpen);
 
-  useEscapeKey(
-    useCallback(() => onClose(), [onClose]),
-    isOpen
-  );
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen) return null;
 

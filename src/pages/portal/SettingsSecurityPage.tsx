@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/contexts/ToastContext';
 
@@ -7,7 +7,15 @@ const SettingsSecurityPage: React.FC = () => {
   const { success, error: toastError } = useToast();
 
   const [passwordSaving, setPasswordSaving] = useState(false);
+  const passwordTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+
+  // Clean up mock API timer on unmount
+  useEffect(() => {
+    return () => {
+      if (passwordTimerRef.current) clearTimeout(passwordTimerRef.current);
+    };
+  }, []);
   const [passwordForm, setPasswordForm] = useState({
     current: '',
     new: '',
@@ -48,7 +56,8 @@ const SettingsSecurityPage: React.FC = () => {
 
     // Simulate API call
     setPasswordSaving(true);
-    setTimeout(() => {
+    if (passwordTimerRef.current) clearTimeout(passwordTimerRef.current);
+    passwordTimerRef.current = setTimeout(() => {
       setPasswordSaving(false);
       success(t('portal.toast.passwordUpdated'));
       setPasswordForm({ current: '', new: '', confirm: '' });

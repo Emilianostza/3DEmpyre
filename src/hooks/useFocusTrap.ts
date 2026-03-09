@@ -33,10 +33,12 @@ export function useFocusTrap<T extends HTMLElement>(active: boolean) {
 
     // Move focus into the trap
     const focusable = getFocusable();
+    let addedTabindex = false;
     if (focusable.length > 0) {
       focusable[0].focus();
     } else {
       container.setAttribute('tabindex', '-1');
+      addedTabindex = true;
       container.focus();
     }
 
@@ -66,6 +68,8 @@ export function useFocusTrap<T extends HTMLElement>(active: boolean) {
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
+      // Remove tabindex we added so the container doesn't stay focusable
+      if (addedTabindex) container.removeAttribute('tabindex');
       // Restore focus
       previouslyFocused?.focus?.();
     };

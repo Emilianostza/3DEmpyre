@@ -83,7 +83,7 @@ export const AssetGrid: React.FC<AssetGridProps> = ({ assets, role, onUploadComp
           return 0;
       }
     });
-  }, [assets, activeCategory, sortBy, searchTerm]);
+  }, [assets, activeCategory, sortBy, debouncedSearch]);
 
   if (assets.length === 0) {
     return (

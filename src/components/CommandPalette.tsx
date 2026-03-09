@@ -388,10 +388,10 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose }) => {
     [flatResults, selectedIndex, onClose]
   );
 
-  // Reset selected index when query changes
+  // Reset selected index when results change (covers query changes and list shrinking)
   useEffect(() => {
     setSelectedIndex(0);
-  }, [query]);
+  }, [flatResults]);
 
   // ── Render ──
 

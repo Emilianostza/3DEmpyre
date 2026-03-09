@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Project, Asset } from '@/types';
 import {
@@ -193,6 +193,27 @@ export const AutomatedReporting: React.FC<AutomatedReportingProps> = ({ projects
   const [scheduleSaved, setScheduleSaved] = useState(false);
   const [resendingId, setResendingId] = useState<string | null>(null);
 
+  // Track pending timers so we can clean them up on unmount
+  const timersRef = useRef(new Set<ReturnType<typeof setTimeout>>());
+
+  useEffect(() => {
+    const timers = timersRef.current;
+    return () => {
+      timers.forEach((id) => clearTimeout(id));
+      timers.clear();
+    };
+  }, []);
+
+  /** Schedule a self-cleaning timeout. */
+  const safeTimeout = useCallback((fn: () => void, ms: number) => {
+    const id = setTimeout(() => {
+      timersRef.current.delete(id);
+      fn();
+    }, ms);
+    timersRef.current.add(id);
+    return id;
+  }, []);
+
   // ---- Computed data from props ----
   const reportData = useMemo(() => {
     const totalProjects = projects.length;
@@ -241,7 +262,7 @@ export const AutomatedReporting: React.FC<AutomatedReportingProps> = ({ projects
       setGeneratingId(template.id);
       setGeneratedReport(null);
 
-      const timer = setTimeout(() => {
+      safeTimeout(() => {
         const now = new Date();
         const oneWeekAgo = new Date(now);
         oneWeekAgo.setDate(now.getDate() - 7);
@@ -285,23 +306,19 @@ export const AutomatedReporting: React.FC<AutomatedReportingProps> = ({ projects
         setGeneratedReport(generated);
         setGeneratingId(null);
       }, 2000);
-
-      return () => clearTimeout(timer);
     },
-    [reportData, t]
+    [reportData, t, safeTimeout]
   );
 
   const handleDownloadPdf = useCallback(() => {
     setDownloadingPdf(true);
-    const timer = setTimeout(() => setDownloadingPdf(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
+    safeTimeout(() => setDownloadingPdf(false), 2000);
+  }, [safeTimeout]);
 
   const handleEmailReport = useCallback(() => {
     setEmailingSent(true);
-    const timer = setTimeout(() => setEmailingSent(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
+    safeTimeout(() => setEmailingSent(false), 2000);
+  }, [safeTimeout]);
 
   const toggleSchedule = useCallback((reportId: string) => {
     setSchedules((prev) =>
@@ -312,22 +329,17 @@ export const AutomatedReporting: React.FC<AutomatedReportingProps> = ({ projects
   const handleSaveSchedule = useCallback(() => {
     setSavingSchedule(true);
     setScheduleSaved(false);
-    const timer = setTimeout(() => {
+    safeTimeout(() => {
       setSavingSchedule(false);
       setScheduleSaved(true);
-      const resetTimer = setTimeout(() => setScheduleSaved(false), 2000);
-      return () => clearTimeout(resetTimer);
+      safeTimeout(() => setScheduleSaved(false), 2000);
     }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
+  }, [safeTimeout]);
 
   const handleResend = useCallback((rowId: string) => {
     setResendingId(rowId);
-    const timer = setTimeout(() => {
-      setResendingId(null);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
+    safeTimeout(() => setResendingId(null), 1500);
+  }, [safeTimeout]);
 
   // ---- Render ----
   return (

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, X, Check, Camera, ArrowRight } from 'lucide-react';
 import { AssetsProvider } from '@/services/dataProvider';
@@ -7,6 +7,14 @@ import { placeholder } from '@/config/site';
 export const NewCaptureWizard: React.FC = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const navTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  // Clean up navigation timer on unmount
+  useEffect(() => {
+    return () => {
+      if (navTimerRef.current) clearTimeout(navTimerRef.current);
+    };
+  }, []);
 
   const [step, setStep] = useState<'upload' | 'processing' | 'complete'>('upload');
   const [files, setFiles] = useState<File[]>([]);
@@ -60,7 +68,8 @@ export const NewCaptureWizard: React.FC = () => {
       });
 
       setStep('complete');
-      setTimeout(() => {
+      if (navTimerRef.current) clearTimeout(navTimerRef.current);
+      navTimerRef.current = setTimeout(() => {
         navigate(`/app/editor/${newAsset.id}`);
       }, 1500);
     } catch (error) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Layers, Sun, Move, Share2, Settings, RotateCcw, Copy, Check, X } from 'lucide-react';
 import { AssetUploader } from '@/components/editor/AssetUploader';
 import { AssetsProvider } from '@/services/dataProvider';
@@ -19,11 +19,11 @@ export const EmbeddedModelEditor: React.FC<EmbeddedModelEditorProps> = ({
 
   // Saving State
   const [isSaving, setIsSaving] = useState(false);
-  const [_lastSaved, setLastSaved] = useState<Date | null>(null);
 
   // Share Modal State
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   // Model Properties
   const [position, setPosition] = useState({ x: 0, y: 0, z: 0 });
@@ -34,6 +34,13 @@ export const EmbeddedModelEditor: React.FC<EmbeddedModelEditorProps> = ({
   const [exposure, setExposure] = useState(1.0);
   const [shadowIntensity, setShadowIntensity] = useState(1.0);
   const [autoRotate, setAutoRotate] = useState(false);
+
+  // Clean up copy-feedback timer on unmount
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    };
+  }, []);
 
   // Initialize
   useEffect(() => {
@@ -68,7 +75,6 @@ export const EmbeddedModelEditor: React.FC<EmbeddedModelEditorProps> = ({
         updated: 'Just now',
       });
 
-      setLastSaved(new Date());
       success('Scene saved successfully');
     } catch {
       error('Failed to save scene');
@@ -80,7 +86,8 @@ export const EmbeddedModelEditor: React.FC<EmbeddedModelEditorProps> = ({
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
     success('Link copied to clipboard');
   };
 
@@ -94,13 +101,6 @@ export const EmbeddedModelEditor: React.FC<EmbeddedModelEditorProps> = ({
       | (HTMLElement & { cameraOrbit: string })
       | null;
     if (viewer) viewer.cameraOrbit = '45deg 55deg 2.5m';
-  };
-
-  const _handleActivateAR = () => {
-    const viewer = document.querySelector('model-viewer') as
-      | (HTMLElement & { activateAR?: () => void })
-      | null;
-    if (viewer?.activateAR) viewer.activateAR();
   };
 
   // If no model is loaded, show uploader

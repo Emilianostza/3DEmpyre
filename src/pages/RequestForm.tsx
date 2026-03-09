@@ -6,7 +6,7 @@
  * Live cost estimate sidebar, session storage draft persistence
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { LocalizedLink as Link } from '@/components/LocalizedLink';
 import { useLocale } from '@/contexts/LocaleContext';
@@ -24,7 +24,6 @@ import {
   Globe,
   Code2,
   Smartphone,
-  Tablet as _Tablet,
   Package,
   QrCode,
   Receipt,
@@ -219,7 +218,15 @@ const RequestForm: React.FC = () => {
   const [showContactSales, setShowContactSales] = useState(false);
   const [salesForm, setSalesForm] = useState({ name: '', email: '', phone: '', time: '', message: '' });
   const [salesSubmitted, setSalesSubmitted] = useState(false);
-  const chatEndRef = React.useRef<HTMLDivElement>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatTypingTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  // Clean up typing-indicator timer on unmount
+  useEffect(() => {
+    return () => {
+      if (chatTypingTimerRef.current) clearTimeout(chatTypingTimerRef.current);
+    };
+  }, []);
 
   /* ─── Step labels ────────────────────────────────────────────────────────── */
   const STEPS = [
@@ -247,7 +254,8 @@ const RequestForm: React.FC = () => {
 
     // Show typing indicator, then next question or summary
     setIsTyping(true);
-    setTimeout(() => {
+    if (chatTypingTimerRef.current) clearTimeout(chatTypingTimerRef.current);
+    chatTypingTimerRef.current = setTimeout(() => {
       setIsTyping(false);
       if (nextStep < AI_SCRIPT.length) {
         setChatStep(nextStep);

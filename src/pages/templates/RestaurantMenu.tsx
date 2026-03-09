@@ -984,6 +984,14 @@ const MenuHero: React.FC<MenuHeroProps> = React.memo(
     const calMonthLabel = calMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     const [aiGenerating, setAiGenerating] = useState(false);
     const [aiPreviewUrl, setAiPreviewUrl] = useState<string | null>(null);
+    const aiTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+    // Clean up AI generation timer on unmount
+    useEffect(() => {
+      return () => {
+        if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
+      };
+    }, []);
 
     const AI_PROMPT_PRESETS = [
       'Elegant fine dining interior with warm lighting',
@@ -1023,7 +1031,8 @@ const MenuHero: React.FC<MenuHeroProps> = React.memo(
       setAiPreviewUrl(null);
       // Mock generation: derive a hue from the prompt string
       const hue = Array.from(aiPrompt).reduce((sum, ch) => sum + ch.charCodeAt(0), 0) % 360;
-      setTimeout(() => {
+      if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
+      aiTimerRef.current = setTimeout(() => {
         setAiPreviewUrl(placeholder(1600, 900, aiPrompt.slice(0, 30), hue));
         setAiGenerating(false);
       }, 2500);
@@ -1922,8 +1931,16 @@ const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(
     }, [activePanel]);
 
     const [copied, setCopied] = useState<'link' | 'embed' | null>(null);
+    const copiedTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Clean up copy-feedback timer on unmount
+    useEffect(() => {
+      return () => {
+        if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+      };
+    }, []);
     const [allergenDropdownOpen, setAllergenDropdownOpen] = useState(false);
     const allergenDropdownRef = useRef<HTMLDivElement>(null);
     const has3D = Boolean(item.modelUrl);
@@ -2004,7 +2021,8 @@ const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(
           .writeText(itemUrl)
           .then(() => {
             setCopied('link');
-            setTimeout(() => setCopied(null), 2000);
+            if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+            copiedTimerRef.current = setTimeout(() => setCopied(null), 2000);
           })
           .catch(() => {
             showError(t('tpl.menu.clipboardFailed', 'Failed to copy to clipboard'));
@@ -2017,7 +2035,8 @@ const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(
         .writeText(itemUrl)
         .then(() => {
           setCopied('link');
-          setTimeout(() => setCopied(null), 2000);
+          if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+          copiedTimerRef.current = setTimeout(() => setCopied(null), 2000);
         })
         .catch(() => {
           showError(t('tpl.menu.clipboardFailed', 'Failed to copy to clipboard'));
@@ -2029,7 +2048,8 @@ const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(
         .writeText(embedCode)
         .then(() => {
           setCopied('embed');
-          setTimeout(() => setCopied(null), 2000);
+          if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+          copiedTimerRef.current = setTimeout(() => setCopied(null), 2000);
         })
         .catch(() => {
           showError(t('tpl.menu.clipboardFailed', 'Failed to copy to clipboard'));
@@ -4063,8 +4083,16 @@ const ModelViewerOverlay: React.FC<ModelViewerOverlayProps> = ({
     pairsWell: pairsIdsToNames(item.pairsWell),
   }));
   const [copied, setCopied] = useState<'link' | 'embed' | null>(null);
+  const copiedTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
   const [allergenDropdownOpen, setAllergenDropdownOpen] = useState(false);
   const allergenDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Clean up copy-feedback timer on unmount
+  useEffect(() => {
+    return () => {
+      if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+    };
+  }, []);
 
   // Reset draft + panel when item changes
   useEffect(() => {
@@ -4105,14 +4133,16 @@ const ModelViewerOverlay: React.FC<ModelViewerOverlayProps> = ({
   const handleCopyLink = () => {
     navigator.clipboard.writeText(itemUrl).then(() => {
       setCopied('link');
-      setTimeout(() => setCopied(null), 2000);
+      if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+      copiedTimerRef.current = setTimeout(() => setCopied(null), 2000);
     }).catch(() => { });
   };
 
   const _handleCopyEmbed = () => {
     navigator.clipboard.writeText(embedCode).then(() => {
       setCopied('embed');
-      setTimeout(() => setCopied(null), 2000);
+      if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+      copiedTimerRef.current = setTimeout(() => setCopied(null), 2000);
     }).catch(() => { });
   };
 

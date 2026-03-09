@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { X, Loader2 } from 'lucide-react';
@@ -60,10 +60,7 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
     currency: '$',
   });
   const { success, error } = useToast();
-  useEscapeKey(
-    useCallback(() => onClose(), [onClose]),
-    isOpen
-  );
+  useEscapeKey(onClose, isOpen);
   const trapRef = useFocusTrap<HTMLDivElement>(isOpen);
 
   // Only reset form when the modal opens — not while it is already open
