@@ -1,15 +1,26 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
-  UtensilsCrossed, Search, Box,
+  UtensilsCrossed, Search, Box, Smartphone,
   LayoutGrid, List, SlidersHorizontal, ChevronDown, Pencil,
   ArrowUpDown, EyeOff, X, Check, Share2,
-  MoreVertical, QrCode, Copy, Trash2,
+  MoreVertical, QrCode, Copy, Trash2, Paintbrush,
 } from 'lucide-react';
 import { usePortalContext } from '@/types/portal';
+import { useAuth } from '@/contexts/AuthContext';
 import { MenusProvider } from '@/services/dataProvider';
 import type { MenuItemDTO, MenuConfigDTO } from '@/types/dtos';
+import { tagStyle } from '@/components/common/DishCardContent';
+import { DishCardShell } from '@/components/common/DishCardShell';
+import { ItemEditModal } from '@/components/common/ItemEditModal';
+import {
+  CustomizationPanel,
+  DEFAULT_CUSTOMIZATION,
+  useLayoutPresets,
+  resolveTheme,
+  type CustomizationState,
+} from '@/components/common/CustomizationPanel';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -19,27 +30,136 @@ function parsePrice(p: string): number {
   return parseFloat(p.replace(/[^0-9.]/g, '')) || 0;
 }
 
-// Tag color mapping (matches the public menu)
-const TAG_COLORS: Record<string, string> = {
-  'raw': 'bg-red-900/60 text-red-300 border border-red-700/40',
-  "chef's pick": 'bg-amber-900/60 text-amber-300 border border-amber-700/40',
-  'vegetarian': 'bg-emerald-900/60 text-emerald-300 border border-emerald-700/40',
-  'vegan': 'bg-green-900/60 text-green-300 border border-green-700/40',
-  'shareable': 'bg-sky-900/60 text-sky-300 border border-sky-700/40',
-  'spicy': 'bg-orange-900/60 text-orange-300 border border-orange-700/40',
-  'gluten-free': 'bg-lime-900/60 text-lime-300 border border-lime-700/40',
-  'seasonal': 'bg-purple-900/60 text-purple-300 border border-purple-700/40',
-  'new': 'bg-teal-900/60 text-teal-300 border border-teal-700/40',
-};
-function tagColor(tag: string) {
-  return TAG_COLORS[tag.toLowerCase()] ?? 'bg-zinc-800/80 text-zinc-300 border border-zinc-700/40';
+/** Write updated items back to the editor's localStorage cache so
+ *  RestaurantMenu picks up changes made from the portal side. */
+function writeItemsToEditorCache(orgId: string, projectId: string, items: MenuItemDTO[]): void {
+  try {
+    const key = `mc3d_menu_${orgId}_${projectId}`;
+    const raw = localStorage.getItem(key);
+    const existing = raw ? JSON.parse(raw) : {};
+    // Convert MenuItemDTO (snake_case) → MenuItem (camelCase)
+    const menuItems = items.map((d) => ({
+      id: d.id,
+      name: d.name,
+      category: d.category,
+      desc: d.desc,
+      price: d.price,
+      image: d.image,
+      calories: d.calories,
+      tags: d.tags,
+      allergens: d.allergens,
+      modelUrl: d.model_url,
+      pairsWell: d.pairs_well,
+      hidden: d.hidden,
+      reviewStatus: d.review_status,
+      viewCount: d.view_count,
+      arLaunches: d.ar_launches,
+      marketplace_listed: d.marketplace_listed,
+      marketplace_price: d.marketplace_price,
+    }));
+    localStorage.setItem(key, JSON.stringify({ ...existing, menuItems }));
+  } catch { /* full or unavailable */ }
+}
+
+
+/** Shape returned by loadEditorCache — items + visual settings from the editor. */
+interface EditorCache {
+  items: (MenuItemDTO & { spiceLevel?: number })[];
+  brandColor: string;
+  surface: string;
+  bg: string;
+  currency: string;
+  showPrices: boolean;
+  cardStyle: 'horizontal' | 'stacked';
+  cardRadius: 'sharp' | 'rounded' | 'pill';
+  fieldVisibility: {
+    description?: boolean;
+    price?: boolean;
+    tags?: boolean;
+    calories?: boolean;
+    spiceLevel?: boolean;
+    allergens?: boolean;
+    pairsWell?: boolean;
+  };
+  customization: CustomizationState;
+}
+
+function loadEditorCache(orgId: string, projectId: string): EditorCache | null {
+  try {
+    const raw = localStorage.getItem(`mc3d_menu_${orgId}_${projectId}`);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const menuItems: Array<Record<string, unknown>> = parsed?.menuItems;
+    if (!Array.isArray(menuItems) || menuItems.length === 0) return null;
+
+    // Convert MenuItem (camelCase) → MenuItemDTO (snake_case) + spiceLevel
+    const items = menuItems.map((m) => ({
+      id: (m.id as string) ?? '',
+      name: (m.name as string) ?? '',
+      category: (m.category as string) ?? '',
+      desc: (m.desc as string) ?? '',
+      price: (m.price as string) ?? '',
+      image: (m.image as string) ?? '',
+      calories: (m.calories as string) ?? '',
+      tags: (m.tags as string[]) ?? [],
+      allergens: (m.allergens as string[]) ?? [],
+      model_url: (m.modelUrl as string) ?? '',
+      pairs_well: (m.pairsWell as string[]) ?? [],
+      hidden: m.hidden as boolean | undefined,
+      review_status: m.reviewStatus as MenuItemDTO['review_status'],
+      view_count: m.viewCount as number | undefined,
+      ar_launches: m.arLaunches as number | undefined,
+      marketplace_listed: m.marketplace_listed as boolean | undefined,
+      marketplace_price: m.marketplace_price as string | undefined,
+      spiceLevel: m.spiceLevel as number | undefined,
+    }));
+
+    // Read visual settings from menuSettings + customization
+    const ms = parsed?.menuSettings as Record<string, unknown> | undefined;
+    const cust = parsed?.customization as Record<string, unknown> | undefined;
+
+    // Build full CustomizationState from stored customization object
+    const customization: CustomizationState = {
+      ...DEFAULT_CUSTOMIZATION,
+      ...(cust as Partial<CustomizationState> | undefined),
+      // themePreset + customBrandColor live in menuSettings
+      themePreset: (ms?.themePreset as string) ?? DEFAULT_CUSTOMIZATION.themePreset,
+      customBrandColor: (ms?.customBrandColor as string) ?? DEFAULT_CUSTOMIZATION.customBrandColor,
+    };
+
+    // Resolve theme colors from the customization state
+    const theme = resolveTheme(customization);
+    const brandColor = theme.brandColor;
+
+    return {
+      items,
+      brandColor,
+      surface: theme.surface,
+      bg: theme.bg,
+      currency: (ms?.currency as string) ?? '$',
+      showPrices: (ms?.showPrices as boolean) ?? true,
+      cardStyle: customization.cardStyle,
+      cardRadius: customization.cardRadius,
+      fieldVisibility: (ms?.fieldVisibility as EditorCache['fieldVisibility']) ?? {},
+      customization,
+    };
+  } catch {
+    return null;
+  }
 }
 
 // ── Menu-Style Dish Card ──────────────────────────────────────────────────────
 
 // ── More Dropdown ─────────────────────────────────────────────────────────────
 
-const MoreDropdown: React.FC<{ projectId: string; itemName: string }> = ({ projectId, itemName: _itemName }) => {
+interface MoreDropdownProps {
+  onEditDetails?: () => void;
+  onDuplicate?: () => void;
+  onToggleHidden?: () => void;
+  onDelete?: () => void;
+}
+
+const MoreDropdown: React.FC<MoreDropdownProps> = ({ onEditDetails, onDuplicate, onToggleHidden, onDelete }) => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -52,11 +172,11 @@ const MoreDropdown: React.FC<{ projectId: string; itemName: string }> = ({ proje
   }, [open]);
 
   const items = [
-    { icon: <Pencil className="w-3.5 h-3.5" />, label: 'Edit Details', href: `/project/${projectId}/menu/edit` },
+    { icon: <Pencil className="w-3.5 h-3.5" />, label: 'Edit Details', onClick: onEditDetails },
     { icon: <QrCode className="w-3.5 h-3.5" />, label: 'QR code' },
-    { icon: <Copy className="w-3.5 h-3.5" />, label: 'Duplicate' },
-    { icon: <EyeOff className="w-3.5 h-3.5" />, label: 'Hide' },
-    { icon: <Trash2 className="w-3.5 h-3.5" />, label: 'Delete', danger: true },
+    { icon: <Copy className="w-3.5 h-3.5" />, label: 'Duplicate', onClick: onDuplicate },
+    { icon: <EyeOff className="w-3.5 h-3.5" />, label: 'Hide', onClick: onToggleHidden },
+    { icon: <Trash2 className="w-3.5 h-3.5" />, label: 'Delete', danger: true, onClick: onDelete },
   ];
 
   return (
@@ -78,15 +198,15 @@ const MoreDropdown: React.FC<{ projectId: string; itemName: string }> = ({ proje
                 ? 'text-zinc-400 hover:bg-red-500/10 hover:text-red-400'
                 : 'text-zinc-400 hover:bg-white/5 hover:text-white'
               }`;
-            if (item.href) {
-              return (
-                <Link key={item.label} to={item.href} className={cls} onClick={() => setOpen(false)}>
-                  {item.icon} {item.label}
-                </Link>
-              );
-            }
             return (
-              <button key={item.label} className={cls} onClick={() => setOpen(false)}>
+              <button
+                key={item.label}
+                className={cls}
+                onClick={() => {
+                  setOpen(false);
+                  item.onClick?.();
+                }}
+              >
                 {item.icon} {item.label}
               </button>
             );
@@ -100,150 +220,92 @@ const MoreDropdown: React.FC<{ projectId: string; itemName: string }> = ({ proje
 // ── Menu-Style Dish Card ──────────────────────────────────────────────────────
 
 const DishCard: React.FC<{
-  item: MenuItemDTO;
+  item: MenuItemDTO & { spiceLevel?: number };
+  allItems: (MenuItemDTO & { spiceLevel?: number })[];
   showPrices: boolean;
   currency: string;
   projectId: string;
-}> = ({ item, showPrices, currency, projectId }) => {
+  brandColor: string;
+  cardStyle?: 'horizontal' | 'stacked';
+  cardRadius?: 'sharp' | 'rounded' | 'pill';
+  fieldVisibility?: EditorCache['fieldVisibility'];
+  onUpdateItem?: (updated: Partial<MenuItemDTO>) => void;
+}> = ({ item, allItems, showPrices, currency, projectId, brandColor, cardStyle, cardRadius, fieldVisibility, onUpdateItem }) => {
+  const [editOpen, setEditOpen] = useState(false);
+
+  // Match RestaurantMenu: replace '$' in stored price with the chosen currency
   const price = showPrices && item.price
-    ? (item.price.match(/^[$€£¥]/) ? item.price : `${currency}${item.price}`)
+    ? item.price.replace('$', currency)
     : null;
 
+  // Resolve pairsWell IDs → display names (same logic as RestaurantMenu)
+  const resolvedPairsWell = (item.pairs_well ?? []).map((p) => {
+    const matched = allItems.find((i) => i.id === p);
+    return matched ? matched.name : p;
+  });
+
   return (
-    <article
-      className="group relative flex rounded-3xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/40"
-      style={{ backgroundColor: 'rgba(24,24,27,0.65)', border: '0.8px solid rgba(255,255,255,0.10)', backdropFilter: 'blur(8px)' }}
-    >
-      {/* Left — image panel */}
-      <div className="relative w-[150px] sm:w-[180px] shrink-0 bg-zinc-900 overflow-hidden">
-        {item.image ? (
-          <img
-            src={item.image}
-            alt={item.name}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-100"
-            loading="lazy"
-          />
-        ) : (
+    <>
+      <DishCardShell
+        name={item.name}
+        price={price}
+        desc={item.desc}
+        tags={item.tags}
+        calories={item.calories}
+        spiceLevel={item.spiceLevel}
+        allergens={item.allergens}
+        pairsWell={resolvedPairsWell}
+        fieldVisibility={fieldVisibility}
+        brandColor={brandColor}
+        image={item.image}
+        hidden={item.hidden}
+        cardStyle={cardStyle}
+        cardRadius={cardRadius}
+        contentClassName={item.model_url ? 'cursor-pointer' : ''}
+        imagePlaceholder={
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-zinc-600">
             <UtensilsCrossed className="w-8 h-8" />
-            <span className="text-xs font-medium text-center px-2 leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-              {item.name}
-            </span>
+            <span className="text-xs font-medium text-center px-2 leading-tight">{item.name}</span>
           </div>
-        )}
-        {/* 3D badge */}
-        {item.model_url && (
-          <div className="absolute bottom-2 left-2">
-            <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-brand-600 text-white shadow-lg">
-              <Box className="w-2.5 h-2.5" /> 3D
-            </span>
-          </div>
-        )}
-        {/* Hidden overlay */}
-        {item.hidden && (
-          <div className="absolute inset-0 bg-zinc-900/70 flex items-center justify-center">
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-zinc-400 uppercase">
-              <EyeOff className="w-3 h-3" /> Hidden
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Right — content */}
-      <div className="flex-1 min-w-0 p-5 sm:p-6 lg:py-8 lg:px-8 flex flex-col justify-between gap-4 cursor-pointer">
-        {/* Name + Price */}
-        <div className="flex items-start justify-between gap-3">
-          <h3
-            className="text-xl font-black text-white leading-snug tracking-tight"
-            style={{ fontFamily: "'Playfair Display', serif" }}
-          >
-            {item.name}
-          </h3>
-          {price && (
-            <span className="shrink-0 text-xl font-bold" style={{ color: 'var(--color-brand-400, #a78bfa)' }}>
-              {price}
-            </span>
-          )}
-        </div>
-
-        {/* Description */}
-        {item.desc && (
-          <p className="text-sm leading-relaxed line-clamp-2" style={{ color: 'rgba(161,161,170,1)' }}>
-            {item.desc}
-          </p>
-        )}
-
-        {/* Tags */}
-        {item.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {item.tags.map((tag) => (
-              <span
-                key={tag}
-                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${tagColor(tag)}`}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Meta rows */}
-        <div className="space-y-1.5 text-[11px]">
-          {item.calories && (
-            <div className="flex items-center gap-2">
-              <span className="uppercase tracking-widest font-bold text-zinc-500 w-20 shrink-0">Calories</span>
-              <span className="px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-300 font-semibold">{item.calories}</span>
-            </div>
-          )}
-          {item.allergens.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="uppercase tracking-widest font-bold text-zinc-500 w-20 shrink-0">Allergens</span>
-              <div className="flex flex-wrap gap-1">
-                {item.allergens.map((a) => (
-                  <span key={a} className="px-2.5 py-0.5 rounded-full bg-red-950/60 text-red-300 border border-red-800/40 font-semibold">
-                    {a}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-          {item.pairs_well.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="uppercase tracking-widest font-bold text-zinc-500 w-20 shrink-0">Pairs with</span>
-              <div className="flex flex-wrap gap-1">
-                {item.pairs_well.map((p) => (
-                  <span key={p} className="px-2.5 py-0.5 rounded-full bg-amber-950/60 text-amber-300 border border-amber-800/40 font-semibold">
-                    {p}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Actions — matches /edit mode of public menu */}
-        <div className="flex items-center gap-3 pt-1">
+        }
+        imageOverlay={undefined}
+      >
+        {/* ── Action Buttons — matches RestaurantMenu structure ── */}
+        <div className="flex items-center gap-3">
           {item.model_url && (
-            <Link
-              to={`/project/${projectId}/menu`}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest text-white transition-all hover:brightness-110 hover:scale-105 active:scale-95"
-              style={{ background: 'linear-gradient(135deg, #f59e0b, #ea580c)', boxShadow: '0 4px 14px rgba(234,88,12,0.30)' }}
+            <button
+              className="flex items-center gap-2 text-xs font-black uppercase tracking-widest px-5 py-2.5 rounded-2xl text-white transition-all active:scale-95 hover:brightness-110 group/ar"
+              style={{
+                backgroundColor: brandColor,
+                boxShadow: `0 10px 15px -3px ${brandColor}1a`,
+              }}
             >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-                <line x1="12" y1="18" x2="12" y2="18.01" />
-              </svg>
+              <Smartphone className="w-4 h-4 transition-transform group-hover/ar:rotate-12" />
               3D / AR
-            </Link>
+            </button>
           )}
           <button className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-all px-3 py-2 rounded-xl hover:bg-white/5">
             <Share2 className="w-3.5 h-3.5" />
             Share
           </button>
-          <MoreDropdown projectId={projectId} itemName={item.name} />
+          <MoreDropdown
+            onEditDetails={() => setEditOpen(true)}
+          />
         </div>
-      </div>
-    </article>
+      </DishCardShell>
+
+      {editOpen && (
+        <ItemEditModal
+          item={item}
+          brandColor={brandColor}
+          onSave={(updated) => {
+            onUpdateItem?.(updated);
+            setEditOpen(false);
+          }}
+          onClose={() => setEditOpen(false)}
+        />
+      )}
+    </>
   );
 };
 
@@ -254,9 +316,10 @@ const DishRow: React.FC<{
   showPrices: boolean;
   currency: string;
   projectId: string;
-}> = ({ item, showPrices, currency, projectId }) => {
+  brandColor: string;
+}> = ({ item, showPrices, currency, projectId, brandColor }) => {
   const price = showPrices && item.price
-    ? (item.price.match(/^[$€£¥]/) ? item.price : `${currency}${item.price}`)
+    ? item.price.replace('$', currency)
     : '—';
   return (
     <tr className="group hover:bg-white/5 transition-colors" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -277,11 +340,11 @@ const DishRow: React.FC<{
       <td className="px-5 py-3.5">
         <div className="flex flex-wrap gap-1">
           {item.tags.slice(0, 2).map((tag) => (
-            <span key={tag} className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${tagColor(tag)}`}>{tag}</span>
+            <span key={tag} className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${tagStyle(tag)}`}>{tag}</span>
           ))}
         </div>
       </td>
-      <td className="px-5 py-3.5 text-sm font-bold" style={{ color: 'var(--color-brand-400, #a78bfa)' }}>{price}</td>
+      <td className="px-5 py-3.5 text-sm font-bold" style={{ color: brandColor }}>{price}</td>
       <td className="px-5 py-3.5 text-right">
         <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <Link to={`/project/${projectId}/menu`} className="p-1.5 rounded-lg text-zinc-500 hover:text-brand-400 hover:bg-white/5 transition-colors" title="View">
@@ -301,9 +364,12 @@ const DishRow: React.FC<{
 const AssetsPage: React.FC = () => {
   const { t } = useTranslation();
   const { projects } = usePortalContext();
+  const { user } = useAuth();
+  const orgId = user?.orgId ?? 'org-001';
 
   const [selectedProjectId, setSelectedProjectId] = useState('');
   const [config, setConfig] = useState<MenuConfigDTO | null>(null);
+  const [editorSettings, setEditorSettings] = useState<Omit<EditorCache, 'items'> | null>(null);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
@@ -317,24 +383,93 @@ const AssetsPage: React.FC = () => {
     if (projects.length > 0 && !selectedProjectId) setSelectedProjectId(projects[0].id);
   }, [projects, selectedProjectId]);
 
+  // Keep a ref to the latest apiConfig so live-sync helpers can overlay
+  // localStorage items without re-fetching the API every time.
+  const apiConfigRef = useRef<MenuConfigDTO | null>(null);
+
+  /** Read editor cache and apply items + visual settings to state. */
+  const applyCacheToState = useCallback((base: MenuConfigDTO) => {
+    const cached = loadEditorCache(orgId, selectedProjectId);
+    if (cached) {
+      const { items: cachedItems, ...settings } = cached;
+      setConfig({ ...base, items: cachedItems as MenuItemDTO[] });
+      setEditorSettings(settings);
+    } else {
+      setConfig(base);
+      setEditorSettings(null);
+    }
+  }, [orgId, selectedProjectId]);
+
+  // Initial fetch: get API config, then overlay localStorage items + settings
   useEffect(() => {
     if (!selectedProjectId) return;
     setLoading(true);
     MenusProvider.get(selectedProjectId)
-      .then(setConfig)
-      .catch(() => setConfig(null))
+      .then((apiConfig) => {
+        if (!apiConfig) { setConfig(null); apiConfigRef.current = null; return; }
+        apiConfigRef.current = apiConfig;
+        applyCacheToState(apiConfig);
+      })
+      .catch(() => { setConfig(null); apiConfigRef.current = null; })
       .finally(() => setLoading(false));
-  }, [selectedProjectId]);
+  }, [selectedProjectId, orgId, applyCacheToState]);
 
-  const items: MenuItemDTO[] = config?.items ?? [];
-  const currency = config?.currency ?? '$';
-  const showPrices = config?.show_prices ?? true;
+  // Live sync: re-read localStorage when the tab regains focus (same-tab
+  // navigation) or when another tab writes to localStorage (cross-tab).
+  useEffect(() => {
+    if (!selectedProjectId) return;
+
+    const syncFromCache = () => {
+      const base = apiConfigRef.current;
+      if (!base) return;
+      applyCacheToState(base);
+    };
+
+    const onFocus = () => syncFromCache();
+    window.addEventListener('focus', onFocus);
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === `mc3d_menu_${orgId}_${selectedProjectId}`) syncFromCache();
+    };
+    window.addEventListener('storage', onStorage);
+
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, [selectedProjectId, orgId, applyCacheToState]);
+
+  const items = (config?.items ?? []) as (MenuItemDTO & { spiceLevel?: number })[];
+  const currency = editorSettings?.currency ?? config?.currency ?? '$';
+  const showPrices = editorSettings?.showPrices ?? config?.show_prices ?? true;
+  const brandColor = editorSettings?.brandColor ?? config?.brand_color ?? '#d97706';
+  const surface = editorSettings?.surface ?? '#18181b';
+  const bg = editorSettings?.bg ?? '#09090b';
+  const cardStyle = editorSettings?.cardStyle ?? 'horizontal';
+  const cardRadius = editorSettings?.cardRadius ?? 'rounded';
+  const fieldVisibility = editorSettings?.fieldVisibility ?? (config?.field_visibility as EditorCache['fieldVisibility']) ?? {};
 
   const categories = useMemo(() => ['All', ...Array.from(new Set(items.map((i) => i.category)))], [items]);
   const allTags = useMemo(() => Array.from(new Set(items.flatMap((i) => i.tags))).sort(), [items]);
   const toggleTag = useCallback((tag: string) => {
     setActiveTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
   }, []);
+
+  const handleUpdateItem = useCallback((updated: Partial<MenuItemDTO>) => {
+    if (!config || !updated.id) return;
+    const newItems = config.items.map((it) =>
+      it.id === updated.id ? { ...it, ...updated } : it
+    );
+    const newConfig = { ...config, items: newItems };
+    setConfig(newConfig);
+    // Write back to localStorage so the menu editor sees the change
+    writeItemsToEditorCache(orgId, selectedProjectId, newItems);
+    // Persist to API
+    const { id: _id, org_id: _org, project_id: _pid, created_at: _ca, updated_at: _ua, ...payload } = newConfig;
+    MenusProvider.save(selectedProjectId, payload).catch(() => {
+      setConfig(config);
+    });
+  }, [config, selectedProjectId, orgId]);
 
   const filtered = useMemo(() => {
     let result = showHidden ? items : items.filter((i) => !i.hidden);
@@ -359,8 +494,18 @@ const AssetsPage: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen rounded-3xl p-6 md:p-8 space-y-6"
-      style={{ background: 'linear-gradient(180deg, #09090b 0%, #0e0e11 100%)' }}
+      className="min-h-screen rounded-3xl py-6 md:py-8 space-y-6 text-zinc-100"
+      style={{
+        background: `linear-gradient(180deg, ${bg} 0%, ${bg}ee 100%)`,
+        fontFamily: "'Outfit', sans-serif",
+        '--brand': brandColor,
+        '--bg': bg,
+        '--surface': surface,
+        '--text': '#fafafa',
+        '--muted': '#71717a',
+        '--border': '#27272a',
+        '--radius': '16px',
+      } as React.CSSProperties}
     >
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -453,7 +598,7 @@ const AssetsPage: React.FC = () => {
                     <button
                       key={tag}
                       onClick={() => toggleTag(tag)}
-                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest border transition-all ${active ? 'bg-brand-600 text-white border-brand-600' : `${tagColor(tag)} hover:opacity-80`}`}
+                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest border transition-all ${active ? 'bg-brand-600 text-white border-brand-600' : `${tagStyle(tag)} hover:opacity-80`}`}
                     >
                       {active && <Check className="w-3 h-3" />}
                       {tag}
@@ -518,9 +663,21 @@ const AssetsPage: React.FC = () => {
 
       {/* Grid — matches RestaurantMenu card style */}
       {!loading && filtered.length > 0 && viewMode === 'grid' && (
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
           {filtered.map((item) => (
-            <DishCard key={item.id} item={item} showPrices={showPrices} currency={currency} projectId={selectedProjectId} />
+            <DishCard
+              key={item.id}
+              item={item}
+              allItems={items}
+              showPrices={showPrices}
+              currency={currency}
+              projectId={selectedProjectId}
+              brandColor={brandColor}
+              cardStyle={cardStyle}
+              cardRadius={cardRadius}
+              fieldVisibility={fieldVisibility}
+              onUpdateItem={handleUpdateItem}
+            />
           ))}
         </div>
       )}
@@ -538,7 +695,7 @@ const AssetsPage: React.FC = () => {
             </thead>
             <tbody>
               {filtered.map((item) => (
-                <DishRow key={item.id} item={item} showPrices={showPrices} currency={currency} projectId={selectedProjectId} />
+                <DishRow key={item.id} item={item} showPrices={showPrices} currency={currency} projectId={selectedProjectId} brandColor={brandColor} />
               ))}
             </tbody>
           </table>

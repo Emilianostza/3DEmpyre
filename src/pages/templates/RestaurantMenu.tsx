@@ -39,17 +39,9 @@ import {
   SlidersHorizontal as _SlidersHorizontal,
   Paintbrush,
   LayoutGrid,
-  Bookmark,
   FolderOpen,
-  Save,
-  Rows3,
-  Columns3,
-  Minus,
-  Equal,
-  AlignVerticalSpaceAround,
   ChevronUp,
   ChevronDown,
-  ImagePlus,
   Sparkles,
   Upload as _Upload,
   Wand2,
@@ -71,6 +63,26 @@ import StaggerItem from '@/components/motion/StaggerItem';
 import { QRCodeDisplay } from '@/components/common/QRCodeDisplay';
 import { BaseModal } from '@/components/common/BaseModal';
 import { SkeletonCard } from '@/components/Skeleton';
+import { DishCardContent, tagStyle as sharedTagStyle } from '@/components/common/DishCardContent';
+import { DishCardShell } from '@/components/common/DishCardShell';
+import {
+  CustomizationPanel,
+  THEME_PRESETS,
+  DEFAULT_CUSTOMIZATION,
+  hexToRgb,
+  rgbToHsl,
+  extractDominantColor,
+  suggestLayoutFromColor,
+  useLayoutPresets,
+  type CustomizationState,
+  type CardLayout,
+  type CardStyle,
+  type MenuSpacing,
+  type HeroSize,
+  type FontWeight,
+  type CardRadius,
+  type SavedLayoutPreset,
+} from '@/components/common/CustomizationPanel';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -164,156 +176,6 @@ const COMMON_TAGS = [
   'Low Carb', 'Keto', 'Sugar-Free', 'Dairy-Free', 'Halal',
 ] as const;
 
-// ─── Customization Panel Types ────────────────────────────────────────────────
-
-type CardLayout = 'grid' | 'single';
-type CardStyle = 'horizontal' | 'stacked';
-type MenuSpacing = 'compact' | 'default' | 'spacious';
-type HeroSize = 'short' | 'default' | 'tall';
-type FontWeight = 'light' | 'default' | 'bold';
-
-interface ThemePreset {
-  id: string;
-  label: string;
-  brandColor: string;
-  bg: string;
-  surface: string;
-  accent: string;
-}
-
-const THEME_PRESETS: ThemePreset[] = [
-  { id: 'amber', label: 'Warm Amber', brandColor: '#d97706', bg: '#09090b', surface: '#18181b', accent: '#fbbf24' },
-  { id: 'slate', label: 'Cool Slate', brandColor: '#6366f1', bg: '#0f172a', surface: '#1e293b', accent: '#818cf8' },
-  { id: 'emerald', label: 'Emerald', brandColor: '#059669', bg: '#022c22', surface: '#064e3b', accent: '#34d399' },
-  { id: 'rose', label: 'Rose', brandColor: '#e11d48', bg: '#0c0a09', surface: '#1c1917', accent: '#fb7185' },
-  { id: 'purple', label: 'Royal', brandColor: '#7c3aed', bg: '#0a0015', surface: '#1a0a2e', accent: '#a78bfa' },
-];
-
-type CardRadius = 'sharp' | 'rounded' | 'pill';
-
-interface CustomizationState {
-  themePreset: string;
-  customBrandColor: string;
-  cardLayout: CardLayout;
-  cardStyle: CardStyle;
-  spacing: MenuSpacing;
-  heroSize: HeroSize;
-  heroImage: string;
-  fontWeight: FontWeight;
-  cardRadius: CardRadius;
-}
-
-const DEFAULT_CUSTOMIZATION: CustomizationState = {
-  themePreset: 'amber',
-  customBrandColor: '',
-  cardLayout: 'grid',
-  cardStyle: 'horizontal',
-  spacing: 'default',
-  heroSize: 'default',
-  heroImage: '',
-  fontWeight: 'default',
-  cardRadius: 'rounded',
-};
-
-// ─── AI Auto-Style Helpers ───────────────────────────────────────────────────
-
-/** Extract dominant color from an image URL using a canvas. */
-function extractDominantColor(imageUrl: string): Promise<{ r: number; g: number; b: number }> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const size = 50; // downsample for performance
-      canvas.width = size;
-      canvas.height = size;
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- canvas 2d context always available
-      const ctx = canvas.getContext('2d')!;
-      ctx.drawImage(img, 0, 0, size, size);
-      const data = ctx.getImageData(0, 0, size, size).data;
-      let rSum = 0, gSum = 0, bSum = 0, count = 0;
-      for (let i = 0; i < data.length; i += 16) { // sample every 4th pixel
-        rSum += data[i];
-        gSum += data[i + 1];
-        bSum += data[i + 2];
-        count++;
-      }
-      resolve({ r: Math.round(rSum / count), g: Math.round(gSum / count), b: Math.round(bSum / count) });
-    };
-    img.onerror = () => resolve({ r: 128, g: 128, b: 128 }); // fallback gray
-    img.src = imageUrl;
-  });
-}
-
-/** Convert RGB to HSL. Returns h in [0,360], s/l in [0,1]. */
-function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number } {
-  r /= 255; g /= 255; b /= 255;
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  const l = (max + min) / 2;
-  if (max === min) return { h: 0, s: 0, l };
-  const d = max - min;
-  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-  let h = 0;
-  if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
-  else if (max === g) h = ((b - r) / d + 2) / 6;
-  else h = ((r - g) / d + 4) / 6;
-  return { h: h * 360, s, l };
-}
-
-/** Parse hex color to RGB. */
-function hexToRgb(hex: string): { r: number; g: number; b: number } {
-  const n = parseInt(hex.replace('#', ''), 16);
-  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
-}
-
-/** Suggest a full layout based on dominant image color. */
-function suggestLayoutFromColor(color: { r: number; g: number; b: number }): Partial<CustomizationState> {
-  const { h, s, l } = rgbToHsl(color.r, color.g, color.b);
-
-  // Find closest theme preset by hue distance
-  let bestPreset = THEME_PRESETS[0];
-  let bestDist = Infinity;
-  for (const preset of THEME_PRESETS) {
-    const pRgb = hexToRgb(preset.brandColor);
-    const pHsl = rgbToHsl(pRgb.r, pRgb.g, pRgb.b);
-    // Circular hue distance + saturation penalty for grays
-    const hueDist = Math.min(Math.abs(h - pHsl.h), 360 - Math.abs(h - pHsl.h));
-    const dist = hueDist + (s < 0.1 ? 50 : 0); // prefer colorful matches
-    if (dist < bestDist) { bestDist = dist; bestPreset = preset; }
-  }
-
-  const isDark = l < 0.35;
-  const isWarm = (h >= 0 && h <= 60) || h >= 330; // reds, oranges, yellows
-
-  return {
-    themePreset: bestPreset.id,
-    heroSize: isDark ? 'tall' : 'default',
-    spacing: isDark ? 'spacious' : 'default',
-    fontWeight: isDark ? 'light' : 'default',
-    cardStyle: isWarm ? 'stacked' : 'horizontal',
-    cardRadius: isWarm ? 'rounded' : 'pill',
-    cardLayout: 'grid',
-  };
-}
-
-// ─── Saved Layout Presets ────────────────────────────────────────────────────
-
-interface SavedLayoutPreset {
-  id: string;
-  name: string;
-  state: CustomizationState;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface SavedLayoutPresetsStore {
-  presets: SavedLayoutPreset[];
-  activePresetId: string | null;
-}
-
-const PRESETS_STORAGE_KEY = (orgId: string, projectId: string) =>
-  `mc3d_layout_presets_${orgId}_${projectId}`;
-
 // ─── Per-Customer Menu Persistence ───────────────────────────────────────────
 
 const MENU_STORAGE_KEY = (orgId: string, projectId: string) =>
@@ -337,80 +199,6 @@ function saveMenuToStorage(orgId: string, projectId: string, state: PersistedMen
   try {
     localStorage.setItem(MENU_STORAGE_KEY(orgId, projectId), JSON.stringify(state));
   } catch { /* full or unavailable */ }
-}
-
-function loadPresetsFromStorage(orgId: string, projectId: string): SavedLayoutPresetsStore {
-  try {
-    const raw = localStorage.getItem(PRESETS_STORAGE_KEY(orgId, projectId));
-    if (raw) return JSON.parse(raw);
-  } catch { /* corrupted or unavailable */ }
-  return { presets: [], activePresetId: null };
-}
-
-function savePresetsToStorage(orgId: string, projectId: string, store: SavedLayoutPresetsStore): void {
-  try {
-    localStorage.setItem(PRESETS_STORAGE_KEY(orgId, projectId), JSON.stringify(store));
-  } catch { /* full or unavailable */ }
-}
-
-function useLayoutPresets(orgId: string, projectId: string | undefined) {
-  const [presetsStore, setPresetsStore] = useState<SavedLayoutPresetsStore>(() =>
-    projectId ? loadPresetsFromStorage(orgId, projectId) : { presets: [], activePresetId: null }
-  );
-
-  useEffect(() => {
-    if (projectId) setPresetsStore(loadPresetsFromStorage(orgId, projectId));
-  }, [orgId, projectId]);
-
-  useEffect(() => {
-    if (projectId) savePresetsToStorage(orgId, projectId, presetsStore);
-  }, [presetsStore, orgId, projectId]);
-
-  const savePreset = useCallback((name: string, state: CustomizationState): SavedLayoutPreset => {
-    const now = new Date().toISOString();
-    const preset: SavedLayoutPreset = {
-      id: crypto.randomUUID?.() ?? Math.random().toString(36).slice(2),
-      name,
-      state,
-      createdAt: now,
-      updatedAt: now,
-    };
-    setPresetsStore((prev) => ({
-      presets: [...prev.presets, preset],
-      activePresetId: preset.id,
-    }));
-    return preset;
-  }, []);
-
-  const loadPreset = useCallback((presetId: string): CustomizationState | null => {
-    const found = presetsStore.presets.find((p) => p.id === presetId);
-    if (!found) return null;
-    setPresetsStore((prev) => ({ ...prev, activePresetId: presetId }));
-    return found.state;
-  }, [presetsStore.presets]);
-
-  const deletePreset = useCallback((presetId: string) => {
-    setPresetsStore((prev) => ({
-      presets: prev.presets.filter((p) => p.id !== presetId),
-      activePresetId: prev.activePresetId === presetId ? null : prev.activePresetId,
-    }));
-  }, []);
-
-  const updatePreset = useCallback((presetId: string, state: CustomizationState) => {
-    setPresetsStore((prev) => ({
-      ...prev,
-      presets: prev.presets.map((p) =>
-        p.id === presetId ? { ...p, state, updatedAt: new Date().toISOString() } : p
-      ),
-    }));
-  }, []);
-
-  const presetBytes = useMemo(() => {
-    try { return new Blob([JSON.stringify(presetsStore)]).size; }
-    catch { return 0; }
-  }, [presetsStore]);
-
-  return { presets: presetsStore.presets, activePresetId: presetsStore.activePresetId, savePreset, loadPreset, deletePreset, updatePreset, presetBytes };
 }
 
 /** Shared input class for all form fields in the edit panel */
@@ -604,23 +392,7 @@ const INITIAL_ITEMS: MenuItem[] = [
   },
 ];
 
-const TAG_STYLES: Record<string, string> = {
-  "Chef's Pick": 'bg-amber-900/40 text-amber-300 border-amber-800/50',
-  Bestseller: 'bg-orange-900/40 text-orange-300 border-orange-800/50',
-  Vegetarian: 'bg-green-900/40 text-green-300 border-green-800/50',
-  Shareable: 'bg-sky-900/40 text-sky-300 border-sky-800/50',
-  Premium: 'bg-purple-900/40 text-purple-300 border-purple-800/50',
-  Seasonal: 'bg-teal-900/40 text-teal-300 border-teal-800/50',
-  Signature: 'bg-rose-900/40 text-rose-300 border-rose-800/50',
-  Sweet: 'bg-pink-900/40 text-pink-300 border-pink-800/50',
-  Dessert: 'bg-pink-900/40 text-pink-300 border-pink-800/50',
-  Classic: 'bg-stone-700/60 text-stone-300 border-stone-600/40',
-  Raw: 'bg-red-900/40 text-red-300 border-red-800/50',
-  New: 'bg-blue-900/40 text-blue-300 border-blue-800/50',
-  Popular: 'bg-amber-900/40 text-amber-300 border-amber-800/50',
-};
-const tagStyle = (tag: string) =>
-  TAG_STYLES[tag] ?? 'bg-stone-800/60 text-stone-300 border-stone-700/40';
+const tagStyle = sharedTagStyle;
 
 // ─── DTO Mappers (camelCase ↔ snake_case) ────────────────────────────────────
 
@@ -932,6 +704,8 @@ const MenuHero: React.FC<MenuHeroProps> = React.memo(
     const defaultSchedule = DAYS.map((d) => ({ day: d, open: true, from: '12:00', to: '23:00' }));
     const [schedule, setSchedule] = useState(defaultSchedule);
     const [closedDates, setClosedDates] = useState<string[]>([]);
+    const [dateOverrides, setDateOverrides] = useState<Record<string, { from: string; to: string }>>({});
+    const [selectedCalDay, setSelectedCalDay] = useState<number | null>(null);
     const [calMonth, setCalMonth] = useState(() => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), 1); });
 
     const formatSchedule = (sched: typeof defaultSchedule) => {
@@ -1234,187 +1008,275 @@ const MenuHero: React.FC<MenuHeroProps> = React.memo(
                   </span>
 
                   {isEditMode && editingHours && createPortal(
-                    <div className="fixed inset-0 z-[9999] flex flex-col bg-zinc-950 overflow-hidden">
-
-                      {/* Header */}
-                      <div className="flex items-center justify-between px-8 py-4 border-b border-white/[0.06] flex-shrink-0">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: brandColor + '18' }}>
-                            <Clock className="w-4 h-4" style={{ color: brandColor }} />
+                    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setEditingHours(false)}>
+                      <div
+                        className="relative w-full max-w-4xl max-h-[90vh] flex flex-col bg-zinc-950 rounded-3xl border border-white/[0.08] shadow-2xl overflow-hidden"
+                        style={{ boxShadow: `0 0 80px ${brandColor}08, 0 25px 50px rgba(0,0,0,0.5)` }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-8 py-5 border-b border-white/[0.06] flex-shrink-0">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ backgroundColor: brandColor + '15' }}>
+                              <Clock className="w-5 h-5" style={{ color: brandColor }} />
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-bold text-white tracking-tight">Opening Hours</h3>
+                              <p className="text-xs text-white/35 mt-0.5">Configure your weekly schedule and special dates</p>
+                            </div>
                           </div>
-                          <div>
-                            <h3 className="text-base font-bold text-white tracking-tight">Opening Hours</h3>
-                            <p className="text-xs text-white/40">Manage schedule, closed dates & presets</p>
-                          </div>
-                        </div>
-                        <button onClick={() => setEditingHours(false)} className="p-2 rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 transition-colors">
-                          <X className="w-5 h-5" />
-                        </button>
-                      </div>
-
-                      {/* Body — scrollable */}
-                      <div className="flex-1 min-h-0 overflow-y-auto px-12 py-10">
-                        {/* Quick actions row */}
-                        <div className="flex flex-wrap gap-3 mb-10">
-                          <button
-                            type="button"
-                            onClick={() => setSchedule(DAYS.map((d) => ({ day: d, open: true, from: '09:00', to: '17:00' })))}
-                            className="flex items-center gap-3 px-6 py-3.5 rounded-2xl text-sm font-semibold bg-white/5 border border-white/[0.06] text-white/60 hover:text-white hover:bg-white/10 transition-all"
-                          >
-                            <Clock className="w-4 h-4" />
-                            9 AM – 5 PM
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setSchedule(DAYS.map((d) => ({ day: d, open: true, from: '12:00', to: '23:00' })))}
-                            className="flex items-center gap-3 px-6 py-3.5 rounded-2xl text-sm font-semibold bg-white/5 border border-white/[0.06] text-white/60 hover:text-white hover:bg-white/10 transition-all"
-                          >
-                            <Clock className="w-4 h-4" />
-                            12 PM – 11 PM
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setSchedule(DAYS.map((d) => ({ day: d, open: true, from: '00:00', to: '23:59' })))}
-                            className="flex items-center gap-3 px-6 py-3.5 rounded-2xl text-sm font-semibold bg-white/5 border border-white/[0.06] text-white/60 hover:text-white hover:bg-white/10 transition-all"
-                          >
-                            <Clock className="w-4 h-4" />
-                            24 Hours
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setSchedule((s) => s.map((d) => ['Sat', 'Sun'].includes(d.day) ? { ...d, open: false } : d))}
-                            className="flex items-center gap-3 px-6 py-3.5 rounded-2xl text-sm font-semibold bg-white/5 border border-white/[0.06] text-white/60 hover:text-white hover:bg-white/10 transition-all"
-                          >
-                            <X className="w-4 h-4" />
-                            Close Weekends
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setSchedule((s) => s.map((d) => ({ ...d, open: true })))}
-                            className="flex items-center gap-3 px-6 py-3.5 rounded-2xl text-sm font-semibold bg-white/5 border border-white/[0.06] text-white/60 hover:text-white hover:bg-white/10 transition-all"
-                          >
-                            <Check className="w-4 h-4" />
-                            Open All Days
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => { setSchedule(defaultSchedule); setClosedDates([]); }}
-                            className="flex items-center gap-3 px-6 py-3.5 rounded-2xl text-sm font-semibold bg-white/5 border border-white/[0.06] text-white/60 hover:text-white hover:bg-white/10 transition-all"
-                          >
-                            <RotateCcw className="w-4 h-4" />
-                            Reset Defaults
+                          <button onClick={() => setEditingHours(false)} className="p-2.5 rounded-xl text-white/25 hover:text-white/70 hover:bg-white/5 transition-all">
+                            <X className="w-5 h-5" />
                           </button>
                         </div>
 
-                        {/* Main content: 3 columns */}
-                        <div className="flex gap-10">
-                          {/* Left: Weekly Schedule */}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-4">Weekly Schedule</p>
-                            <div className="space-y-2">
+                        {/* Presets strip */}
+                        <div className="px-8 py-3.5 border-b border-white/[0.04] flex items-center gap-2 overflow-x-auto flex-shrink-0 bg-white/[0.015]">
+                          <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest mr-1 flex-shrink-0">Presets</span>
+                          {[
+                            { label: '9–5', fn: () => setSchedule(DAYS.map((d) => ({ day: d, open: true, from: '09:00', to: '17:00' }))) },
+                            { label: '12–11 PM', fn: () => setSchedule(DAYS.map((d) => ({ day: d, open: true, from: '12:00', to: '23:00' }))) },
+                            { label: '24h', fn: () => setSchedule(DAYS.map((d) => ({ day: d, open: true, from: '00:00', to: '23:59' }))) },
+                            { label: 'No Weekends', fn: () => setSchedule((s) => s.map((d) => ['Sat', 'Sun'].includes(d.day) ? { ...d, open: false } : d)) },
+                            { label: 'All Open', fn: () => setSchedule((s) => s.map((d) => ({ ...d, open: true }))) },
+                          ].map((preset) => (
+                            <button
+                              key={preset.label}
+                              type="button"
+                              onClick={preset.fn}
+                              className="flex-shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-semibold text-white/40 bg-white/[0.04] border border-white/[0.06] hover:text-white/80 hover:bg-white/[0.08] hover:border-white/[0.12] transition-all"
+                            >
+                              {preset.label}
+                            </button>
+                          ))}
+                          <div className="w-px h-5 bg-white/[0.06] mx-1 flex-shrink-0" />
+                          <button
+                            type="button"
+                            onClick={() => { setSchedule(defaultSchedule); setClosedDates([]); setDateOverrides({}); setSelectedCalDay(null); }}
+                            className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-semibold text-white/30 hover:text-white/60 transition-all"
+                          >
+                            <RotateCcw className="w-3 h-3" />
+                            Reset
+                          </button>
+                        </div>
+
+                        {/* Body */}
+                        <div className="flex-1 min-h-0 overflow-y-auto">
+                          <div className="flex divide-x divide-white/[0.06]">
+                            {/* Left: Weekly Schedule */}
+                            <div className="flex-1 p-6 space-y-1">
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-white/25 mb-3 px-1">Weekly Schedule</p>
                               {schedule.map((entry, idx) => (
                                 <div
                                   key={entry.day}
-                                  className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all ${entry.open ? 'bg-white/[0.04] hover:bg-white/[0.07]' : 'bg-transparent opacity-40'}`}
+                                  className={`group flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${entry.open ? 'bg-white/[0.025] hover:bg-white/[0.05]' : 'hover:bg-white/[0.02]'}`}
                                 >
                                   <button
                                     type="button"
                                     onClick={() => setSchedule((s) => s.map((d, i) => i === idx ? { ...d, open: !d.open } : d))}
-                                    className={`w-12 h-7 rounded-full transition-colors flex-shrink-0 relative ${entry.open ? 'bg-emerald-500' : 'bg-white/10'}`}
+                                    className={`w-10 h-6 rounded-full transition-all flex-shrink-0 relative ${entry.open ? 'bg-emerald-500 shadow-lg shadow-emerald-500/20' : 'bg-white/[0.08]'}`}
                                   >
-                                    <span className={`absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white shadow-sm transition-transform ${entry.open ? 'left-[25px]' : 'left-[3px]'}`} />
+                                    <span className={`absolute top-[3px] w-[18px] h-[18px] rounded-full bg-white shadow transition-all ${entry.open ? 'left-[19px]' : 'left-[3px]'}`} />
                                   </button>
-                                  <span className={`text-base font-bold w-12 ${entry.open ? 'text-white' : 'text-white/40'}`}>{entry.day}</span>
+                                  <span className={`text-sm font-bold w-10 transition-colors ${entry.open ? 'text-white' : 'text-white/25'}`}>{entry.day}</span>
                                   {entry.open ? (
                                     <div className="flex items-center gap-2 flex-1 min-w-0">
                                       <input
                                         type="time"
                                         value={entry.from}
                                         onChange={(e) => setSchedule((s) => s.map((d, i) => i === idx ? { ...d, from: e.target.value } : d))}
-                                        className="bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-sm text-white font-mono outline-none focus:border-white/30 w-[7rem]"
+                                        className="bg-white/[0.06] border border-white/[0.06] rounded-xl px-3 py-2 text-sm text-white font-mono outline-none focus:border-white/20 focus:bg-white/[0.1] transition-all w-[7.5rem]"
                                       />
-                                      <span className="text-white/20 text-base">–</span>
+                                      <span className="text-white/15 text-sm">–</span>
                                       <input
                                         type="time"
                                         value={entry.to}
                                         onChange={(e) => setSchedule((s) => s.map((d, i) => i === idx ? { ...d, to: e.target.value } : d))}
-                                        className="bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-sm text-white font-mono outline-none focus:border-white/30 w-[7rem]"
+                                        className="bg-white/[0.06] border border-white/[0.06] rounded-xl px-3 py-2 text-sm text-white font-mono outline-none focus:border-white/20 focus:bg-white/[0.1] transition-all w-[7.5rem]"
                                       />
                                     </div>
                                   ) : (
-                                    <span className="text-sm text-white/20 italic">Closed</span>
+                                    <span className="text-xs text-white/15 italic tracking-wide">Closed</span>
                                   )}
                                 </div>
                               ))}
                             </div>
-                          </div>
 
-                          {/* Middle: Calendar */}
-                          <div className="w-[340px] flex-shrink-0">
-                            <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-4">Close Specific Dates</p>
-                            <div className="bg-white/[0.03] rounded-2xl p-6 border border-white/[0.06]">
-                              {/* Month nav */}
-                              <div className="flex items-center justify-between mb-4">
-                                <button
-                                  type="button"
-                                  onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1))}
-                                  className="p-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
-                                >
-                                  <ChevronLeft className="w-5 h-5" />
-                                </button>
-                                <span className="text-lg font-bold text-white/80">{calMonthLabel}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1))}
-                                  className="p-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
-                                >
-                                  <ChevronRight className="w-5 h-5" />
-                                </button>
+                            {/* Right: Calendar & Summary */}
+                            <div className="w-[380px] flex-shrink-0 p-6 space-y-5">
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-white/25 px-1">Calendar & Overrides</p>
+
+                              {/* Calendar */}
+                              <div className="bg-white/[0.025] rounded-2xl p-5 border border-white/[0.05]">
+                                {/* Month nav */}
+                                <div className="flex items-center justify-between mb-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1))}
+                                    className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/10 transition-all"
+                                  >
+                                    <ChevronLeft className="w-4 h-4" />
+                                  </button>
+                                  <span className="text-sm font-bold text-white/70">{calMonthLabel}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1))}
+                                    className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/10 transition-all"
+                                  >
+                                    <ChevronRight className="w-4 h-4" />
+                                  </button>
+                                </div>
+                                {/* Day headers */}
+                                <div className="grid grid-cols-7 gap-1 mb-1">
+                                  {DAYS.map((d) => (
+                                    <div key={d} className="text-[10px] font-bold text-white/20 text-center py-1">{d}</div>
+                                  ))}
+                                </div>
+                                {/* Date cells */}
+                                <div className="grid grid-cols-7 gap-1">
+                                  {calendarCells.map((day, i) => {
+                                    if (day === null) return <div key={`empty-${i}`} className="w-full aspect-square" />;
+                                    const past = isDayInPast(day);
+                                    const closed = isDateClosed(day);
+                                    const today = new Date();
+                                    const isToday = day === today.getDate() && calMonth.getMonth() === today.getMonth() && calMonth.getFullYear() === today.getFullYear();
+                                    const hasOverride = !!dateOverrides[toDateStr(day)];
+                                    const isSelected = selectedCalDay === day;
+                                    return (
+                                      <div key={day} className="relative">
+                                        <button
+                                          type="button"
+                                          disabled={past}
+                                          onClick={() => setSelectedCalDay(isSelected ? null : day)}
+                                          className={`w-full aspect-square rounded-lg text-xs font-medium transition-all flex flex-col items-center justify-center gap-0.5 ${past ? 'text-white/8 cursor-not-allowed' :
+                                            isSelected ? 'bg-white/20 text-white font-bold ring-2 ring-white/40 scale-105' :
+                                              closed ? 'bg-red-500/70 text-white font-bold ring-1 ring-red-400/30' :
+                                                hasOverride ? 'bg-amber-500/40 text-white font-bold ring-1 ring-amber-400/20' :
+                                                  isToday ? 'bg-white/12 text-white font-bold ring-1 ring-white/20' :
+                                                    'text-white/50 hover:bg-white/[0.08] hover:text-white/80'
+                                            }`}
+                                        >
+                                          {day}
+                                          {hasOverride && !closed && !past && <span className="w-1 h-1 rounded-full bg-amber-400" />}
+                                        </button>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
                               </div>
-                              {/* Day headers */}
-                              <div className="grid grid-cols-7 gap-1.5 mb-2">
-                                {DAYS.map((d) => (
-                                  <div key={d} className="text-xs font-bold text-white/25 text-center py-1">{d}</div>
-                                ))}
-                              </div>
-                              {/* Date cells */}
-                              <div className="grid grid-cols-7 gap-1.5">
-                                {calendarCells.map((day, i) => {
-                                  if (day === null) return <div key={`empty-${i}`} className="w-full aspect-square" />;
-                                  const past = isDayInPast(day);
-                                  const closed = isDateClosed(day);
-                                  const today = new Date();
-                                  const isToday = day === today.getDate() && calMonth.getMonth() === today.getMonth() && calMonth.getFullYear() === today.getFullYear();
-                                  return (
-                                    <button
-                                      key={day}
-                                      type="button"
-                                      disabled={past}
-                                      onClick={() => toggleClosedDate(day)}
-                                      className={`w-full aspect-square rounded-xl text-sm font-medium transition-all flex items-center justify-center ${past ? 'text-white/10 cursor-not-allowed' :
-                                        closed ? 'bg-red-500/80 text-white font-bold ring-2 ring-red-400/30' :
-                                          isToday ? 'bg-white/15 text-white font-bold ring-2 ring-white/20' :
-                                            'text-white/60 hover:bg-white/10 hover:text-white'
+
+                              {/* Day editor panel */}
+                              {selectedCalDay !== null && !isDayInPast(selectedCalDay) && (() => {
+                                const day = selectedCalDay;
+                                const ds = toDateStr(day);
+                                const closed = isDateClosed(day);
+                                const dayOfWeek = new Date(calMonth.getFullYear(), calMonth.getMonth(), day).getDay();
+                                const schedIdx = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                                const defaultFrom = schedule[schedIdx]?.from || '12:00';
+                                const defaultTo = schedule[schedIdx]?.to || '23:00';
+                                const override = dateOverrides[ds];
+                                const currentFrom = override?.from || defaultFrom;
+                                const currentTo = override?.to || defaultTo;
+                                const dateLabel = new Date(calMonth.getFullYear(), calMonth.getMonth(), day).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+                                return (
+                                  <div className="bg-white/[0.03] rounded-2xl border border-white/[0.06] overflow-hidden">
+                                    <div className="flex items-center justify-between px-4 py-2.5 bg-white/[0.02]">
+                                      <div className="flex items-center gap-2">
+                                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${closed ? 'bg-red-500/20 text-red-400' : override ? 'bg-amber-500/20 text-amber-400' : 'bg-white/10 text-white/60'}`}>
+                                          {day}
+                                        </div>
+                                        <div>
+                                          <p className="text-xs font-bold text-white/80 leading-tight">{dateLabel}</p>
+                                          <p className="text-[9px] text-white/25 leading-tight">
+                                            {closed ? 'Closed' : override ? 'Custom hours set' : 'Using weekly default'}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <button type="button" onClick={() => setSelectedCalDay(null)} className="p-1 rounded text-white/20 hover:text-white/50 transition-colors">
+                                        <X className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                    {!closed && (
+                                      <div className="px-4 py-3 space-y-2">
+                                        <div className="flex items-center gap-2">
+                                          <div className="flex-1">
+                                            <p className="text-[9px] text-white/20 mb-1 font-medium uppercase tracking-wider">Opens</p>
+                                            <input
+                                              type="time"
+                                              value={currentFrom}
+                                              onChange={(e) => {
+                                                const current = override || { from: defaultFrom, to: defaultTo };
+                                                setDateOverrides((prev) => ({ ...prev, [ds]: { ...current, from: e.target.value } }));
+                                              }}
+                                              className="w-full bg-white/[0.06] border border-white/[0.06] rounded-xl px-3 py-2 text-sm text-white font-mono outline-none focus:border-white/20 focus:bg-white/[0.1] transition-all"
+                                            />
+                                          </div>
+                                          <span className="text-white/10 text-sm mt-4">–</span>
+                                          <div className="flex-1">
+                                            <p className="text-[9px] text-white/20 mb-1 font-medium uppercase tracking-wider">Closes</p>
+                                            <input
+                                              type="time"
+                                              value={currentTo}
+                                              onChange={(e) => {
+                                                const current = override || { from: defaultFrom, to: defaultTo };
+                                                setDateOverrides((prev) => ({ ...prev, [ds]: { ...current, to: e.target.value } }));
+                                              }}
+                                              className="w-full bg-white/[0.06] border border-white/[0.06] rounded-xl px-3 py-2 text-sm text-white font-mono outline-none focus:border-white/20 focus:bg-white/[0.1] transition-all"
+                                            />
+                                          </div>
+                                        </div>
+                                        {override && (
+                                          <button
+                                            type="button"
+                                            onClick={() => setDateOverrides((prev) => { const next = { ...prev }; delete next[ds]; return next; })}
+                                            className="flex items-center gap-1 text-[10px] font-medium text-amber-400/50 hover:text-amber-400 transition-colors"
+                                          >
+                                            <RotateCcw className="w-2.5 h-2.5" />
+                                            Reset to default
+                                          </button>
+                                        )}
+                                      </div>
+                                    )}
+                                    <div className="px-4 py-2.5 border-t border-white/[0.04] flex items-center justify-between">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          toggleClosedDate(day);
+                                          if (!closed) setDateOverrides((prev) => { const next = { ...prev }; delete next[ds]; return next; });
+                                        }}
+                                        className={`flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all ${closed
+                                          ? 'text-emerald-400/70 hover:text-emerald-400 hover:bg-emerald-500/10'
+                                          : 'text-red-400/60 hover:text-red-400 hover:bg-red-500/10'
                                         }`}
-                                      title={closed ? `${day} — marked closed` : `Click to close ${day}`}
-                                    >
-                                      {day}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                              {/* Closed dates list */}
+                                      >
+                                        {closed ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                                        {closed ? 'Reopen' : 'Close day'}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => setSelectedCalDay(null)}
+                                        className="text-[11px] font-medium text-white/25 hover:text-white/50 px-2 py-1 transition-colors"
+                                      >
+                                        Done
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+
+                              {/* Closed dates pills */}
                               {closedDates.length > 0 && (
-                                <div className="mt-4 pt-4 border-t border-white/[0.06]">
-                                  <p className="text-xs font-bold text-red-400/70 uppercase tracking-wider mb-2">Closed dates ({closedDates.length})</p>
-                                  <div className="flex flex-wrap gap-2">
+                                <div>
+                                  <p className="text-[10px] font-bold text-red-400/50 uppercase tracking-wider mb-2 px-1">Closed ({closedDates.length})</p>
+                                  <div className="flex flex-wrap gap-1.5">
                                     {closedDates.sort().map((ds) => {
                                       const d = new Date(ds + 'T00:00:00');
                                       return (
-                                        <span key={ds} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/15 text-xs text-red-400 font-medium">
+                                        <span key={ds} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-500/10 text-[11px] text-red-400/80 font-medium border border-red-500/10">
                                           {d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                          <button type="button" onClick={() => setClosedDates((p) => p.filter((x) => x !== ds))} className="hover:text-red-300 transition-colors">
-                                            <X className="w-3.5 h-3.5" />
+                                          <button type="button" onClick={() => setClosedDates((p) => p.filter((x) => x !== ds))} className="hover:text-red-300 transition-colors ml-0.5">
+                                            <X className="w-3 h-3" />
                                           </button>
                                         </span>
                                       );
@@ -1422,91 +1284,66 @@ const MenuHero: React.FC<MenuHeroProps> = React.memo(
                                   </div>
                                 </div>
                               )}
-                            </div>
-                          </div>
 
-                          {/* Right: Summary & Options */}
-                          <div className="w-[240px] flex-shrink-0 space-y-6">
-                            <div>
-                              <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-4">Summary</p>
-                              <div className="bg-white/[0.03] rounded-2xl p-6 border border-white/[0.06] space-y-5">
-                                <div>
-                                  <p className="text-xs text-white/40 mb-1">Open days</p>
-                                  <p className="text-2xl font-bold text-white">{schedule.filter((d) => d.open).length} <span className="text-base text-white/30">/ 7</span></p>
+                              {/* Summary */}
+                              <div className="bg-white/[0.025] rounded-2xl p-4 border border-white/[0.05] space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <p className="text-[10px] text-white/30 font-medium">Open days</p>
+                                  <p className="text-sm font-bold text-white">{schedule.filter((d) => d.open).length}<span className="text-white/25 font-normal">/7</span></p>
                                 </div>
-                                <div className="border-t border-white/[0.06] pt-4">
-                                  <p className="text-xs text-white/40 mb-1">Closed dates</p>
-                                  <p className="text-2xl font-bold text-white">{closedDates.length}</p>
+                                {closedDates.length > 0 && (
+                                  <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
+                                    <p className="text-[10px] text-white/30 font-medium">Dates closed</p>
+                                    <p className="text-sm font-bold text-red-400/80">{closedDates.length}</p>
+                                  </div>
+                                )}
+                                {Object.keys(dateOverrides).length > 0 && (
+                                  <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
+                                    <p className="text-[10px] text-white/30 font-medium">Custom overrides</p>
+                                    <p className="text-sm font-bold text-amber-400/80">{Object.keys(dateOverrides).length}</p>
+                                  </div>
+                                )}
+                                <div className="pt-2 border-t border-white/[0.04]">
+                                  <p className="text-[10px] text-white/30 font-medium mb-1">Schedule preview</p>
+                                  <p className="text-xs font-medium text-white/50 leading-relaxed">{formatSchedule(schedule) || '—'}</p>
                                 </div>
-                                <div className="border-t border-white/[0.06] pt-4">
-                                  <p className="text-xs text-white/40 mb-1">Preview</p>
-                                  <p className="text-sm font-medium text-white/70 leading-relaxed">{formatSchedule(schedule) || '—'}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <div>
-                              <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-4">Actions</p>
-                              <div className="space-y-3">
-                                <button
-                                  type="button"
-                                  onClick={() => { setSchedule(defaultSchedule); setClosedDates([]); }}
-                                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold bg-white/5 border border-white/[0.06] text-white/50 hover:text-white hover:bg-white/10 transition-all"
-                                >
-                                  <RotateCcw className="w-4 h-4" />
-                                  Reset All
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setSchedule((s) => s.map((d) => ({ ...d, open: false })))}
-                                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold bg-red-500/5 border border-red-500/10 text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-all"
-                                >
-                                  <X className="w-4 h-4" />
-                                  Close All Days
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setSchedule((s) => s.map((d) => ({ ...d, open: true })))}
-                                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold bg-emerald-500/5 border border-emerald-500/10 text-emerald-400/60 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all"
-                                >
-                                  <Check className="w-4 h-4" />
-                                  Open All Days
-                                </button>
                               </div>
                             </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Footer */}
-                      <div className="flex items-center justify-between px-12 py-6 border-t border-white/[0.06] flex-shrink-0 bg-zinc-950/80">
-                        <p className="text-sm text-white/30">{schedule.filter((d) => d.open).length} days open{closedDates.length > 0 ? ` · ${closedDates.length} date${closedDates.length > 1 ? 's' : ''} closed` : ''}</p>
-                        <div className="flex gap-4">
-                          <button
-                            type="button"
-                            onClick={() => { setSchedule(defaultSchedule); setClosedDates([]); setEditingHours(false); }}
-                            className="px-8 py-3.5 rounded-2xl text-base font-semibold text-white/40 hover:text-white/70 bg-white/5 hover:bg-white/10 transition-all"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const result = formatSchedule(schedule);
-                              const suffix = closedDates.length > 0
-                                ? ` (closed ${closedDates.sort().map((ds) => { const d = new Date(ds + 'T00:00:00'); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }).join(', ')})`
-                                : '';
-                              onHoursChange?.(result + suffix);
-                              setEditingHours(false);
-                            }}
-                            className="px-10 py-3.5 rounded-2xl text-base font-bold text-white transition-all hover:brightness-110 flex items-center gap-2.5"
-                            style={{ backgroundColor: brandColor }}
-                          >
-                            <Check className="w-5 h-5" />
-                            Save Hours
-                          </button>
+                        {/* Footer */}
+                        <div className="flex items-center justify-between px-8 py-4 border-t border-white/[0.06] flex-shrink-0 bg-white/[0.015]">
+                          <p className="text-xs text-white/25">
+                            {schedule.filter((d) => d.open).length} days open{closedDates.length > 0 ? ` · ${closedDates.length} closed` : ''}{Object.keys(dateOverrides).length > 0 ? ` · ${Object.keys(dateOverrides).length} override${Object.keys(dateOverrides).length > 1 ? 's' : ''}` : ''}
+                          </p>
+                          <div className="flex gap-3">
+                            <button
+                              type="button"
+                              onClick={() => { setSchedule(defaultSchedule); setClosedDates([]); setEditingHours(false); }}
+                              className="px-6 py-2.5 rounded-xl text-sm font-medium text-white/35 hover:text-white/60 hover:bg-white/5 transition-all"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const result = formatSchedule(schedule);
+                                const suffix = closedDates.length > 0
+                                  ? ` (closed ${closedDates.sort().map((ds) => { const d = new Date(ds + 'T00:00:00'); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }).join(', ')})`
+                                  : '';
+                                onHoursChange?.(result + suffix);
+                                setEditingHours(false);
+                              }}
+                              className="px-8 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:brightness-110 flex items-center gap-2 shadow-lg"
+                              style={{ backgroundColor: brandColor, boxShadow: `0 4px 20px ${brandColor}30` }}
+                            >
+                              <Check className="w-4 h-4" />
+                              Save Hours
+                            </button>
+                          </div>
                         </div>
                       </div>
-
                     </div>, document.body
                   )}
                 </div>
@@ -1657,6 +1494,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = React.memo(
     const [librarySearch, setLibrarySearch] = useState('');
     const [libraryCategory, setLibraryCategory] = useState<string>('all');
     const libraryRef = useRef<HTMLDivElement>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
       const container = tabsRef.current;
@@ -1678,7 +1516,10 @@ const CategoryTabs: React.FC<CategoryTabsProps> = React.memo(
     useEffect(() => {
       if (!showLibrary) return;
       const handleClickOutside = (e: MouseEvent) => {
-        if (libraryRef.current && !libraryRef.current.contains(e.target as Node)) {
+        if (
+          libraryRef.current && !libraryRef.current.contains(e.target as Node) &&
+          (!dropdownRef.current || !dropdownRef.current.contains(e.target as Node))
+        ) {
           setShowLibrary(false);
         }
       };
@@ -1695,154 +1536,166 @@ const CategoryTabs: React.FC<CategoryTabsProps> = React.memo(
     });
 
     return (
-      <nav
-        className="sticky z-40 backdrop-blur-2xl border-b border-white/5 shadow-2xl shadow-black/40 transition-colors duration-500"
-        style={{ top: '64px', backgroundColor: 'color-mix(in srgb, var(--bg, #09090b) 60%, transparent)' }}
-        aria-label="Menu categories"
-      >
-        <div className="flex items-center gap-2 px-5 md:px-8 max-w-7xl mx-auto">
-          <div className="relative flex-1 min-w-0">
-            {/* Right fade to indicate scrollable tabs */}
-            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-zinc-950/80 to-transparent pointer-events-none z-10 md:hidden" />
-            <div
-              ref={tabsRef}
-              className="flex-1 flex gap-1 overflow-x-auto scrollbar-none py-3"
-              role="tablist"
-            >
-              {categories.filter((cat) => items.some((i) => i.category === cat.id)).map((cat) => {
-                const count = items.filter((i) => i.category === cat.id).length;
-                const isActive = active === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    data-cat={cat.id}
-                    role="tab"
-                    aria-selected={isActive}
-                    onClick={() => onSelect(cat.id)}
-                    className="relative flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 group/tab"
-                    style={{
-                      color: isActive ? '#fff' : 'rgba(255,255,255,0.4)',
-                      backgroundColor: isActive ? 'rgba(255,255,255,0.05)' : 'transparent',
-                    }}
-                  >
-                    <span className="font-sans-premium tracking-tight">{cat.label}</span>
-                    <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded-lg font-black ${isActive ? 'bg-white/10 text-white/50' : 'text-white/20 group-hover/tab:text-white/40'}`}
+      <>
+        <nav
+          className="sticky z-40 backdrop-blur-2xl border-b border-white/5 shadow-2xl shadow-black/40 transition-colors duration-500"
+          style={{ top: '64px', backgroundColor: 'color-mix(in srgb, var(--bg, #09090b) 60%, transparent)' }}
+          aria-label="Menu categories"
+        >
+          <div className="flex items-center gap-2 px-5 md:px-8 max-w-7xl mx-auto">
+            <div className="relative flex-1 min-w-0">
+              {/* Right fade to indicate scrollable tabs */}
+              <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-zinc-950/80 to-transparent pointer-events-none z-10 md:hidden" />
+              <div
+                ref={tabsRef}
+                className="flex-1 flex gap-1 overflow-x-auto scrollbar-none py-3"
+                role="tablist"
+              >
+                {categories.filter((cat) => items.some((i) => i.category === cat.id)).map((cat) => {
+                  const count = items.filter((i) => i.category === cat.id).length;
+                  const isActive = active === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      data-cat={cat.id}
+                      role="tab"
+                      aria-selected={isActive}
+                      onClick={() => onSelect(cat.id)}
+                      className="relative flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 group/tab"
+                      style={{
+                        color: isActive ? '#fff' : 'rgba(255,255,255,0.4)',
+                        backgroundColor: isActive ? 'rgba(255,255,255,0.05)' : 'transparent',
+                      }}
                     >
-                      {count}
-                    </span>
-                    {isActive && (
+                      <span className="font-sans-premium tracking-tight">{cat.label}</span>
                       <span
-                        className="absolute bottom-0 left-4 right-4 h-0.5 rounded-t-full shadow-[0_-2px_8px_rgba(255,255,255,0.3)]"
-                        style={{ backgroundColor: brandColor }}
-                      />
-                    )}
+                        className={`text-[10px] px-1.5 py-0.5 rounded-lg font-black ${isActive ? 'bg-white/10 text-white/50' : 'text-white/20 group-hover/tab:text-white/40'}`}
+                      >
+                        {count}
+                      </span>
+                      {isActive && (
+                        <span
+                          className="absolute bottom-0 left-4 right-4 h-0.5 rounded-t-full shadow-[0_-2px_8px_rgba(255,255,255,0.3)]"
+                          style={{ backgroundColor: brandColor }}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 flex-shrink-0 py-2 ml-3 border-l border-white/10 pl-3">
+              {isEditMode && onAddFromLibrary && (
+                <div className="relative" ref={libraryRef}>
+                  <button
+                    onClick={() => setShowLibrary((v) => !v)}
+                    className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/10 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+                    style={{ backgroundColor: showLibrary ? `${brandColor}15` : undefined, color: showLibrary ? brandColor : undefined }}
+                    aria-label="Add dish from library"
+                    title="Add from library"
+                  >
+                    <Plus className="w-4 h-4" />
                   </button>
-                );
-              })}
+                </div>
+              )}
+              <button
+                onClick={onSearchToggle}
+                className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/10 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+                aria-label={t('tpl.menu.searchMenu')}
+              >
+                <Search className="w-4 h-4" />
+              </button>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 flex-shrink-0 py-2 ml-3 border-l border-white/10 pl-3">
-            {isEditMode && onAddFromLibrary && (
-              <div className="relative" ref={libraryRef}>
-                <button
-                  onClick={() => setShowLibrary((v) => !v)}
-                  className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/10 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
-                  style={{ backgroundColor: showLibrary ? `${brandColor}15` : undefined, color: showLibrary ? brandColor : undefined }}
-                  aria-label="Add dish from library"
-                  title="Add from library"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-                {showLibrary && (
-                  <div className="absolute right-0 top-full mt-2 w-80 max-h-[420px] bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden flex flex-col z-50">
-                    <div className="p-3 border-b border-white/5">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Library className="w-4 h-4 text-white/50" />
-                        <span className="text-sm font-bold text-white/80">Dish Library</span>
-                      </div>
-                      <input
-                        type="text"
-                        placeholder="Search dishes..."
-                        value={librarySearch}
-                        onChange={(e) => setLibrarySearch(e.target.value)}
-                        className="w-full px-3 py-1.5 text-sm bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-white/20"
-                        autoFocus
-                      />
-                      <div className="flex gap-1 mt-2 overflow-x-auto scrollbar-none">
-                        {[{ id: 'all', label: 'All' }, ...categories].map((cat) => (
-                          <button
-                            key={cat.id}
-                            onClick={() => setLibraryCategory(cat.id)}
-                            className="flex-shrink-0 px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all whitespace-nowrap"
-                            style={{
-                              backgroundColor: libraryCategory === cat.id ? brandColor + '30' : 'rgba(255,255,255,0.05)',
-                              color: libraryCategory === cat.id ? brandColor : 'rgba(255,255,255,0.4)',
-                              borderWidth: 1,
-                              borderColor: libraryCategory === cat.id ? brandColor + '40' : 'transparent',
-                            }}
-                          >
-                            {cat.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-2">
-                      {filteredLibrary.length === 0 ? (
-                        <div className="text-center py-6 text-white/30 text-sm">
-                          {librarySearch ? 'No matching dishes' : 'All dishes already added'}
-                        </div>
-                      ) : (
-                        filteredLibrary.map((dish) => {
-                          const cat = categories.find((c) => c.id === dish.category);
-                          return (
-                            <button
-                              key={dish.id}
-                              onClick={() => {
-                                onAddFromLibrary(dish);
-                                setShowLibrary(false);
-                                setLibrarySearch('');
-                              }}
-                              className="w-full text-left p-2.5 rounded-xl hover:bg-white/5 transition-all group/lib flex items-start gap-3"
-                            >
-                              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ backgroundColor: brandColor + '15' }}>
-                                <Plus className="w-3.5 h-3.5 opacity-0 group-hover/lib:opacity-100 transition-opacity" style={{ color: brandColor }} />
-                                <ChefHat className="w-3.5 h-3.5 absolute opacity-100 group-hover/lib:opacity-0 transition-opacity" style={{ color: brandColor }} />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm font-bold text-white/80 group-hover/lib:text-white truncate">{dish.name}</span>
-                                  <span className="text-xs font-bold text-white/30">{dish.price}</span>
-                                </div>
-                                <p className="text-[11px] text-white/30 truncate mt-0.5">{dish.desc}</p>
-                                <div className="flex items-center gap-1.5 mt-1">
-                                  {cat && (
-                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-white/30 font-medium">{cat.label}</span>
-                                  )}
-                                  {dish.tags.slice(0, 2).map((tag) => (
-                                    <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: brandColor + '15', color: brandColor }}>{tag}</span>
-                                  ))}
-                                </div>
-                              </div>
-                            </button>
-                          );
-                        })
-                      )}
-                    </div>
-                  </div>
-                )}
+        </nav>
+        {showLibrary && createPortal(
+          <div
+            ref={dropdownRef}
+            className="fixed z-[9999] w-80 max-h-[420px] bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden flex flex-col"
+            style={{
+              top: (libraryRef.current?.getBoundingClientRect().bottom ?? 0) + 8,
+              right: window.innerWidth - (libraryRef.current?.getBoundingClientRect().right ?? 0),
+            }}
+            role="dialog"
+            aria-label="Dish Library"
+          >
+            <div className="p-3 border-b border-white/5">
+              <div className="flex items-center gap-2 mb-2">
+                <Library className="w-4 h-4 text-white/50" />
+                <span className="text-sm font-bold text-white/80">Dish Library</span>
               </div>
-            )}
-            <button
-              onClick={onSearchToggle}
-              className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/10 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
-              aria-label={t('tpl.menu.searchMenu')}
-            >
-              <Search className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </nav>
+              <input
+                type="text"
+                placeholder="Search dishes..."
+                value={librarySearch}
+                onChange={(e) => setLibrarySearch(e.target.value)}
+                className="w-full px-3 py-1.5 text-sm bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-white/20"
+                autoFocus
+              />
+              <div className="flex gap-1 mt-2 overflow-x-auto scrollbar-none">
+                {[{ id: 'all', label: 'All' }, ...categories].map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setLibraryCategory(cat.id)}
+                    className="flex-shrink-0 px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all whitespace-nowrap"
+                    style={{
+                      backgroundColor: libraryCategory === cat.id ? brandColor + '30' : 'rgba(255,255,255,0.05)',
+                      color: libraryCategory === cat.id ? brandColor : 'rgba(255,255,255,0.4)',
+                      borderWidth: 1,
+                      borderColor: libraryCategory === cat.id ? brandColor + '40' : 'transparent',
+                    }}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2">
+              {filteredLibrary.length === 0 ? (
+                <div className="text-center py-6 text-white/30 text-sm">
+                  {librarySearch ? 'No matching dishes' : 'All dishes already added'}
+                </div>
+              ) : (
+                filteredLibrary.map((dish) => {
+                  const cat = categories.find((c) => c.id === dish.category);
+                  return (
+                    <button
+                      key={dish.id}
+                      onClick={() => {
+                        onAddFromLibrary!(dish);
+                        setShowLibrary(false);
+                        setLibrarySearch('');
+                      }}
+                      className="w-full text-left p-2.5 rounded-xl hover:bg-white/5 transition-all group/lib flex items-start gap-3"
+                    >
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ backgroundColor: brandColor + '15' }}>
+                        <Plus className="w-3.5 h-3.5 opacity-0 group-hover/lib:opacity-100 transition-opacity" style={{ color: brandColor }} />
+                        <ChefHat className="w-3.5 h-3.5 absolute opacity-100 group-hover/lib:opacity-0 transition-opacity" style={{ color: brandColor }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-white/80 group-hover/lib:text-white truncate">{dish.name}</span>
+                          <span className="text-xs font-bold text-white/30">{dish.price}</span>
+                        </div>
+                        <p className="text-[11px] text-white/30 truncate mt-0.5">{dish.desc}</p>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          {cat && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-white/30 font-medium">{cat.label}</span>
+                          )}
+                          {dish.tags.slice(0, 2).map((tag) => (
+                            <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: brandColor + '15', color: brandColor }}>{tag}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </div>,
+          document.body
+        )}
+      </>
     );
   }
 );
@@ -1910,7 +1763,6 @@ const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(
   }) => {
     const { t } = useTranslation();
     const { error: showError } = useToast();
-    const [imgLoaded, setImgLoaded] = useState(false);
     const [activePanel, setActivePanel] = useState<ModalPanel | null>(null);
     const [isDragging, setIsDragging] = useState(false);
 
@@ -2097,14 +1949,41 @@ const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(
 
     return (
       <>
-        <article
-          className={`group relative flex ${cardStyle === 'stacked' ? 'flex-col' : 'flex-col lg:flex-row'} backdrop-blur-md border ${cardRadius === 'sharp' ? 'rounded-lg' : cardRadius === 'pill' ? 'rounded-[2rem]' : 'rounded-3xl'} overflow-visible transition-all duration-500 shadow-xl shadow-black/10 premium-card-glow ${isHidden
-            ? 'border-white/10 opacity-50'
-            : 'border-white/10 hover:border-white/25 hover:shadow-2xl hover:shadow-black/40 hover:bg-zinc-900/60 hover:-translate-y-1'
-            } cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-500/60 focus-visible:outline-none ${isDragging ? 'opacity-40 scale-95' : ''} ${isDragOver ? 'ring-2 ring-amber-500/60 border-amber-500/40' : ''}`}
-          style={{
-            backgroundColor: 'color-mix(in srgb, var(--surface) 65%, transparent)',
-            ...(dropdownOpen ? { zIndex: Z.cardElevated } : {}),
+        <DishCardShell
+          name={displayItem.name}
+          price={showPrices ? displayItem.price.replace('$', currency) : null}
+          desc={displayItem.desc}
+          tags={displayItem.tags}
+          calories={displayItem.calories}
+          spiceLevel={displayItem.spiceLevel}
+          allergens={displayItem.allergens}
+          pairsWell={displayItem.pairsWell.map((p) => {
+            const matched = allItems.find((i) => i.id === p);
+            return matched ? matched.name : p;
+          })}
+          fieldVisibility={fieldVisibility}
+          brandColor={brandColor}
+          image={item.image}
+          hidden={isHidden}
+          cardStyle={cardStyle}
+          cardRadius={cardRadius}
+          articleClassName={`${isDragging ? 'opacity-40 scale-95' : ''} ${isDragOver ? 'ring-2 ring-amber-500/60 border-amber-500/40' : ''}`}
+          articleStyle={dropdownOpen ? { zIndex: Z.cardElevated } : undefined}
+          onClick={(e) => {
+            const target = e.target as HTMLElement;
+            if (
+              target.closest('button') ||
+              target.closest('input') ||
+              target.closest('model-viewer') ||
+              target.closest('a')
+            ) {
+              return;
+            }
+            if (isEditMode) {
+              setActivePanel('edit');
+            } else {
+              onDetails();
+            }
           }}
           onDragOver={(e) => {
             e.preventDefault();
@@ -2114,378 +1993,210 @@ const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(
             e.preventDefault();
             onDrop?.();
           }}
-          onClick={(e) => {
-            const target = e.target as HTMLElement;
-            // Don't trigger if clicking interactive elements
-            if (
-              target.closest('button') ||
-              target.closest('input') ||
-              target.closest('model-viewer') ||
-              target.closest('a')
-            ) {
-              return;
-            }
-
-            if (isEditMode) {
-              setActivePanel('edit');
-            } else {
-              onDetails();
-            }
-          }}
-        >
-          {/* Drag handle — edit mode only */}
-          {isEditMode && (
-            <div
-              draggable
-              onDragStart={(e) => {
-                e.dataTransfer.effectAllowed = 'move';
-                e.dataTransfer.setData('text/plain', item.id);
-                setIsDragging(true);
-                onDragStart?.();
-              }}
-              onDragEnd={() => {
-                setIsDragging(false);
-                onDragEnd?.();
-              }}
-              className="absolute top-3 left-3 lg:top-0 lg:left-0 lg:bottom-0 w-8 flex items-center justify-center z-10 cursor-grab active:cursor-grabbing text-zinc-700 hover:text-zinc-500 transition-colors"
-            >
-              <GripVertical className="w-5 h-5" />
-            </div>
-          )}
-
-          {/* ── Image with Interactive 3D Preview ── */}
-          <div
-            className={`relative w-full ${cardStyle === 'stacked' ? 'h-56 sm:h-64' : 'h-56 sm:h-64 lg:w-48 xl:w-56 lg:h-auto'} flex-shrink-0 bg-zinc-800 overflow-hidden ${cardRadius === 'sharp'
-              ? (cardStyle === 'stacked' ? 'rounded-t-md' : 'rounded-t-md lg:rounded-t-none lg:rounded-l-md')
-              : cardRadius === 'pill'
-                ? (cardStyle === 'stacked' ? 'rounded-t-[1.75rem]' : 'rounded-t-[1.75rem] lg:rounded-t-none lg:rounded-l-[1.75rem]')
-                : (cardStyle === 'stacked' ? 'rounded-t-2xl' : 'rounded-t-2xl lg:rounded-t-none lg:rounded-l-2xl')
-              } ${has3D && !isEditMode ? 'cursor-pointer' : ''} transition-all duration-500`}
-            onClick={(e) => {
-              // Only open full viewer if not interacting with inline 3D preview
-              const target = e.target as HTMLElement;
-              if (has3D && !isEditMode && !target.closest('model-viewer')) {
-                onView3D();
-              }
-            }}
-            role={has3D && !isEditMode ? 'button' : undefined}
-            tabIndex={has3D && !isEditMode ? 0 : undefined}
-            onKeyDown={(e) => {
-              if (has3D && !isEditMode && (e.key === 'Enter' || e.key === ' ')) {
-                e.preventDefault();
-                onView3D();
-              }
-            }}
-            aria-label={has3D && !isEditMode ? `View ${item.name} in 3D` : undefined}
-          >
-            {!imgLoaded && <div className="absolute inset-0 bg-zinc-800 animate-pulse" />}
-
-            {/* 3D model — always mounted underneath so it preloads */}
-            {has3D && !isEditMode && item.modelUrl && (
+          beforeImage={
+            isEditMode ? (
+              <div
+                draggable
+                onDragStart={(e) => {
+                  e.dataTransfer.effectAllowed = 'move';
+                  e.dataTransfer.setData('text/plain', item.id);
+                  setIsDragging(true);
+                  onDragStart?.();
+                }}
+                onDragEnd={() => {
+                  setIsDragging(false);
+                  onDragEnd?.();
+                }}
+                className="absolute top-3 left-3 lg:top-0 lg:left-0 lg:bottom-0 w-8 flex items-center justify-center z-10 cursor-grab active:cursor-grabbing text-zinc-700 hover:text-zinc-500 transition-colors"
+              >
+                <GripVertical className="w-5 h-5" />
+              </div>
+            ) : undefined
+          }
+          imageBehind={
+            has3D && !isEditMode && item.modelUrl ? (
               <Inline3DPreview
                 modelUrl={item.modelUrl}
                 itemName={item.name}
                 brandColor={brandColor}
                 onExpand={onView3D}
               />
-            )}
-
-            {/* Static Image — sits on top in its own stacking context, fades out on hover to reveal 3D */}
-            <div
-              className={`absolute inset-0 transition-opacity duration-500 ${has3D && !isEditMode ? 'group-hover:opacity-0 group-hover:pointer-events-none' : ''}`}
-              style={{ zIndex: 30, isolation: 'isolate' }}
-            >
-              <img
-                src={item.image}
-                alt={item.name}
-                loading="lazy"
-                onLoad={() => setImgLoaded(true)}
-                className={`w-full h-full object-cover ${!has3D || isEditMode ? 'transition-transform duration-500 group-hover:scale-105' : ''} ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
-              />
-            </div>
-
-            {/* Interactive hint — only show on 3D-capable items in edit mode */}
-            {has3D && isEditMode && (
+            ) : undefined
+          }
+          imageFadesOnHover={has3D && !isEditMode}
+          imageOverlay={
+            has3D && isEditMode ? (
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
                 <ControlsHint pointerEventsNone={false} />
               </div>
-            )}
-
-            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-            {isHidden && (
-              <div className="absolute inset-0 bg-zinc-950/60 backdrop-blur-md flex items-center justify-center">
-                <EyeOff className="w-8 h-8 text-white/20" />
-              </div>
-            )}
-          </div>
-
-          {/* ── Content ── */}
-          <div
-            className={`flex-1 min-w-0 p-5 sm:p-6 lg:py-8 lg:px-8 flex flex-col justify-between gap-4 ${has3D ? 'cursor-pointer' : ''}`}
-            onClick={(e) => {
-              if (has3D) {
-                e.stopPropagation();
-                onView3D();
-              }
-            }}
-          >
-            <div>
-              {/* Name + Price */}
-              <div className="flex items-start justify-between gap-4 mb-2">
-                <h3
-                  className="text-xl md:text-2xl font-serif-premium font-bold text-white leading-tight truncate transition-colors group-hover:[color:var(--brand-hover)]"
-                  style={{ '--brand-hover': brandColor } as React.CSSProperties}
-                >
-                  {displayItem.name}
-                </h3>
-                {showPrices && fieldVisibility.price && (
-                  <span
-                    className="text-xl font-black font-sans-premium flex-shrink-0 tracking-tighter"
-                    style={{ color: brandColor }}
-                  >
-                    {displayItem.price.replace('$', currency)}
-                  </span>
-                )}
-              </div>
-
-              {/* Description — shown in both modes */}
-              {fieldVisibility.description && (
-                <p className="text-sm md:text-base font-sans-premium leading-relaxed line-clamp-2 mb-3 text-zinc-400">
-                  {displayItem.desc}
-                </p>
-              )}
-
-              {/* Tags — shown in both modes */}
-              {displayItem.tags.length > 0 && fieldVisibility.tags && (
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {displayItem.tags.slice(0, 3).map((tag) => (
-                    <span
-                      key={tag}
-                      className={`text-[11px] md:text-xs px-2.5 py-1 rounded-lg border font-black uppercase tracking-widest transition-all ${tagStyle(tag)}`}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* Calories */}
-              {fieldVisibility.calories && displayItem.calories && (
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-[11px] md:text-xs font-bold uppercase tracking-widest text-zinc-500">
-                    {t('tpl.menu.calories', 'Calories')}
-                  </span>
-                  <span className="text-xs font-semibold text-white bg-zinc-800/80 px-2 py-0.5 rounded-md border border-zinc-700/50">
-                    {displayItem.calories}
-                  </span>
-                </div>
-              )}
-
-              {/* Spice Level */}
-              {fieldVisibility.spiceLevel && (displayItem.spiceLevel ?? 0) > 0 && (
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-[11px] md:text-xs font-bold uppercase tracking-widest text-zinc-500">
-                    {t('tpl.menu.spiceLevel', 'Spice')}
-                  </span>
-                  <span className="flex gap-0.5">
-                    {Array.from({ length: 3 }, (_, i) => (
-                      <span
-                        key={i}
-                        className={`text-sm ${i < (displayItem.spiceLevel ?? 0) ? 'opacity-100' : 'opacity-20'}`}
-                      >
-                        🌶
-                      </span>
-                    ))}
-                  </span>
-                </div>
-              )}
-
-              {/* Allergens */}
-              {fieldVisibility.allergens && displayItem.allergens.length > 0 && (
-                <div className="flex flex-wrap items-center gap-1.5 mb-3">
-                  <span className="text-[11px] md:text-xs font-bold uppercase tracking-widest text-zinc-500 mr-1">
-                    {t('tpl.menu.allergens', 'Allergens')}
-                  </span>
-                  {displayItem.allergens.map((a) => (
-                    <span
-                      key={a}
-                      className="text-[11px] md:text-xs px-2 py-0.5 rounded-lg bg-red-500/20 text-red-300 border border-red-500/25 font-semibold"
-                    >
-                      {a}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* Pairs well with */}
-              {fieldVisibility.pairsWell && displayItem.pairsWell.length > 0 && (
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-[11px] md:text-xs font-bold uppercase tracking-widest text-zinc-500 mr-1">
-                    {t('tpl.menu.pairsWellWith', 'Pairs well with')}
-                  </span>
-                  {displayItem.pairsWell.map((p) => {
-                    const matched = allItems.find((i) => i.id === p);
-                    return (
-                      <span
-                        key={p}
-                        className="text-[11px] md:text-xs px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/25 font-semibold"
-                      >
-                        {matched ? matched.name : p}
-                      </span>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* ── Action Buttons ── */}
-            <div className="flex flex-col gap-3">
-              {/* Primary actions — shown in both modes */}
-              <div className="flex items-center gap-3 flex-wrap">
-                {has3D && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (onLaunchAR) {
-                        onLaunchAR();
-                      } else {
-                        onView3D();
-                      }
-                    }}
-                    className="flex items-center gap-2 text-xs font-black uppercase tracking-widest px-5 py-2.5 rounded-2xl text-white transition-all active:scale-95 hover:brightness-110 group/ar"
-                    style={{
-                      backgroundColor: brandColor,
-                      boxShadow: `0 10px 15px -3px ${brandColor}1a`,
-                    }}
-                  >
-                    <Smartphone className="w-4 h-4 transition-transform group-hover/ar:rotate-12" />
-                    {t('tpl.menu.viewIn3DAR')}
-                  </button>
-                )}
+            ) : undefined
+          }
+          imageClassName={has3D && !isEditMode ? 'cursor-pointer' : ''}
+          onImageClick={(e) => {
+            const target = e.target as HTMLElement;
+            if (has3D && !isEditMode && !target.closest('model-viewer')) {
+              onView3D();
+            }
+          }}
+          imageRole={has3D && !isEditMode ? 'button' : undefined}
+          imageTabIndex={has3D && !isEditMode ? 0 : undefined}
+          onImageKeyDown={(e) => {
+            if (has3D && !isEditMode && (e.key === 'Enter' || e.key === ' ')) {
+              e.preventDefault();
+              onView3D();
+            }
+          }}
+          imageAriaLabel={has3D && !isEditMode ? `View ${item.name} in 3D` : undefined}
+          contentClassName={has3D ? 'cursor-pointer' : ''}
+          contentOnClick={has3D ? (e) => { e.stopPropagation(); onView3D(); } : undefined}
+        >
+          {/* ── Action Buttons ── */}
+          <div className="flex flex-col gap-3">
+            {/* Primary actions — shown in both modes */}
+            <div className="flex items-center gap-3 flex-wrap">
+              {has3D && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleShare();
+                    if (onLaunchAR) {
+                      onLaunchAR();
+                    } else {
+                      onView3D();
+                    }
                   }}
-                  className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-all px-3 py-2 rounded-xl hover:bg-white/5"
-                  aria-label={t('tpl.menu.share')}
+                  className="flex items-center gap-2 text-xs font-black uppercase tracking-widest px-5 py-2.5 rounded-2xl text-white transition-all active:scale-95 hover:brightness-110 group/ar"
+                  style={{
+                    backgroundColor: brandColor,
+                    boxShadow: `0 10px 15px -3px ${brandColor}1a`,
+                  }}
                 >
-                  <Share2 className="w-3.5 h-3.5" />
-                  {t('tpl.menu.share')}
+                  <Smartphone className="w-4 h-4 transition-transform group-hover/ar:rotate-12" />
+                  {t('tpl.menu.viewIn3DAR')}
                 </button>
+              )}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleShare();
+                }}
+                className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-all px-3 py-2 rounded-xl hover:bg-white/5"
+                aria-label={t('tpl.menu.share')}
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                {t('tpl.menu.share')}
+              </button>
 
-                {/* Dropdown menu — edit mode */}
-                {isEditMode && (
-                  <div ref={dropdownRef} className="relative">
-                    {/* Dropdown trigger button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDropdownOpen((v) => !v);
-                      }}
-                      className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-white hover:bg-white/5 px-3 py-2 rounded-xl transition-all"
+              {/* Dropdown menu — edit mode */}
+              {isEditMode && (
+                <div ref={dropdownRef} className="relative">
+                  {/* Dropdown trigger button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDropdownOpen((v) => !v);
+                    }}
+                    className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-white hover:bg-white/5 px-3 py-2 rounded-xl transition-all"
+                    aria-label={t('tpl.menu.moreOptions', 'More options')}
+                    aria-expanded={dropdownOpen}
+                    aria-haspopup="menu"
+                  >
+                    <MoreVertical className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">{t('tpl.menu.more', 'More')}</span>
+                  </button>
+
+                  {/* Dropdown menu */}
+                  {dropdownOpen && (
+                    <div
+                      className="absolute right-0 top-full mt-2 min-w-[200px] max-h-[80vh] bg-zinc-900 rounded-xl shadow-2xl border border-zinc-800 overflow-y-auto py-1 animate-slide-down"
+                      style={{ zIndex: Z.dropdown }}
+                      role="menu"
                       aria-label={t('tpl.menu.moreOptions', 'More options')}
-                      aria-expanded={dropdownOpen}
-                      aria-haspopup="menu"
                     >
-                      <MoreVertical className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">{t('tpl.menu.more', 'More')}</span>
-                    </button>
+                      {/* Group 1: Modal triggers */}
+                      {MODAL_TABS.map((tab) => {
+                        const Icon = tab.icon;
+                        const isActive = activePanel === tab.id;
+                        return (
+                          <button
+                            key={tab.id}
+                            role="menuitem"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActivePanel(tab.id);
+                              setDropdownOpen(false);
+                            }}
+                            className={`flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm transition-colors ${isActive
+                              ? 'bg-white/5'
+                              : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                              }`}
+                            style={isActive ? { color: brandColor } : {}}
+                          >
+                            <Icon className="w-4 h-4" />
+                            <span className="font-medium">{tab.label}</span>
+                          </button>
+                        );
+                      })}
 
-                    {/* Dropdown menu */}
-                    {dropdownOpen && (
-                      <div
-                        className="absolute right-0 top-full mt-2 min-w-[200px] max-h-[80vh] bg-zinc-900 rounded-xl shadow-2xl border border-zinc-800 overflow-y-auto py-1 animate-slide-down"
-                        style={{ zIndex: Z.dropdown }}
-                        role="menu"
-                        aria-label={t('tpl.menu.moreOptions', 'More options')}
+                      {/* Separator */}
+                      <div className="h-px bg-white/10 my-1" />
+
+                      {/* Group 2: Content actions */}
+                      <button
+                        role="menuitem"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDuplicate?.();
+                          setDropdownOpen(false);
+                        }}
+                        className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-zinc-400 hover:bg-white/5 hover:text-white transition-colors"
                       >
-                        {/* Group 1: Modal triggers */}
-                        {MODAL_TABS.map((tab) => {
-                          const Icon = tab.icon;
-                          const isActive = activePanel === tab.id;
-                          return (
-                            <button
-                              key={tab.id}
-                              role="menuitem"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setActivePanel(tab.id);
-                                setDropdownOpen(false);
-                              }}
-                              className={`flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm transition-colors ${isActive
-                                ? 'bg-white/5'
-                                : 'text-zinc-400 hover:bg-white/5 hover:text-white'
-                                }`}
-                              style={isActive ? { color: brandColor } : {}}
-                            >
-                              <Icon className="w-4 h-4" />
-                              <span className="font-medium">{tab.label}</span>
-                            </button>
-                          );
-                        })}
+                        <CopyPlus className="w-4 h-4" />
+                        <span className="font-medium">
+                          {t('tpl.menu.duplicate', 'Duplicate')}
+                        </span>
+                      </button>
 
-                        {/* Separator */}
-                        <div className="h-px bg-white/10 my-1" />
+                      <button
+                        role="menuitem"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleHidden?.();
+                          setDropdownOpen(false);
+                        }}
+                        className={`flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm transition-colors ${isHidden
+                          ? 'bg-amber-500/10 text-amber-500'
+                          : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                          }`}
+                      >
+                        {isHidden ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                        <span className="font-medium">
+                          {isHidden ? t('tpl.menu.show', 'Show') : t('tpl.menu.hide', 'Hide')}
+                        </span>
+                      </button>
 
-                        {/* Group 2: Content actions */}
-                        <button
-                          role="menuitem"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDuplicate?.();
-                            setDropdownOpen(false);
-                          }}
-                          className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-zinc-400 hover:bg-white/5 hover:text-white transition-colors"
-                        >
-                          <CopyPlus className="w-4 h-4" />
-                          <span className="font-medium">
-                            {t('tpl.menu.duplicate', 'Duplicate')}
-                          </span>
-                        </button>
+                      {/* Separator */}
+                      <div className="h-px bg-white/10 my-1" />
 
-                        <button
-                          role="menuitem"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onToggleHidden?.();
-                            setDropdownOpen(false);
-                          }}
-                          className={`flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm transition-colors ${isHidden
-                            ? 'bg-amber-500/10 text-amber-500'
-                            : 'text-zinc-400 hover:bg-white/5 hover:text-white'
-                            }`}
-                        >
-                          {isHidden ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                          <span className="font-medium">
-                            {isHidden ? t('tpl.menu.show', 'Show') : t('tpl.menu.hide', 'Hide')}
-                          </span>
-                        </button>
-
-                        {/* Separator */}
-                        <div className="h-px bg-white/10 my-1" />
-
-                        {/* Group 3: Destructive action */}
-                        <button
-                          role="menuitem"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete?.();
-                            setDropdownOpen(false);
-                          }}
-                          className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-zinc-400 hover:bg-red-500/10 hover:text-red-500 transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          <span className="font-medium">{t('tpl.menu.delete', 'Delete')}</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+                      {/* Group 3: Destructive action */}
+                      <button
+                        role="menuitem"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete?.();
+                          setDropdownOpen(false);
+                        }}
+                        className="flex items-center gap-2.5 w-full px-3.5 py-2.5 text-sm text-zinc-400 hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        <span className="font-medium">{t('tpl.menu.delete', 'Delete')}</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-        </article>
+        </DishCardShell>
 
         {/* ═══════ Asset Management Popup ═══════ */}
         {isEditMode && activePanel !== null && (
@@ -3648,60 +3359,21 @@ const ItemDetailsSheet: React.FC<ItemDetailsSheetProps> = ({
                 )}
               </div>
 
-              <div className="p-5 space-y-5">
-                <div>
-                  <div className="flex items-start justify-between gap-3 mb-2.5">
-                    <h2 className="text-xl font-bold text-white font-serif leading-snug">
-                      {item.name}
-                    </h2>
-                    {showPrices && (
-                      <span
-                        className="text-2xl font-black font-sans-premium flex-shrink-0 tracking-tighter"
-                        style={{ color: brandColor }}
-                      >
-                        {item.price.replace('$', currency)}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {item.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className={`text-[10px] md:text-xs px-3 py-1 rounded-lg border font-black uppercase tracking-widest ${tagStyle(tag)}`}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <p className="text-base text-zinc-400 leading-relaxed">{item.desc}</p>
-
-                <div className="flex items-center justify-between text-sm py-4 border-y border-zinc-800/60 font-medium">
-                  <span className="text-zinc-500 uppercase tracking-widest text-[10px] font-bold">
-                    {t('tpl.menu.calories', 'Calories')}
-                  </span>
-                  <span className="text-white font-mono bg-zinc-900 px-3 py-1 rounded-lg border border-zinc-800">{item.calories}</span>
-                </div>
-
-                {item.allergens.length > 0 && (
-                  <div className="py-2">
-                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">
-                      {t('tpl.menu.allergens')}
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {item.allergens.map((a) => (
-                        <span
-                          key={a}
-                          className="text-xs px-3 py-1.5 rounded-xl bg-zinc-900 text-zinc-300 border border-zinc-800 font-medium"
-                        >
-                          {a}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
+              <DishCardContent
+                name={item.name}
+                price={showPrices ? item.price.replace('$', currency) : null}
+                desc={item.desc}
+                tags={item.tags}
+                calories={item.calories}
+                allergens={item.allergens}
+                pairsWell={item.pairsWell.map((id) => {
+                  const matched = allItems.find((i) => i.id === id);
+                  return matched ? matched.name : id;
+                })}
+                brandColor={brandColor}
+                className="p-5"
+              >
+                {/* Related items thumbnails */}
                 {relatedItems.length > 0 && (
                   <div>
                     <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-4">
@@ -3751,7 +3423,7 @@ const ItemDetailsSheet: React.FC<ItemDetailsSheetProps> = ({
                     {t('tpl.menu.share')}
                   </button>
                 </div>
-              </div>
+              </DishCardContent>
             </>
           )}
         </div>
@@ -4790,73 +4462,25 @@ const ModelViewerOverlay: React.FC<ModelViewerOverlayProps> = ({
 
         {/* ── Right: Item Details (live preview from draftItem when editing) ── */}
         <div className="lg:w-[360px] xl:w-[400px] flex-shrink-0 bg-zinc-950 lg:border-l border-t lg:border-t-0 border-white/5 overflow-y-auto lg:h-[calc(100dvh-57px)]">
-          <>
-            {/* Name + Price header */}
-            <div className="px-5 pt-5 pb-3">
-              <div className="flex items-start justify-between gap-3 mb-2">
-                <h2 className="text-lg font-bold text-white font-serif leading-snug">
-                  {displayItem.name}
-                </h2>
-                {showPrices && fieldVisibility.price && (
-                  <span
-                    className="text-xl font-black font-sans-premium flex-shrink-0 tracking-tighter"
-                    style={{ color: brandColor }}
-                  >
-                    {displayItem.price.replace('$', currency)}
-                  </span>
-                )}
-              </div>
-              {fieldVisibility.tags && displayItem.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {displayItem.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className={`text-[9px] px-2.5 py-0.5 rounded-md border font-black uppercase tracking-widest ${tagStyle(tag)}`}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Description */}
-            {fieldVisibility.description && (
-              <p className="px-5 text-sm text-zinc-400 leading-relaxed">{displayItem.desc}</p>
-            )}
-
-            {/* Calories */}
-            {fieldVisibility.calories && (
-              <div className="flex items-center justify-between text-sm mx-5 mt-3 py-2.5 border-y border-zinc-800/60 font-medium">
-                <span className="text-zinc-500 uppercase tracking-widest text-[9px] font-bold">
-                  {t('tpl.menu.calories', 'Calories')}
-                </span>
-                <span className="text-white font-mono text-xs bg-zinc-900 px-2.5 py-0.5 rounded-md border border-zinc-800">{displayItem.calories}</span>
-              </div>
-            )}
-
-            {/* Allergens */}
-            {fieldVisibility.allergens && displayItem.allergens.length > 0 && (
-              <div className="px-5 mt-3">
-                <h3 className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 mb-2">
-                  {t('tpl.menu.allergens')}
-                </h3>
-                <div className="flex flex-wrap gap-1.5">
-                  {displayItem.allergens.map((a) => (
-                    <span
-                      key={a}
-                      className="text-[11px] px-2.5 py-1 rounded-lg bg-zinc-900 text-zinc-300 border border-zinc-800 font-medium"
-                    >
-                      {a}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Pairs well with */}
+          <DishCardContent
+            name={displayItem.name}
+            price={showPrices ? displayItem.price.replace('$', currency) : null}
+            desc={displayItem.desc}
+            tags={displayItem.tags}
+            calories={displayItem.calories}
+            spiceLevel={displayItem.spiceLevel}
+            allergens={displayItem.allergens}
+            pairsWell={displayItem.pairsWell.map((p) => {
+              const matched = allItems.find((i) => i.id === p);
+              return matched ? matched.name : p;
+            })}
+            fieldVisibility={fieldVisibility}
+            brandColor={brandColor}
+            className="px-5 pt-5 pb-0"
+          >
+            {/* Related items thumbnails */}
             {fieldVisibility.pairsWell && relatedItems.length > 0 && (
-              <div className="px-5 mt-3">
+              <div>
                 <h3 className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 mb-2">
                   {t('tpl.menu.pairsWellWith')}
                 </h3>
@@ -4885,7 +4509,7 @@ const ModelViewerOverlay: React.FC<ModelViewerOverlayProps> = ({
             )}
 
             {/* Action buttons */}
-            <div className="px-5 pt-3 pb-5 mt-3 border-t border-white/5 space-y-2">
+            <div className="pt-3 pb-5 mt-3 border-t border-white/5 space-y-2">
               <div className="flex gap-2">
                 <button
                   onClick={handleAR}
@@ -4915,7 +4539,7 @@ const ModelViewerOverlay: React.FC<ModelViewerOverlayProps> = ({
                 />
               )}
             </div>
-          </>
+          </DishCardContent>
         </div>
       </div>
     </div>
@@ -5024,555 +4648,8 @@ const HowARPopup: React.FC<HowARPopupProps> = ({ open, onClose, brandColor }) =>
 
 // ─── RestaurantMenu (main) ────────────────────────────────────────────────────
 
-// ─── Customization Panel ──────────────────────────────────────────────────────
+/* CustomizationPanel imported from @/components/common/CustomizationPanel */
 
-interface CustomizationPanelProps {
-  state: CustomizationState;
-  onChange: (patch: Partial<CustomizationState>) => void;
-  isOpen: boolean;
-  onClose: () => void;
-  presets: SavedLayoutPreset[];
-  activePresetId: string | null;
-  onSavePreset: (name: string) => void;
-  onLoadPreset: (presetId: string) => void;
-  onDeletePreset: (presetId: string) => void;
-  onUpdatePreset: (presetId: string) => void;
-}
-
-const CustomizationPanel: React.FC<CustomizationPanelProps> = React.memo(({ state, onChange, isOpen, onClose, presets, activePresetId, onSavePreset, onLoadPreset, onDeletePreset, onUpdatePreset }) => {
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [hoveredTheme, _setHoveredTheme] = useState<string | null>(null);
-  const [newPresetName, setNewPresetName] = useState('');
-  const [autoStyling, setAutoStyling] = useState(false);
-  const panelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [isOpen, onClose]);
-
-  const currentTheme = (() => {
-    const base = THEME_PRESETS.find((t) => t.id === state.themePreset) ?? THEME_PRESETS[0];
-    if (state.customBrandColor) {
-      const rgb = hexToRgb(state.customBrandColor);
-      const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-      const h = Math.round(hsl.h);
-      const s = Math.round(hsl.s * 100);
-      return {
-        ...base,
-        brandColor: state.customBrandColor,
-        bg: `hsl(${h}, ${Math.min(s, 30)}%, 4%)`,
-        surface: `hsl(${h}, ${Math.min(s, 25)}%, 10%)`,
-        accent: state.customBrandColor,
-      };
-    }
-    return base;
-  })();
-  const previewTheme = hoveredTheme ? (THEME_PRESETS.find((t) => t.id === hoveredTheme) ?? currentTheme) : currentTheme;
-
-  const isDefault = JSON.stringify(state) === JSON.stringify(DEFAULT_CUSTOMIZATION);
-
-  const SegmentButton = ({
-    active,
-    onClick,
-    children,
-    title,
-  }: {
-    active: boolean;
-    onClick: () => void;
-    children: React.ReactNode;
-    title?: string;
-  }) => (
-    <button
-      onClick={onClick}
-      title={title}
-      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${active
-        ? 'text-white shadow-lg'
-        : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/5'
-        }`}
-      style={active ? { backgroundColor: currentTheme.brandColor, boxShadow: `0 4px 14px -3px ${currentTheme.brandColor}50` } : undefined}
-    >
-      {children}
-    </button>
-  );
-
-  if (!isOpen) return null;
-
-  return createPortal(
-    <div
-      ref={panelRef}
-      className="fixed bottom-6 right-6 w-[340px] rounded-2xl shadow-2xl shadow-black/60 backdrop-blur-2xl overflow-hidden"
-      style={{
-        zIndex: 9999,
-        backgroundColor: `${previewTheme.surface}f2`,
-        animation: 'customizer-slide-in 0.3s cubic-bezier(0.16,1,0.3,1)',
-        border: `1px solid ${currentTheme.brandColor}18`,
-      }}
-    >
-      <style>{`
-        @keyframes customizer-slide-in {
-          from { opacity: 0; transform: translateY(16px) scale(0.96); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes customizer-glow {
-          0%, 100% { box-shadow: 0 0 24px -6px ${currentTheme.brandColor}20, 0 20px 50px -12px rgba(0,0,0,0.6); }
-          50% { box-shadow: 0 0 32px -4px ${currentTheme.brandColor}30, 0 20px 50px -12px rgba(0,0,0,0.6); }
-        }
-      `}</style>
-
-      {/* Header */}
-      <div
-        className="flex items-center justify-between px-4 py-3 border-b border-white/5"
-        style={{ background: `linear-gradient(90deg, ${currentTheme.brandColor}08, transparent)` }}
-      >
-        <div className="flex items-center gap-2.5">
-          <div
-            className="w-8 h-8 rounded-xl flex items-center justify-center"
-            style={{ backgroundColor: `${currentTheme.brandColor}18` }}
-          >
-            <Paintbrush className="w-4 h-4" style={{ color: currentTheme.brandColor }} />
-          </div>
-          <div>
-            <span className="text-sm font-bold text-white tracking-tight block leading-tight">Customize</span>
-            <span className="text-[10px] text-zinc-500 leading-tight">Appearance & layout</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-0.5">
-          <button
-            onClick={() => setIsMinimized((v) => !v)}
-            className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-white/5 transition-colors"
-            aria-label={isMinimized ? 'Expand' : 'Minimize'}
-          >
-            {isMinimized ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-white/5 transition-colors"
-            aria-label="Close"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Body */}
-      {!isMinimized && (
-        <div className="p-4 space-y-5 max-h-[65vh] overflow-y-auto scrollbar-thin">
-          {/* Info blurb */}
-          <p className="text-[11px] text-zinc-500 leading-relaxed">
-            Adjust how your menu looks to customers. Changes preview live. Save a named layout preset below to keep your settings.
-          </p>
-
-          {/* AI Auto-Style from Image */}
-          {state.heroImage && (
-            <button
-              onClick={async () => {
-                setAutoStyling(true);
-                try {
-                  const color = await extractDominantColor(state.heroImage);
-                  const suggestion = suggestLayoutFromColor(color);
-                  // Small delay for visual feedback
-                  await new Promise((r) => setTimeout(r, 800));
-                  onChange(suggestion);
-                } finally {
-                  setAutoStyling(false);
-                }
-              }}
-              disabled={autoStyling}
-              className="w-full flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl text-xs font-bold text-white transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-70 disabled:cursor-wait"
-              style={{
-                background: `linear-gradient(135deg, ${currentTheme.brandColor}, #7c3aed)`,
-                boxShadow: `0 4px 20px -4px ${currentTheme.brandColor}40`,
-              }}
-            >
-              {autoStyling ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Analyzing image...
-                </>
-              ) : (
-                <>
-                  <Wand2 className="w-4 h-4" />
-                  Auto-Style from Image
-                  <Sparkles className="w-3 h-3 opacity-60" />
-                </>
-              )}
-            </button>
-          )}
-
-          {/* Theme Presets with Mini Preview */}
-          <div>
-            <div className="flex items-center justify-between mb-2.5">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-                Theme
-              </label>
-              <span className="text-[10px] text-zinc-500 font-medium transition-all duration-200">
-                {(hoveredTheme ? THEME_PRESETS.find((t) => t.id === hoveredTheme)?.label : currentTheme.label) ?? ''}
-              </span>
-            </div>
-
-            {/* Mini preview card */}
-            <div
-              className="mb-3 rounded-xl p-3 border border-white/5 transition-all duration-500 overflow-hidden"
-              style={{ backgroundColor: `${previewTheme.bg}cc` }}
-            >
-              <div className="flex gap-2.5 items-center">
-                <div
-                  className="w-10 h-10 rounded-lg flex-shrink-0 transition-all duration-500"
-                  style={{
-                    backgroundColor: previewTheme.surface,
-                    backgroundImage: `linear-gradient(135deg, ${previewTheme.brandColor}30, transparent)`,
-                  }}
-                />
-                <div className="flex-1 space-y-1.5">
-                  <div
-                    className="h-2 rounded-full w-3/4 transition-all duration-500"
-                    style={{ backgroundColor: `${previewTheme.accent}50` }}
-                  />
-                  <div
-                    className="h-1.5 rounded-full w-1/2 transition-all duration-500"
-                    style={{ backgroundColor: `${previewTheme.surface}90` }}
-                  />
-                </div>
-                <div
-                  className="w-8 h-5 rounded-md text-[8px] font-bold flex items-center justify-center text-white/90 transition-all duration-500"
-                  style={{ backgroundColor: previewTheme.brandColor }}
-                >
-                  3D
-                </div>
-              </div>
-            </div>
-
-            {/* Custom Color Picker */}
-            <div className="mt-3">
-              <label className="text-[10px] font-medium text-zinc-500 mb-1.5 block">Custom Color</label>
-              <label className="flex items-center gap-2 bg-white/[0.03] border border-white/5 rounded-lg px-2 py-1 cursor-pointer hover:border-white/15 transition-colors">
-                <input
-                  type="color"
-                  value={state.customBrandColor || currentTheme.brandColor}
-                  onChange={(e) => {
-                    onChange({ customBrandColor: e.target.value });
-                  }}
-                  className="w-8 h-8 rounded cursor-pointer bg-transparent border-none appearance-none"
-                />
-                <span className="text-xs font-mono text-zinc-400">{state.customBrandColor || currentTheme.brandColor}</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Card Layout */}
-          <div>
-            <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2.5 block">
-              Layout
-            </label>
-            <div className="flex gap-1 bg-white/[0.03] rounded-xl p-1 border border-white/5">
-              <SegmentButton
-                active={state.cardLayout === 'grid'}
-                onClick={() => onChange({ cardLayout: 'grid' })}
-                title="Two columns"
-              >
-                <LayoutGrid className="w-3.5 h-3.5" /> Grid
-              </SegmentButton>
-              <SegmentButton
-                active={state.cardLayout === 'single'}
-                onClick={() => onChange({ cardLayout: 'single' })}
-                title="Single column"
-              >
-                <Rows3 className="w-3.5 h-3.5" /> List
-              </SegmentButton>
-            </div>
-          </div>
-
-          {/* Card Style */}
-          <div>
-            <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2.5 block">
-              Card Style
-            </label>
-            <div className="flex gap-1 bg-white/[0.03] rounded-xl p-1 border border-white/5">
-              <SegmentButton
-                active={state.cardStyle === 'horizontal'}
-                onClick={() => onChange({ cardStyle: 'horizontal' })}
-                title="Side-by-side image and text"
-              >
-                <Columns3 className="w-3.5 h-3.5" /> Row
-              </SegmentButton>
-              <SegmentButton
-                active={state.cardStyle === 'stacked'}
-                onClick={() => onChange({ cardStyle: 'stacked' })}
-                title="Image on top, text below"
-              >
-                <Rows3 className="w-3.5 h-3.5" /> Stacked
-              </SegmentButton>
-            </div>
-          </div>
-
-          {/* Card Radius */}
-          <div>
-            <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2.5 block">
-              Corners
-            </label>
-            <div className="flex gap-1 bg-white/[0.03] rounded-xl p-1 border border-white/5">
-              <SegmentButton
-                active={state.cardRadius === 'sharp'}
-                onClick={() => onChange({ cardRadius: 'sharp' })}
-              >
-                <div className="w-3.5 h-3.5 border-2 border-current rounded-none" /> Sharp
-              </SegmentButton>
-              <SegmentButton
-                active={state.cardRadius === 'rounded'}
-                onClick={() => onChange({ cardRadius: 'rounded' })}
-              >
-                <div className="w-3.5 h-3.5 border-2 border-current rounded-lg" /> Rounded
-              </SegmentButton>
-              <SegmentButton
-                active={state.cardRadius === 'pill'}
-                onClick={() => onChange({ cardRadius: 'pill' })}
-              >
-                <div className="w-3.5 h-3.5 border-2 border-current rounded-full" /> Pill
-              </SegmentButton>
-            </div>
-          </div>
-
-          {/* Spacing */}
-          <div>
-            <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2.5 block">
-              Spacing
-            </label>
-            <div className="flex gap-1 bg-white/[0.03] rounded-xl p-1 border border-white/5">
-              <SegmentButton
-                active={state.spacing === 'compact'}
-                onClick={() => onChange({ spacing: 'compact' })}
-              >
-                <Minus className="w-3.5 h-3.5" /> Tight
-              </SegmentButton>
-              <SegmentButton
-                active={state.spacing === 'default'}
-                onClick={() => onChange({ spacing: 'default' })}
-              >
-                <Equal className="w-3.5 h-3.5" /> Default
-              </SegmentButton>
-              <SegmentButton
-                active={state.spacing === 'spacious'}
-                onClick={() => onChange({ spacing: 'spacious' })}
-              >
-                <AlignVerticalSpaceAround className="w-3.5 h-3.5" /> Airy
-              </SegmentButton>
-            </div>
-          </div>
-
-          {/* Hero Size */}
-          <div>
-            <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2.5 block">
-              Hero Banner
-            </label>
-            <div className="flex gap-1 bg-white/[0.03] rounded-xl p-1 border border-white/5">
-              <SegmentButton
-                active={state.heroSize === 'short'}
-                onClick={() => onChange({ heroSize: 'short' })}
-              >
-                Short
-              </SegmentButton>
-              <SegmentButton
-                active={state.heroSize === 'default'}
-                onClick={() => onChange({ heroSize: 'default' })}
-              >
-                Default
-              </SegmentButton>
-              <SegmentButton
-                active={state.heroSize === 'tall'}
-                onClick={() => onChange({ heroSize: 'tall' })}
-              >
-                Tall
-              </SegmentButton>
-            </div>
-            {/* Hero Image */}
-            <div className="mt-3">
-              <label className="text-[10px] font-medium text-zinc-500 mb-1.5 block">Hero Image</label>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                id="hero-image-upload"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const url = URL.createObjectURL(file);
-                    onChange({ heroImage: url });
-                  }
-                  e.target.value = '';
-                }}
-              />
-              {state.heroImage ? (
-                <div className="flex items-center gap-2">
-                  <img src={state.heroImage} alt="Hero preview" className="w-12 h-8 rounded-lg object-cover border border-white/10" />
-                  <button
-                    type="button"
-                    onClick={() => document.getElementById('hero-image-upload')?.click()}
-                    className="text-[10px] font-medium text-zinc-400 hover:text-white px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 transition-colors"
-                  >
-                    Change
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onChange({ heroImage: '' })}
-                    className="text-[10px] font-medium text-zinc-500 hover:text-red-400 px-2 py-1 rounded-lg bg-white/5 hover:bg-red-500/10 border border-white/5 transition-colors"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => document.getElementById('hero-image-upload')?.click()}
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2.5 border border-dashed border-white/10 rounded-xl text-[11px] font-medium text-zinc-500 hover:border-white/20 hover:text-zinc-300 hover:bg-white/[0.02] transition-colors"
-                >
-                  <ImagePlus className="w-3.5 h-3.5" />
-                  Upload image
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Font Weight */}
-          <div>
-            <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2.5 block">
-              Typography
-            </label>
-            <div className="flex gap-1 bg-white/[0.03] rounded-xl p-1 border border-white/5">
-              <SegmentButton
-                active={state.fontWeight === 'light'}
-                onClick={() => onChange({ fontWeight: 'light' })}
-              >
-                <span className="font-light">Light</span>
-              </SegmentButton>
-              <SegmentButton
-                active={state.fontWeight === 'default'}
-                onClick={() => onChange({ fontWeight: 'default' })}
-              >
-                <span className="font-medium">Medium</span>
-              </SegmentButton>
-              <SegmentButton
-                active={state.fontWeight === 'bold'}
-                onClick={() => onChange({ fontWeight: 'bold' })}
-              >
-                <span className="font-black">Heavy</span>
-              </SegmentButton>
-            </div>
-          </div>
-
-          {/* Reset */}
-          {!isDefault && (
-            <button
-              onClick={() => onChange({ ...DEFAULT_CUSTOMIZATION })}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-zinc-500 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] transition-all duration-200 border border-white/5 hover:border-white/10"
-            >
-              <RotateCcw className="w-3.5 h-3.5" /> Reset to defaults
-            </button>
-          )}
-
-          {/* ── Saved Layouts ── */}
-          <div>
-            <div className="flex items-center justify-between mb-2.5">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-                Saved Layouts
-              </label>
-              <span className="text-[10px] text-zinc-500 font-medium">
-                {presets.length} saved
-              </span>
-            </div>
-
-            {/* Existing presets list */}
-            {presets.length > 0 && (
-              <div className="space-y-1.5 mb-3 max-h-[140px] overflow-y-auto scrollbar-thin">
-                {presets.map((preset) => {
-                  const isActive = activePresetId === preset.id;
-                  return (
-                    <div
-                      key={preset.id}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition-all ${isActive
-                        ? 'bg-white/10 border border-white/10'
-                        : 'bg-white/[0.03] border border-transparent hover:border-white/5'
-                        }`}
-                    >
-                      {isActive && (
-                        <div
-                          className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: currentTheme.brandColor }}
-                        />
-                      )}
-                      <span className="flex-1 text-zinc-300 truncate font-medium">{preset.name}</span>
-                      <button
-                        onClick={() => onLoadPreset(preset.id)}
-                        className="text-zinc-500 hover:text-white transition-colors p-1 rounded-md hover:bg-white/5"
-                        title="Load this layout"
-                      >
-                        <FolderOpen className="w-3 h-3" />
-                      </button>
-                      {isActive && (
-                        <button
-                          onClick={() => onUpdatePreset(preset.id)}
-                          className="text-zinc-500 hover:text-white transition-colors p-1 rounded-md hover:bg-white/5"
-                          title="Update with current settings"
-                        >
-                          <Save className="w-3 h-3" />
-                        </button>
-                      )}
-                      <button
-                        onClick={() => onDeletePreset(preset.id)}
-                        className="text-zinc-500 hover:text-red-400 transition-colors p-1 rounded-md hover:bg-white/5"
-                        title="Delete preset"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Save new preset */}
-            <div className="flex gap-1.5">
-              <input
-                type="text"
-                placeholder="Preset name..."
-                value={newPresetName}
-                onChange={(e) => setNewPresetName(e.target.value)}
-                maxLength={30}
-                className="flex-1 px-3 py-2 bg-white/[0.03] border border-white/5 rounded-xl text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-white/15 transition-colors"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && newPresetName.trim()) {
-                    onSavePreset(newPresetName.trim());
-                    setNewPresetName('');
-                  }
-                }}
-              />
-              <button
-                onClick={() => {
-                  if (newPresetName.trim()) {
-                    onSavePreset(newPresetName.trim());
-                    setNewPresetName('');
-                  }
-                }}
-                disabled={!newPresetName.trim()}
-                className="px-3 py-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                style={{ backgroundColor: newPresetName.trim() ? currentTheme.brandColor : undefined, color: newPresetName.trim() ? '#fff' : undefined }}
-                title="Save current layout as preset"
-              >
-                <Bookmark className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>,
-    document.body
-  );
-});
-CustomizationPanel.displayName = 'CustomizationPanel';
 
 const RestaurantMenu: React.FC = () => {
   const { t } = useTranslation();

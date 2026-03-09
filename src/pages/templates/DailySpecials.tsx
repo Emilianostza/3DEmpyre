@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { placeholder } from '@/config/site';
 import { SEO } from '@/components/common/SEO';
+import { DishCardContent, tagStyle } from '@/components/common/DishCardContent';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -79,22 +80,7 @@ function useCountdown(isoTarget: string): { h: string; m: string; s: string; exp
   return time;
 }
 
-// ─── Tag Styles ─────────────────────────────────────────────────────────────
-
-const TAG_STYLES: Record<string, string> = {
-  "Chef's Pick": 'bg-amber-900/40 text-amber-300 border-amber-800/50',
-  Vegetarian: 'bg-green-900/40 text-green-300 border-green-800/50',
-  New: 'bg-blue-900/40 text-blue-300 border-blue-800/50',
-  Spicy: 'bg-red-900/40 text-red-300 border-red-800/50',
-  Seasonal: 'bg-teal-900/40 text-teal-300 border-teal-800/50',
-  Premium: 'bg-purple-900/40 text-purple-300 border-purple-800/50',
-  Comfort: 'bg-orange-900/40 text-orange-300 border-orange-800/50',
-  Classic: 'bg-zinc-700/60 text-zinc-300 border-zinc-600/40',
-  Sweet: 'bg-pink-900/40 text-pink-300 border-pink-800/50',
-  Hearty: 'bg-amber-900/40 text-amber-300 border-amber-800/50',
-};
-const tagStyle = (tag: string) =>
-  TAG_STYLES[tag] ?? 'bg-zinc-800/60 text-zinc-300 border-zinc-700/40';
+// tagStyle imported from @/components/common/DishCardContent
 
 // ─── Mock Data ──────────────────────────────────────────────────────────────
 
@@ -405,26 +391,17 @@ const SpecialCard: React.FC<SpecialCardProps> = ({ item, onView3D, animDelay }) 
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-zinc-950/80 to-transparent" />
       </div>
 
-      <div className="p-4 space-y-3">
-        <div>
-          <h3 className="text-base font-bold text-zinc-50 leading-snug mb-1">{item.name}</h3>
-          <p className="text-sm text-zinc-400 leading-relaxed line-clamp-2">{item.desc}</p>
-        </div>
-
-        <div className="flex flex-wrap gap-1.5">
-          {item.tags.map((tag) => (
-            <span
-              key={tag}
-              className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${tagStyle(tag)}`}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-
+      <DishCardContent
+        name={item.name}
+        price={item.price}
+        desc={item.desc}
+        tags={item.tags}
+        brandColor="#d97706"
+        className="p-4"
+      >
+        {/* Price row with original price + countdown */}
         <div className="flex items-center justify-between">
           <div className="flex items-baseline gap-2">
-            <span className="text-lg font-bold text-amber-400 font-mono">{item.price}</span>
             {item.originalPrice && (
               <span className="text-sm text-zinc-500 line-through font-mono">
                 {item.originalPrice}
@@ -453,7 +430,7 @@ const SpecialCard: React.FC<SpecialCardProps> = ({ item, onView3D, animDelay }) 
             {t('tpl.specials.viewInAR')}
           </button>
         </div>
-      </div>
+      </DishCardContent>
     </article>
   );
 };

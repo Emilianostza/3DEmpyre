@@ -117,45 +117,7 @@ export const MenuSettingsModal: React.FC<MenuSettingsModalProps> = ({
 
           {/* Appearance */}
           <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
-              <Palette className="w-3.5 h-3.5" /> {t('portal.menuSettings.appearance', 'Appearance')}
-            </h3>
-
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-                  {t('portal.menuSettings.themePreset', 'Theme Preset')}
-                </label>
-                <select
-                  value={settings.themePreset || 'amber'}
-                  onChange={(e) => setSettings({ ...settings, themePreset: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
-                >
-                  {THEME_PRESETS.map((t) => (
-                    <option key={t.id} value={t.id}>{t.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-                  {t('portal.menuSettings.brandColor', 'Custom Brand Color')}
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={settings.customBrandColor || settings.brandColor || '#d97706'}
-                    onChange={(e) => setSettings({ ...settings, customBrandColor: e.target.value, brandColor: e.target.value })}
-                    className="w-10 h-10 p-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl cursor-pointer shrink-0"
-                  />
-                  <input
-                    type="text"
-                    value={settings.customBrandColor || settings.brandColor || '#d97706'}
-                    onChange={(e) => setSettings({ ...settings, customBrandColor: e.target.value, brandColor: e.target.value })}
-                    placeholder="#HEX"
-                    className="w-full px-3.5 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all uppercase"
-                  />
-                </div>
-              </div>
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
                   {t('portal.menuSettings.currency')}
