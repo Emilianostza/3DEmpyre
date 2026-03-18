@@ -72,9 +72,22 @@ export const placeholder = (w: number, h: number, label: string, hue = 270): str
   'data:image/svg+xml,' +
   encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
-      `<rect fill="#18181b" width="${w}" height="${h}"/>` +
-      `<rect fill="hsl(${hue},30%,20%)" x="${w * 0.1}" y="${h * 0.15}" width="${w * 0.8}" height="${h * 0.6}" rx="12"/>` +
-      `<text x="${w / 2}" y="${h * 0.55}" text-anchor="middle" fill="hsl(${hue},40%,55%)" font-size="${Math.max(12, w * 0.04)}" font-family="system-ui">${label}</text>` +
+      `<defs>` +
+        `<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">` +
+          `<stop offset="0%" stop-color="hsl(${hue},15%,12%)"/>` +
+          `<stop offset="100%" stop-color="hsl(${hue},20%,8%)"/>` +
+        `</linearGradient>` +
+      `</defs>` +
+      `<rect fill="url(#bg)" width="${w}" height="${h}"/>` +
+      /* Subtle utensils icon */
+      `<g transform="translate(${w / 2 - 16}, ${h * 0.35})" fill="none" stroke="hsl(${hue},25%,35%)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">` +
+        `<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/>` + // fork
+        `<line x1="8" y1="2" x2="8" y2="8"/>` +
+        `<line x1="11" y1="2" x2="11" y2="5"/>` +
+        `<path d="M21 15V2c-2 0-4 1.5-4 5s2 5 4 5"/>` + // knife
+        `<path d="M8 11v11M21 15v7"/>` + // handles
+      `</g>` +
+      `<text x="${w / 2}" y="${h * 0.72}" text-anchor="middle" fill="hsl(${hue},20%,40%)" font-size="${Math.max(11, w * 0.032)}" font-family="system-ui" font-weight="500" letter-spacing="0.05em">${label}</text>` +
       '</svg>'
   );
 

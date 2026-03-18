@@ -49,10 +49,11 @@ const SettingsProfilePage: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+            <label htmlFor="profile-fullname" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
               {t('portal.settings.fullName')}
             </label>
             <input
+              id="profile-fullname"
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
@@ -60,10 +61,11 @@ const SettingsProfilePage: React.FC = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+            <label htmlFor="profile-email" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
               {t('portal.settings.email')}
             </label>
             <input
+              id="profile-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -71,10 +73,11 @@ const SettingsProfilePage: React.FC = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+            <label htmlFor="profile-phone" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
               {t('portal.settings.phone')}
             </label>
             <input
+              id="profile-phone"
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
@@ -82,10 +85,11 @@ const SettingsProfilePage: React.FC = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+            <label htmlFor="profile-company" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
               {t('portal.settings.company')}
             </label>
             <input
+              id="profile-company"
               type="text"
               value={company}
               onChange={(e) => setCompany(e.target.value)}

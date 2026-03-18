@@ -49,6 +49,9 @@ export interface DishCardContentProps {
     pairsWell?: boolean;
   };
 
+  /** "card" = compact (hides calories/allergens/pairsWell), "detail" = full info */
+  variant?: 'card' | 'detail';
+
   brandColor?: string;
   className?: string;
   onClick?: (e: React.MouseEvent) => void;
@@ -68,18 +71,20 @@ export const DishCardContent: React.FC<DishCardContentProps> = ({
   allergens = [],
   pairsWell = [],
   fieldVisibility: fv,
+  variant = 'card',
   brandColor,
   className = '',
   onClick,
   children,
 }) => {
+  const isDetail = variant === 'detail';
   const showPrice = fv?.price ?? true;
   const showDesc = fv?.description ?? true;
   const showTags = fv?.tags ?? true;
-  const showCalories = fv?.calories ?? true;
-  const showSpice = fv?.spiceLevel ?? true;
-  const showAllergens = fv?.allergens ?? true;
-  const showPairs = fv?.pairsWell ?? true;
+  const showCalories = (fv?.calories ?? true) && isDetail;
+  const showSpice = (fv?.spiceLevel ?? true) && isDetail;
+  const showAllergens = (fv?.allergens ?? true) && isDetail;
+  const showPairs = (fv?.pairsWell ?? true) && isDetail;
 
   return (
     <div
@@ -112,10 +117,10 @@ export const DishCardContent: React.FC<DishCardContentProps> = ({
           </p>
         )}
 
-        {/* Tags */}
+        {/* Tags — show max 2 on card, all in detail */}
         {showTags && tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-2">
-            {tags.slice(0, 3).map((tag) => (
+            {(isDetail ? tags : tags.slice(0, 2)).map((tag) => (
               <span
                 key={tag}
                 className={`text-[10px] md:text-[11px] px-2 py-0.5 rounded-md border font-black uppercase tracking-widest transition-all ${tagStyle(tag)}`}
@@ -126,7 +131,7 @@ export const DishCardContent: React.FC<DishCardContentProps> = ({
           </div>
         )}
 
-        {/* Calories */}
+        {/* Calories — detail view only */}
         {showCalories && calories && (
           <div className="flex items-center gap-2 mb-2">
             <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-zinc-500">
@@ -138,7 +143,7 @@ export const DishCardContent: React.FC<DishCardContentProps> = ({
           </div>
         )}
 
-        {/* Spice Level */}
+        {/* Spice Level — detail view only */}
         {showSpice && (spiceLevel ?? 0) > 0 && (
           <div className="flex items-center gap-2 mb-2">
             <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-zinc-500">
@@ -157,7 +162,7 @@ export const DishCardContent: React.FC<DishCardContentProps> = ({
           </div>
         )}
 
-        {/* Allergens */}
+        {/* Allergens — detail view only */}
         {showAllergens && allergens.length > 0 && (
           <div className="flex flex-wrap items-center gap-1 mb-2">
             <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-zinc-500 mr-1">
@@ -174,7 +179,7 @@ export const DishCardContent: React.FC<DishCardContentProps> = ({
           </div>
         )}
 
-        {/* Pairs well with */}
+        {/* Pairs well with — detail view only */}
         {showPairs && pairsWell.length > 0 && (
           <div className="flex flex-wrap items-center gap-1">
             <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-zinc-500 mr-1">

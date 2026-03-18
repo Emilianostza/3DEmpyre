@@ -115,6 +115,7 @@ export interface Project {
   type?: ProjectType;
   address?: string;
   phone?: string;
+  customer_id?: string; // Owner customer org ID (for data isolation)
 
   // PHASE 3: Lifecycle management
   assigned_to?: string; // Technician ID

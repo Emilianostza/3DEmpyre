@@ -121,6 +121,24 @@ export const sheetFromRight: Variants = {
   exit: { x: '100%', transition: { duration: 0.25 } },
 };
 
+export const sheetFromLeft: Variants = {
+  hidden: { x: '-100%' },
+  visible: { x: 0, transition: springs.gentle },
+  exit: { x: '-100%', transition: { duration: 0.25 } },
+};
+
+// ─── Portal-specific Variants ────────────────────────────────────────────────
+
+export const portalFadeIn: Variants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.2, ease: 'easeOut' } },
+};
+
+export const portalCardEnter: Variants = {
+  hidden: { opacity: 0, scale: 0.98 },
+  visible: { opacity: 1, scale: 1, transition: springs.snappy },
+};
+
 // ─── Toast Variants ───────────────────────────────────────────────────────────
 
 export const toastVariants: Variants = {

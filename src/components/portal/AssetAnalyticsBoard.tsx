@@ -240,6 +240,31 @@ export const AssetAnalyticsBoard: React.FC<AssetAnalyticsBoardProps> = ({
             )}
           </div>
 
+          {/* Blurred preview when locked — shows what analytics look like */}
+          {locked && (
+            <div className="relative mt-6 overflow-hidden rounded-xl max-h-48" aria-hidden="true">
+              <div className="opacity-40 blur-[2px] pointer-events-none select-none">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 mb-4">
+                  {[
+                    { label: t('analytics.views'), value: '2.4K', color: 'from-blue-50 to-blue-100/50 dark:from-blue-900/10 dark:to-blue-900/5 border-blue-200 dark:border-blue-800' },
+                    { label: t('analytics.visitors'), value: '1.8K', color: 'from-purple-50 to-purple-100/50 dark:from-purple-900/10 dark:to-purple-900/5 border-purple-200 dark:border-purple-800' },
+                    { label: t('analytics.avgTime'), value: '2:34', color: 'from-emerald-50 to-emerald-100/50 dark:from-emerald-900/10 dark:to-emerald-900/5 border-emerald-200 dark:border-emerald-800' },
+                    { label: t('analytics.interactions'), value: '68%', color: 'from-amber-50 to-amber-100/50 dark:from-amber-900/10 dark:to-amber-900/5 border-amber-200 dark:border-amber-800' },
+                  ].map((card) => (
+                    <div key={card.label} className={`bg-gradient-to-br ${card.color} p-3 md:p-5 rounded-xl border`}>
+                      <div className="text-xs md:text-sm font-semibold text-zinc-500 mb-1">{card.label}</div>
+                      <div className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white">{card.value}</div>
+                      <div className="text-xs text-zinc-400 mt-1">↑ 12.5%</div>
+                    </div>
+                  ))}
+                </div>
+                {/* Fake chart area */}
+                <div className="h-24 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl" />
+              </div>
+              <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white dark:from-zinc-900 to-transparent" />
+            </div>
+          )}
+
           {/* Top Cards Row - Responsive grid */}
           {isExpanded && (
             <>

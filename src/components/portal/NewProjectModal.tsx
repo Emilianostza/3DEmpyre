@@ -31,6 +31,8 @@ interface NewProjectModalProps {
   project?: Project | null;
   menuSettings?: MenuSettings;
   onSaveMenuSettings?: (settings: MenuSettings) => void;
+  /** When 'menu', the modal shows menu-specific copy and sets type to restaurant_menu */
+  mode?: 'project' | 'menu';
 }
 
 export const NewProjectModal: React.FC<NewProjectModalProps> = ({
@@ -40,11 +42,13 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
   project,
   menuSettings: initialMenuSettings,
   onSaveMenuSettings,
+  mode = 'project',
 }) => {
   const { t } = useTranslation();
+  const isMenuMode = mode === 'menu';
   const [name, setName] = useState('');
   const [client, setClient] = useState('');
-  const [type, setType] = useState('standard');
+  const [type, setType] = useState(isMenuMode ? 'restaurant_menu' : 'standard');
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [description, setDescription] = useState('');
@@ -89,7 +93,7 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
     } else {
       setName('');
       setClient('');
-      setType('standard');
+      setType(isMenuMode ? 'restaurant_menu' : 'standard');
       setAddress('');
       setPhone('');
       setDescription('');
@@ -163,10 +167,18 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
             id="new-project-title"
             className="text-xl font-bold text-zinc-900 dark:text-white mb-1"
           >
-            {project ? t('newProject.updateProject') : t('newProject.newCaptureProject')}
+            {project
+              ? t('newProject.updateProject')
+              : isMenuMode
+                ? t('newProject.newMenu', 'New Menu')
+                : t('newProject.newCaptureProject')}
           </h2>
           <p className="text-sm text-zinc-700 dark:text-zinc-400">
-            {project ? t('newProject.editDescription') : t('newProject.createDescription')}
+            {project
+              ? t('newProject.editDescription')
+              : isMenuMode
+                ? t('newProject.createMenuDescription', 'Set up a new restaurant menu with 3D dish previews.')
+                : t('newProject.createDescription')}
           </p>
           <button
             onClick={onClose}
@@ -185,7 +197,7 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
                 htmlFor="new-project-name"
                 className="block text-sm font-semibold text-zinc-900 dark:text-white mb-2"
               >
-                {t('newProject.menuTitle', 'Menu Title')} <span className="text-red-500">*</span>
+                {isMenuMode ? t('newProject.menuName', 'Menu Name') : t('newProject.menuTitle', 'Menu Title')} <span className="text-red-500">*</span>
               </label>
               <input
                 id="new-project-name"
@@ -195,12 +207,12 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
                 aria-invalid={Boolean(fieldErrors.name)}
                 aria-describedby="new-project-name-hint"
                 className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-brand-500 outline-none bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 ${fieldErrors.name ? 'border-red-400 dark:border-red-500' : 'border-zinc-300 dark:border-zinc-700'}`}
-                placeholder="e.g. Summer Collection 2026"
+                placeholder={isMenuMode ? 'e.g. Spring Dinner Menu' : 'e.g. Summer Collection 2026'}
                 value={name}
                 onChange={(e) => { setName(e.target.value); if (fieldErrors.name) setFieldErrors((p) => ({ ...p, name: undefined })); }}
               />
               <p id="new-project-name-hint" className={`text-xs mt-1 ${fieldErrors.name ? 'text-red-500' : 'text-zinc-500 dark:text-zinc-400'}`}>
-                {fieldErrors.name || t('newProject.whatCapturing')}
+                {fieldErrors.name || (isMenuMode ? t('newProject.whatMenuName', 'Give your menu a name') : t('newProject.whatCapturing'))}
               </p>
             </div>
 
@@ -209,7 +221,7 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
                 htmlFor="new-project-client"
                 className="block text-sm font-semibold text-zinc-900 dark:text-white mb-2"
               >
-                {t('newProject.clientOrganization')} <span className="text-red-500">*</span>
+                {isMenuMode ? t('newProject.restaurantName', 'Restaurant Name') : t('newProject.clientOrganization')} <span className="text-red-500">*</span>
               </label>
               <input
                 id="new-project-client"
@@ -218,12 +230,12 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
                 aria-invalid={Boolean(fieldErrors.client)}
                 aria-describedby="new-project-client-hint"
                 className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-brand-500 outline-none bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 ${fieldErrors.client ? 'border-red-400 dark:border-red-500' : 'border-zinc-300 dark:border-zinc-700'}`}
-                placeholder="e.g. Acme Corp"
+                placeholder={isMenuMode ? 'e.g. Bistro 55' : 'e.g. Acme Corp'}
                 value={client}
                 onChange={(e) => { setClient(e.target.value); if (fieldErrors.client) setFieldErrors((p) => ({ ...p, client: undefined })); }}
               />
               <p id="new-project-client-hint" className={`text-xs mt-1 ${fieldErrors.client ? 'text-red-500' : 'text-zinc-500 dark:text-zinc-400'}`}>
-                {fieldErrors.client || t('newProject.whoCommissioning')}
+                {fieldErrors.client || (isMenuMode ? t('newProject.whichRestaurant', 'Which restaurant is this menu for?') : t('newProject.whoCommissioning'))}
               </p>
             </div>
           </div>
@@ -241,7 +253,7 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
                 </label>
                 <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/40 border border-dashed border-zinc-200 dark:border-zinc-700/60">
                   <span className="w-2 h-2 rounded-full bg-brand-500 flex-shrink-0" />
-                  <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{type}</span>
+                  <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{isMenuMode ? t('newProject.restaurantMenu', 'Restaurant Menu') : type}</span>
                 </div>
               </div>
 
@@ -304,7 +316,9 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
                   : t('newProject.creating')
                 : project
                   ? t('newProject.updateProject')
-                  : t('newProject.createProject')}
+                  : isMenuMode
+                    ? t('newProject.createMenu', 'Create Menu')
+                    : t('newProject.createProject')}
             </button>
           </div>
         </form>

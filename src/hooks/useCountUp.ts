@@ -32,12 +32,15 @@ export function useCountUp({
   const [value, setValue] = useState(0);
   const rafRef = useRef<number>(0);
   const startTimeRef = useRef<number>(0);
-  const hasAnimated = useRef(false);
+  // Keep ref to preserve hook order (was hasAnimated); not used as a gate
+  const _reserved = useRef(false);
 
   useEffect(() => {
-    if (!enabled || hasAnimated.current) return;
+    if (!enabled) return;
 
-    hasAnimated.current = true;
+    _reserved.current = true;
+    // Reset so strict-mode re-runs and value changes animate correctly
+    setValue(0);
     startTimeRef.current = performance.now();
 
     const animate = (now: number) => {

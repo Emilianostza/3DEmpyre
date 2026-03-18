@@ -1,35 +1,44 @@
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Plus, AlertCircle, Camera, LifeBuoy, Box, LayoutDashboard, CreditCard, Settings as SettingsIcon, X } from 'lucide-react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import {
+  AlertCircle,
+  X,
+  LayoutDashboard,
+  UtensilsCrossed,
+  Paintbrush,
+  Settings as SettingsIcon,
+  FolderOpen,
+  Box,
+} from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 
 import { Asset, Project } from '@/types';
 import type { PortalOutletContext } from '@/types/portal';
 import { NewProjectModal } from '@/components/portal/NewProjectModal';
 import { ProjectsProvider, AssetsProvider } from '@/services/dataProvider';
-import DarkModeToggle from '@/components/DarkModeToggle';
 import { PortalLoadingSkeleton } from '@/components/portal/PortalLoadingSkeleton';
 import { UpgradePlanModal } from '@/components/portal/UpgradePlanModal';
-import { NotificationCenter } from '@/components/portal/NotificationCenter';
 import { AssignTechnicianModal } from '@/components/portal/AssignTechnicianModal';
+import { PortalSidebar } from '@/components/portal/PortalSidebar';
+import { PortalTopBar } from '@/components/portal/PortalTopBar';
 import { useAuth } from '@/contexts/AuthContext';
-import { getPortalConfig } from '@/constants/portal-configs';
 import { useToast } from '@/contexts/ToastContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { SEO } from '@/components/common/SEO';
 import { pageVariants } from '@/components/motion/presets';
 import { announceToScreenReader } from '@/utils/a11y';
+import { useSidebarState } from '@/hooks/useSidebarState';
 
 const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => {
-  const { logout, organization } = useAuth();
-  const portalConfig = getPortalConfig(organization?.industry);
+  const { logout, organization, user } = useAuth();
   const { success, error: showError } = useToast();
   const { theme } = useTheme();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const prefersReducedMotion = useReducedMotion();
+  const { collapsed, toggle, isMobileOpen, openMobile, closeMobile } = useSidebarState();
 
   // Re-apply portal theme preference when entering the authenticated area
   useEffect(() => {
@@ -48,9 +57,13 @@ const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => 
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [assigningProject, setAssigningProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'project' | 'menu'>('project');
   const [menuSettingsMap, setMenuSettingsMap] = useState<
     Record<string, { title: string; brandColor: string; font: string; showPrices: boolean; currency: string }>
   >({});
+
+  // Customer data isolation: filter by customer_id when logged in as customer
+  const customerId = role === 'customer' ? user?.customerId : undefined;
 
   const handleCreateProject = useCallback(
     async (data: {
@@ -62,7 +75,7 @@ const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => 
     }) => {
       try {
         await ProjectsProvider.create({ ...data, type: 'standard' });
-        const projData = await ProjectsProvider.list();
+        const projData = await ProjectsProvider.list(customerId ? { customer_id: customerId } : {});
         setProjects(projData as Project[]);
         success(t('portal.toast.projectCreated', { defaultValue: 'Project created' }));
         navigate('projects');
@@ -71,36 +84,42 @@ const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => 
         showError(t('portal.toast.projectCreateFailed', { defaultValue: 'Failed to create project' }));
       }
     },
-    [navigate]
+    [navigate, success, showError, t, customerId]
   );
 
   const handleUpdateProject = useCallback(async (id: string, data: Partial<Project>) => {
     try {
       await ProjectsProvider.update(id, data);
-      const projData = await ProjectsProvider.list();
+      const projData = await ProjectsProvider.list(customerId ? { customer_id: customerId } : {});
       setProjects(projData as Project[]);
       success(t('portal.toast.projectUpdated', { defaultValue: 'Project updated' }));
     } catch (err) {
       if (import.meta.env.DEV) console.error('Failed to update project', err);
       showError(t('portal.toast.projectUpdateFailed', { defaultValue: 'Failed to update project' }));
     }
-  }, [success, showError, t]);
+  }, [success, showError, t, customerId]);
 
   const refreshData = useCallback(async () => {
     try {
       setError(null);
       const [projData, assetData] = await Promise.all([
-        ProjectsProvider.list(),
+        ProjectsProvider.list(customerId ? { customer_id: customerId } : {}),
         AssetsProvider.list(),
       ]);
-      setProjects(projData as Project[]);
-      setAssets(assetData as Asset[]);
+      const filteredProjects = projData as Project[];
+      setProjects(filteredProjects);
+      // Filter assets to only include those belonging to the customer's projects
+      const projectIds = new Set(filteredProjects.map((p) => p.id));
+      const allAssets = assetData as Asset[];
+      setAssets(
+        role === 'customer' ? allAssets.filter((a) => a.project_id && projectIds.has(a.project_id)) : allAssets
+      );
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load portal data';
       if (import.meta.env.DEV) console.error('Failed to fetch data', err);
       setError(errorMessage);
     }
-  }, []);
+  }, [customerId, role]);
 
   useEffect(() => {
     let cancelled = false;
@@ -108,12 +127,20 @@ const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => 
       try {
         setError(null);
         const [projData, assetData] = await Promise.all([
-          ProjectsProvider.list(),
+          ProjectsProvider.list(customerId ? { customer_id: customerId } : {}),
           AssetsProvider.list(),
         ]);
         if (!cancelled) {
-          setProjects(projData as Project[]);
-          setAssets(assetData as Asset[]);
+          const filteredProjects = projData as Project[];
+          setProjects(filteredProjects);
+          // Filter assets to only include those belonging to the customer's projects
+          const projectIds = new Set(filteredProjects.map((p) => p.id));
+          const allAssets = assetData as Asset[];
+          setAssets(
+            role === 'customer'
+              ? allAssets.filter((a) => a.project_id && projectIds.has(a.project_id))
+              : allAssets
+          );
         }
       } catch (err) {
         if (!cancelled) {
@@ -129,21 +156,12 @@ const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [customerId, role]);
 
   const handleLogout = async () => {
     await logout();
     navigate('/app/login');
   };
-
-  const navItems = [
-    { path: 'dashboard', label: t('portal.tab.menus', 'Menus') },
-    ...(role === 'employee' ? [{ path: 'projects', label: t('portal.tab.projects') }] : []),
-    { path: 'assets', label: t('portal.tab.dishes', 'Dishes') },
-    ...(role === 'employee' ? [{ path: 'pipeline', label: t('portal.tab.pipeline', '3D Pipeline') }] : []),
-    ...(role === 'customer' ? [{ path: 'billing', label: t('portal.tab.billing') }] : []),
-    { path: 'settings', label: t('portal.tab.settings') },
-  ];
 
   // Derive page title from current path
   const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -151,7 +169,21 @@ const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => 
   const sectionLabel = t(`portal.tab.${currentSection}`, currentSection.charAt(0).toUpperCase() + currentSection.slice(1));
   const pageTitle = `${sectionLabel} | ${t('portal.tab.dashboard')}`;
 
-  // Check if a nav item is active based on current path
+  // Mobile bottom tab bar nav items (simplified — 4 key tabs)
+  const mobileNavItems = role === 'customer'
+    ? [
+        { path: 'dashboard', label: t('portal.tab.menus', 'Dashboard'), icon: LayoutDashboard },
+        { path: 'assets', label: t('portal.tab.dishes', 'Dishes'), icon: UtensilsCrossed },
+        { path: 'menu-editor', label: t('portal.tab.menuEditor', 'Editor'), icon: Paintbrush },
+        { path: 'settings', label: t('portal.tab.settings', 'Settings'), icon: SettingsIcon },
+      ]
+    : [
+        { path: 'dashboard', label: t('portal.tab.menus', 'Dashboard'), icon: LayoutDashboard },
+        { path: 'projects', label: t('portal.tab.projects', 'Projects'), icon: FolderOpen },
+        { path: 'assets', label: t('portal.tab.dishes', 'Assets'), icon: Box },
+        { path: 'settings', label: t('portal.tab.settings', 'Settings'), icon: SettingsIcon },
+      ];
+
   const isNavActive = (navPath: string) => {
     const basePath = role === 'customer' ? '/portal' : '/app';
     const fullNavPath = `${basePath}/${navPath}`;
@@ -165,27 +197,33 @@ const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => 
     assets,
     loading,
     error,
+    sidebarCollapsed: collapsed,
     handleCreateProject,
     handleUpdateProject,
     refreshData,
     setEditingProject,
     setAssigningProject,
     setIsModalOpen,
+    setModalMode,
     setShowUpgradePlanModal,
     announce: announceToScreenReader,
   };
+
+  const userName = user?.name || organization?.name || t('portal.bistroOwner', 'User');
+  const userEmail = user?.email || '';
 
   if (loading) return <PortalLoadingSkeleton />;
 
   return (
     <div
-      className="flex flex-col min-h-screen bg-zinc-50 dark:bg-zinc-950"
+      className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950"
       {...(import.meta.env.DEV && {
         'data-component': 'Portal Layout',
         'data-file': 'src/pages/portal/PortalLayout.tsx',
       })}
     >
       <SEO title={pageTitle} description="Manage your 3D assets and projects." />
+
       {/* Skip to content — accessibility */}
       <a
         href="#portal-main-content"
@@ -193,13 +231,17 @@ const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => 
       >
         {t('nav.skipToContent', 'Skip to content')}
       </a>
+
+      {/* Modals */}
       <NewProjectModal
         isOpen={isModalOpen || Boolean(editingProject)}
         onClose={() => {
           setIsModalOpen(false);
           setEditingProject(null);
+          setModalMode('project');
         }}
         project={editingProject}
+        mode={editingProject ? 'project' : modalMode}
         onSave={async (data) => {
           if (editingProject) {
             await handleUpdateProject(editingProject.id, data);
@@ -229,206 +271,103 @@ const PortalLayout: React.FC<{ role: 'employee' | 'customer' }> = ({ role }) => 
           setAssigningProject(null);
         }}
       />
-
-      {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-20 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shadow-sm">
-        <div className="max-w-screen-xl mx-auto px-4 md:px-8 flex items-center justify-between h-16 gap-4">
-          {/* Brand */}
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <div className="w-8 h-8 rounded-lg bg-gradient-brand flex items-center justify-center shadow-sm">
-              <Box className="w-4 h-4 text-white" strokeWidth={2.5} />
-            </div>
-            {role === 'customer' ? (
-              <div className="hidden sm:flex items-center gap-2">
-                <div
-                  className={`w-7 h-7 rounded-md ${portalConfig.theme.accentBg} ${portalConfig.theme.accentBgDark} flex items-center justify-center`}
-                >
-                  {React.createElement(portalConfig.theme.iconComponent, {
-                    className: `w-3.5 h-3.5 ${portalConfig.theme.accentText} ${portalConfig.theme.accentTextDark}`,
-                  })}
-                </div>
-                <div>
-                  <div className="font-bold text-zinc-900 dark:text-white text-sm leading-tight">
-                    {t(portalConfig.labels.welcome)}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="hidden sm:block">
-                <div className="font-bold text-zinc-900 dark:text-white text-base leading-tight">
-                  3D <span className="text-brand-600 dark:text-brand-400">Empyre</span>
-                </div>
-                <div className="text-xs leading-tight">
-                  {t('portal.welcomeBack')}{' '}
-                  <span className="font-bold text-sm text-zinc-900 dark:text-white">
-                    {t('portal.bistroOwner')}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Nav Tabs — now use NavLink for URL-based routing */}
-          <nav className="hidden sm:flex items-center gap-1 flex-1 justify-center overflow-x-auto scrollbar-none">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                end={item.path === 'dashboard'}
-                className={() => {
-                  const active = isNavActive(item.path);
-                  return `px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-brand-400 focus:outline-none ${active
-                    ? role === 'customer'
-                      ? `${portalConfig.theme.accentBg} ${portalConfig.theme.accentBgDark} ${portalConfig.theme.accentText} ${portalConfig.theme.accentTextDark}`
-                      : 'bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'
-                    }`;
-                }}
-                {...(isNavActive(item.path) ? { 'aria-current': 'page' as const } : {})}
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
-          {/* Spacer for mobile when nav is hidden */}
-          <div className="flex-1 sm:hidden" />
-
-          {/* Right actions */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {role === 'customer' && (
-              <>
-                <Link
-                  to="/request"
-                  className="bg-brand-600 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-brand-700 flex items-center gap-1.5 transition-colors"
-                >
-                  <Camera className="w-4 h-4" />
-                  <span className="hidden sm:inline">{t('cta.getQuote')}</span>
-                </Link>
-                <button
-                  className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-lg text-sm font-bold transition-colors"
-                  title={t('portal.help')}
-                  aria-label={t('portal.help')}
-                >
-                  <LifeBuoy className="w-4 h-4" />
-                  <span>{t('portal.help')}</span>
-                </button>
-              </>
-            )}
-            {role === 'employee' && (
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="bg-brand-600 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-brand-700 flex items-center gap-1.5 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                <span className="hidden sm:inline">{t('portal.newMenu')}</span>
-              </button>
-            )}
-            <NotificationCenter projects={projects} assets={assets} />
-            <DarkModeToggle />
-            <button
-              onClick={handleLogout}
-              title={t('portal.signOut')}
-              aria-label={t('portal.signOut')}
-              className="p-2 rounded-lg text-zinc-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main id="portal-main-content" className="flex-1 p-6 md:p-8 pb-20 sm:pb-8 max-w-screen-xl mx-auto w-full">
-        {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-4 mb-6">
-            <div className="flex gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-red-800 dark:text-red-200">
-                  {t('portal.errorLoading')}
-                </p>
-                <p className="text-sm text-red-700 dark:text-red-300 mt-1">{error}</p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="mt-2 text-sm text-red-600 dark:text-red-400 underline hover:opacity-70 transition-opacity"
-                >
-                  {t('portal.reloadPage')}
-                </button>
-              </div>
-              <button
-                onClick={() => setError(null)}
-                className="flex-shrink-0 p-1 rounded-md text-red-400 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-                aria-label={t('portal.close')}
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        )}
-        <Suspense fallback={<PortalLoadingSkeleton />}>
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={location.pathname}
-              variants={prefersReducedMotion ? undefined : pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-            >
-              <Outlet context={outletContext} />
-            </motion.div>
-          </AnimatePresence>
-        </Suspense>
-      </main>
-
-      {/* Upgrade Plan Modal */}
       <UpgradePlanModal
         isOpen={showUpgradePlanModal}
         onClose={() => setShowUpgradePlanModal(false)}
       />
 
-      {/* Mobile Bottom Tab Bar */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-20 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 safe-area-pb">
-        <div className="flex items-center justify-around h-14">
-          {navItems.map((item) => {
-            const active = isNavActive(item.path);
-            const iconMap: Record<string, React.ElementType> = {
-              dashboard: LayoutDashboard,
-              billing: CreditCard,
-              settings: SettingsIcon,
-              customers: Box,
-              pipeline: Box,
-            };
-            const Icon = iconMap[item.path] ?? Box;
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                end={item.path === 'dashboard'}
-                className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg text-[10px] font-medium transition-colors ${active
-                  ? 'text-brand-600 dark:text-brand-400'
-                  : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300'
-                  }`}
-                {...(active ? { 'aria-current': 'page' as const } : {})}
+      {/* Sidebar */}
+      <PortalSidebar
+        role={role}
+        collapsed={collapsed}
+        onToggleCollapse={toggle}
+        isMobileOpen={isMobileOpen}
+        onCloseMobile={closeMobile}
+        userName={userName}
+        userEmail={userEmail}
+        onLogout={handleLogout}
+        onNewProject={role === 'employee' ? () => setIsModalOpen(true) : undefined}
+      />
+
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top Bar */}
+        <PortalTopBar
+          role={role}
+          onMenuToggle={openMobile}
+          projects={projects}
+          assets={assets}
+          onNewProject={role === 'employee' ? () => setIsModalOpen(true) : undefined}
+        />
+
+        {/* Page Content */}
+        <main id="portal-main-content" className="flex-1 p-4 lg:p-6 xl:p-8 pb-20 lg:pb-8 overflow-y-auto">
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl p-4 mb-6">
+              <div className="flex gap-3">
+                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-red-800 dark:text-red-200">
+                    {t('portal.errorLoading')}
+                  </p>
+                  <p className="text-sm text-red-700 dark:text-red-300 mt-1">{error}</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="mt-2 text-sm text-red-600 dark:text-red-400 underline hover:opacity-70 transition-opacity"
+                  >
+                    {t('portal.reloadPage')}
+                  </button>
+                </div>
+                <button
+                  onClick={() => setError(null)}
+                  className="flex-shrink-0 p-1 rounded-md text-red-400 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                  aria-label={t('portal.close')}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+          <Suspense fallback={<PortalLoadingSkeleton />}>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={location.pathname}
+                variants={prefersReducedMotion ? undefined : pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
               >
-                <Icon className="w-5 h-5" />
-                {item.label}
-              </NavLink>
-            );
-          })}
-        </div>
-      </nav>
+                <Outlet context={outletContext} />
+              </motion.div>
+            </AnimatePresence>
+          </Suspense>
+        </main>
+
+        {/* Mobile Bottom Tab Bar (simplified — 4 key tabs) */}
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-20 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl border-t border-zinc-200 dark:border-zinc-800 safe-area-pb">
+          <div className="flex items-center justify-around h-14">
+            {mobileNavItems.map((item) => {
+              const active = isNavActive(item.path);
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  end={item.path === 'dashboard'}
+                  className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg text-[10px] font-medium transition-colors ${
+                    active
+                      ? 'text-brand-600 dark:text-brand-400'
+                      : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300'
+                  }`}
+                  {...(active ? { 'aria-current': 'page' as const } : {})}
+                >
+                  <item.icon className={`w-5 h-5 ${active ? 'scale-110' : ''} transition-transform`} />
+                  {item.label}
+                </NavLink>
+              );
+            })}
+          </div>
+        </nav>
+      </div>
 
       {/* Screen reader live region for dynamic announcements */}
       <div id="portal-status-announcer" aria-live="polite" aria-atomic="true" className="sr-only" />

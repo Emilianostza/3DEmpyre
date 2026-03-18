@@ -77,10 +77,11 @@ const SettingsSecurityPage: React.FC = () => {
         </div>
         <div className="p-6 space-y-6">
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+            <label htmlFor="security-current-pw" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
               {t('portal.settings.currentPassword')}
             </label>
             <input
+              id="security-current-pw"
               type="password"
               value={passwordForm.current}
               onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
@@ -89,10 +90,11 @@ const SettingsSecurityPage: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+              <label htmlFor="security-new-pw" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                 {t('portal.settings.newPassword')}
               </label>
               <input
+                id="security-new-pw"
                 type="password"
                 value={passwordForm.new}
                 onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
@@ -115,10 +117,11 @@ const SettingsSecurityPage: React.FC = () => {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+              <label htmlFor="security-confirm-pw" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                 {t('portal.settings.confirmPassword')}
               </label>
               <input
+                id="security-confirm-pw"
                 type="password"
                 value={passwordForm.confirm}
                 onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}

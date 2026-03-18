@@ -2,22 +2,25 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Eye, Layers, Clock, Pencil, Settings, QrCode, Download, X, ImagePlus, Trash2, Code2, Check } from 'lucide-react';
+import { Eye, Layers, Clock, Pencil, Settings, QrCode, Share2, Download, X, ImagePlus, Trash2, Code2, Check, Plus } from 'lucide-react';
 import { QRCodeDisplay } from '@/components/common/QRCodeDisplay';
 import type QRCodeStyling from 'qr-code-styling';
 import type { Asset, Project } from '@/types';
 import { timeAgo } from '@/utils/formatters';
 import { MenuSettingsModal } from '@/components/portal/MenuSettingsModal';
 import { getStatusConfig } from '@/constants/status-config';
+import { useToast } from '@/contexts/ToastContext';
 
 interface Props {
   projects: Project[];
   assets: Asset[];
   onEditProject?: (projectId: string) => void;
+  onCreateMenu?: () => void;
 }
 
-export const ProjectCards: React.FC<Props> = ({ projects, assets, onEditProject }) => {
+export const ProjectCards: React.FC<Props> = ({ projects, assets, onEditProject, onCreateMenu }) => {
   const { t } = useTranslation();
+  const { addToast } = useToast();
   const [settingsProjectId, setSettingsProjectId] = useState<string | null>(null);
   const [qrCodeProjectId, setQrCodeProjectId] = useState<string | null>(null);
   const [qrTableNumber, setQrTableNumber] = useState<string>('');
@@ -51,6 +54,15 @@ export const ProjectCards: React.FC<Props> = ({ projects, assets, onEditProject 
         <h2 className="text-2xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
           {t('portal.yourMenus')}
         </h2>
+        {onCreateMenu && (
+          <button
+            onClick={onCreateMenu}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-brand-600 hover:bg-brand-500 text-white shadow-lg shadow-brand-600/25 transition-all hover:shadow-xl hover:shadow-brand-500/30 hover:-translate-y-0.5 active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            {t('portal.newMenu', 'New Menu')}
+          </button>
+        )}
       </div>
 
       {/* Feature cards grid — 2 columns for prominence */}
@@ -190,6 +202,26 @@ export const ProjectCards: React.FC<Props> = ({ projects, assets, onEditProject 
                     <Pencil className="w-4 h-4 text-brand-100 group-hover/btn:-rotate-12 transition-transform duration-300" />
                     {t('portal.editMenu', 'Edit Menu')}
                   </Link>
+                  <button
+                    onClick={async () => {
+                      const shareUrl = `${window.location.origin}/project/${project.id}/menu`;
+                      if (navigator.share) {
+                        navigator.share({ title: project.name, url: shareUrl }).catch(() => {});
+                      } else {
+                        try {
+                          await navigator.clipboard.writeText(shareUrl);
+                          addToast(t('portal.menuUrlCopied', 'Menu link copied!'), 'success');
+                        } catch {
+                          addToast(t('portal.copyFailed', 'Copy failed'), 'error');
+                        }
+                      }
+                    }}
+                    className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/50 dark:border-zinc-700/50 text-zinc-500 dark:text-zinc-400 hover:bg-white dark:hover:bg-zinc-700 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-500/30 shadow-sm hover:shadow-md transition-all group/btn flex-shrink-0"
+                    title={t('portal.shareMenu', 'Share Menu')}
+                    aria-label={t('portal.shareMenu', 'Share Menu')}
+                  >
+                    <Share2 className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+                  </button>
                   <button
                     onClick={() => setQrCodeProjectId(project.id)}
                     className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/50 dark:border-zinc-700/50 text-zinc-500 dark:text-zinc-400 hover:bg-white dark:hover:bg-zinc-700 hover:text-brand-600 dark:hover:text-brand-400 hover:border-brand-500/30 shadow-sm hover:shadow-md transition-all group/btn flex-shrink-0"
@@ -489,7 +521,7 @@ export const ProjectCards: React.FC<Props> = ({ projects, assets, onEditProject 
                     />
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(menuUrl);
+                        navigator.clipboard.writeText(menuUrl).catch(() => {});
                       }}
                       className="px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-lg text-sm font-medium transition-colors"
                     >
@@ -508,7 +540,7 @@ export const ProjectCards: React.FC<Props> = ({ projects, assets, onEditProject 
                       onClick={() => {
                         navigator.clipboard.writeText(
                           `<iframe src="${menuUrl}" width="400" height="600" frameborder="0" allowfullscreen></iframe>`
-                        );
+                        ).catch(() => {});
                         setEmbedCopied(true);
                         if (embedCopyTimerRef.current) clearTimeout(embedCopyTimerRef.current);
                         embedCopyTimerRef.current = setTimeout(() => setEmbedCopied(false), 2000);

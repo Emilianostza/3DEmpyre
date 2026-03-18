@@ -105,6 +105,7 @@ interface MenuItem {
   arLaunches?: number;
   marketplace_listed?: boolean;
   marketplace_price?: string;
+  fieldVisibility?: Partial<FieldVisibility>;
 }
 
 interface Category {
@@ -256,14 +257,8 @@ function getReviewConfig(t: TFunction, status: 'pending' | 'approved' | 'rejecte
 // ─── Data ────────────────────────────────────────────────────────────────────
 
 const CATEGORIES: Category[] = [
-  { id: 'starters', label: 'Starters', desc: 'Shareable small plates' },
-  { id: 'mains', label: 'Main Courses', desc: 'Signature dishes' },
-  { id: 'sides', label: 'Sides', desc: 'Perfect accompaniments' },
-  { id: 'salads', label: 'Salads', desc: 'Fresh & healthy' },
-  { id: 'soups', label: 'Soups', desc: 'Warm comforts' },
-  { id: 'beverages', label: 'Beverages', desc: 'Drinks & cocktails' },
-  { id: 'desserts', label: 'Desserts', desc: 'Sweet finales' },
-  { id: 'specials', label: 'Specials', desc: 'Limited-time offerings' },
+  { id: 'food', label: 'Food', desc: 'From small plates to signature dishes' },
+  { id: 'drinks', label: 'Drinks', desc: 'Handcrafted beverages' },
 ];
 
 const DISH_LIBRARY: MenuItem[] = [
@@ -297,7 +292,7 @@ const INITIAL_ITEMS: MenuItem[] = [
   {
     id: '1',
     name: 'Wagyu Tartare',
-    category: 'starters',
+    category: 'food',
     desc: 'A5 wagyu, quail egg yolk, capers, shallots, dijon, served with crostini.',
     price: '$28',
     image: '/images/2N2A1724.webp',
@@ -313,7 +308,7 @@ const INITIAL_ITEMS: MenuItem[] = [
   {
     id: '2',
     name: 'Truffle Fries',
-    category: 'starters',
+    category: 'food',
     desc: 'Hand-cut Kennebec potatoes, parmesan dust, fresh herbs, drizzled with black truffle oil.',
     price: '$12',
     image: placeholder(400, 300, 'Truffle Fries', 45),
@@ -329,7 +324,7 @@ const INITIAL_ITEMS: MenuItem[] = [
   {
     id: '3',
     name: 'Signature Burger',
-    category: 'mains',
+    category: 'food',
     desc: 'Wagyu beef patty, aged white cheddar, house-made truffle aioli, caramelized onions on a toasted brioche bun.',
     price: '$24',
     image: placeholder(400, 300, 'Signature Burger', 25),
@@ -345,7 +340,7 @@ const INITIAL_ITEMS: MenuItem[] = [
   {
     id: '4',
     name: 'Lobster Roll',
-    category: 'mains',
+    category: 'food',
     desc: 'Maine lobster, lemon-herb butter, chives, served on a toasted New England split-top roll.',
     price: '$32',
     image: placeholder(400, 300, 'Lobster Roll', 10),
@@ -361,7 +356,7 @@ const INITIAL_ITEMS: MenuItem[] = [
   {
     id: '5',
     name: 'Artisan Shake',
-    category: 'desserts',
+    category: 'food',
     desc: 'Tahitian vanilla bean, house salted caramel swirl, whipped cream, edible gold leaf.',
     price: '$16',
     image: placeholder(400, 300, 'Artisan Shake', 280),
@@ -377,7 +372,7 @@ const INITIAL_ITEMS: MenuItem[] = [
   {
     id: '6',
     name: 'Crème Brûlée',
-    category: 'desserts',
+    category: 'food',
     desc: 'Classic Tahitian vanilla custard, torched sugar crust, fresh berries.',
     price: '$14',
     image: placeholder(400, 300, 'Crème Brûlée', 40),
@@ -389,6 +384,134 @@ const INITIAL_ITEMS: MenuItem[] = [
     reviewStatus: 'approved',
     viewCount: 780,
     arLaunches: 145,
+  },
+  {
+    id: '7',
+    name: 'Burrata Caprese',
+    category: 'food',
+    desc: 'Creamy burrata, heirloom tomatoes, aged balsamic reduction, fresh basil, extra virgin olive oil.',
+    price: '$18',
+    image: placeholder(400, 300, 'Burrata Caprese', 60),
+    calories: '320 kcal',
+    tags: ['Vegetarian', 'Fresh'],
+    allergens: ['Dairy'],
+    modelUrl: '/models/AdvancedExport/3DModel_Custom.gltf',
+    pairsWell: ['3', '4'],
+    reviewStatus: 'approved',
+    viewCount: 1230,
+    arLaunches: 198,
+  },
+  {
+    id: '8',
+    name: 'Grilled Salmon',
+    category: 'food',
+    desc: 'Atlantic salmon, lemon-dill beurre blanc, roasted asparagus, fingerling potatoes.',
+    price: '$34',
+    image: placeholder(400, 300, 'Grilled Salmon', 20),
+    calories: '620 kcal',
+    tags: ['Healthy', "Chef's Pick"],
+    allergens: ['Fish', 'Dairy'],
+    modelUrl: '/models/AdvancedExport/3DModel_Custom.gltf',
+    pairsWell: ['7', '12'],
+    reviewStatus: 'approved',
+    viewCount: 1580,
+    arLaunches: 267,
+  },
+  {
+    id: '9',
+    name: 'Mushroom Risotto',
+    category: 'food',
+    desc: 'Arborio rice, wild porcini mushrooms, white truffle oil, aged parmesan, fresh chives.',
+    price: '$22',
+    image: placeholder(400, 300, 'Mushroom Risotto', 35),
+    calories: '580 kcal',
+    tags: ['Vegetarian', 'Comfort'],
+    allergens: ['Dairy'],
+    modelUrl: '/models/AdvancedExport/3DModel_Custom.gltf',
+    pairsWell: ['7', '2'],
+    reviewStatus: 'approved',
+    viewCount: 920,
+    arLaunches: 134,
+  },
+  {
+    id: '10',
+    name: 'Tiramisu',
+    category: 'food',
+    desc: 'Espresso-soaked ladyfingers, mascarpone cream, cocoa dust, dark chocolate shavings.',
+    price: '$15',
+    image: placeholder(400, 300, 'Tiramisu', 55),
+    calories: '480 kcal',
+    tags: ['Classic', 'Popular'],
+    allergens: ['Dairy', 'Egg', 'Gluten'],
+    modelUrl: '/models/AdvancedExport/3DModel_Custom.gltf',
+    pairsWell: ['11'],
+    reviewStatus: 'approved',
+    viewCount: 1050,
+    arLaunches: 176,
+  },
+  {
+    id: '11',
+    name: 'Espresso Martini',
+    category: 'drinks',
+    desc: 'Fresh espresso, premium vodka, coffee liqueur, vanilla syrup, served ice cold.',
+    price: '$16',
+    image: placeholder(400, 300, 'Espresso Martini', 70),
+    calories: '210 kcal',
+    tags: ['Signature', 'Cocktail'],
+    allergens: [],
+    modelUrl: '/models/AdvancedExport/3DModel_Custom.gltf',
+    pairsWell: ['10', '6'],
+    reviewStatus: 'approved',
+    viewCount: 1420,
+    arLaunches: 89,
+  },
+  {
+    id: '12',
+    name: 'Sparkling Lemonade',
+    category: 'drinks',
+    desc: 'House-made lemonade, elderflower syrup, sparkling water, fresh mint, served over ice.',
+    price: '$8',
+    image: placeholder(400, 300, 'Sparkling Lemonade', 85),
+    calories: '120 kcal',
+    tags: ['Non-Alcoholic', 'Refreshing'],
+    allergens: [],
+    modelUrl: '/models/AdvancedExport/3DModel_Custom.gltf',
+    pairsWell: ['8', '4'],
+    reviewStatus: 'approved',
+    viewCount: 680,
+    arLaunches: 42,
+  },
+  {
+    id: '13',
+    name: 'Tuna Poke Bowl',
+    category: 'food',
+    desc: 'Sushi-grade ahi tuna, avocado, edamame, sesame-soy dressing, crispy wonton chips.',
+    price: '$22',
+    image: placeholder(400, 300, 'Tuna Poke Bowl', 50),
+    calories: '410 kcal',
+    tags: ['Healthy', 'Popular'],
+    allergens: ['Fish', 'Soy', 'Gluten'],
+    modelUrl: '/models/AdvancedExport/3DModel_Custom.gltf',
+    pairsWell: ['12'],
+    reviewStatus: 'approved',
+    viewCount: 1150,
+    arLaunches: 210,
+  },
+  {
+    id: '14',
+    name: 'Filet Mignon',
+    category: 'food',
+    desc: '8oz center-cut filet, red wine jus, truffle mashed potatoes, grilled broccolini.',
+    price: '$48',
+    image: placeholder(400, 300, 'Filet Mignon', 5),
+    calories: '780 kcal',
+    tags: ['Premium', "Chef's Pick"],
+    allergens: ['Dairy'],
+    modelUrl: '/models/AdvancedExport/3DModel_Custom.gltf',
+    pairsWell: ['7', '11'],
+    reviewStatus: 'approved',
+    viewCount: 2100,
+    arLaunches: 445,
   },
 ];
 
@@ -1349,29 +1472,7 @@ const MenuHero: React.FC<MenuHeroProps> = React.memo(
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-4 pt-2">
-                <button
-                  onClick={onViewSignature}
-                  className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl text-sm font-bold text-white shadow-2xl transition-all hover:brightness-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 group/btn"
-                  style={{
-                    backgroundColor: brandColor,
-                    boxShadow: `0 12px 32px -8px ${brandColor}40`,
-                    backgroundImage:
-                      'linear-gradient(to bottom right, rgba(255,255,255,0.1), transparent)',
-                  }}
-                >
-                  <Box className="w-5 h-5 transition-transform group-hover/btn:rotate-12" />
-                  {t('tpl.menu.viewSignature')}
-                </button>
-                <button
-                  type="button"
-                  onClick={onHowAR}
-                  className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl text-sm font-bold text-white bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
-                >
-                  <Smartphone className="w-5 h-5" />
-                  {t('tpl.menu.howARWorks')}
-                </button>
-              </div>
+              {/* Hero CTAs removed for cleaner layout — 3D/AR accessible via dish detail sheet */}
             </div>
 
             {/* Right — Customize FAB + Saved Layouts dropdown */}
@@ -1797,6 +1898,22 @@ const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(
     const allergenDropdownRef = useRef<HTMLDivElement>(null);
     const has3D = Boolean(item.modelUrl);
 
+    // Per-item field visibility: merge global defaults with item-level overrides
+    const effectiveFieldVisibility: FieldVisibility = useMemo(() => ({
+      ...fieldVisibility,
+      ...item.fieldVisibility,
+    }), [fieldVisibility, item.fieldVisibility]);
+
+    // Toggle field visibility on this specific item (not globally)
+    const handleItemToggleFieldVisibility = useCallback(
+      (field: keyof FieldVisibility) => {
+        const currentVal = effectiveFieldVisibility[field];
+        const updated = { ...(item.fieldVisibility ?? {}), [field]: !currentVal };
+        onUpdate('fieldVisibility', updated);
+      },
+      [effectiveFieldVisibility, item.fieldVisibility, onUpdate]
+    );
+
     const pairsIdsToNames = (ids: string[]) =>
       ids.map((id) => allItems.find((i) => i.id === id)?.name ?? id).join(', ');
     const pairsNamesToIds = (names: string) =>
@@ -1961,12 +2078,13 @@ const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(
             const matched = allItems.find((i) => i.id === p);
             return matched ? matched.name : p;
           })}
-          fieldVisibility={fieldVisibility}
+          fieldVisibility={effectiveFieldVisibility}
           brandColor={brandColor}
           image={item.image}
           hidden={isHidden}
           cardStyle={cardStyle}
           cardRadius={cardRadius}
+          dataItemId={item.id}
           articleClassName={`${isDragging ? 'opacity-40 scale-95' : ''} ${isDragOver ? 'ring-2 ring-amber-500/60 border-amber-500/40' : ''}`}
           articleStyle={dropdownOpen ? { zIndex: Z.cardElevated } : undefined}
           onClick={(e) => {
@@ -2052,39 +2170,22 @@ const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(
         >
           {/* ── Action Buttons ── */}
           <div className="flex flex-col gap-3">
-            {/* Primary actions — shown in both modes */}
             <div className="flex items-center gap-3 flex-wrap">
+              {/* View in 3D button — shown on cards with a 3D model */}
               {has3D && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (onLaunchAR) {
-                      onLaunchAR();
-                    } else {
-                      onView3D();
-                    }
+                    onView3D();
                   }}
-                  className="flex items-center gap-2 text-xs font-black uppercase tracking-widest px-5 py-2.5 rounded-2xl text-white transition-all active:scale-95 hover:brightness-110 group/ar"
-                  style={{
-                    backgroundColor: brandColor,
-                    boxShadow: `0 10px 15px -3px ${brandColor}1a`,
-                  }}
+                  className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded-xl transition-all hover:brightness-110 active:scale-95 text-white shadow-lg"
+                  style={{ backgroundColor: `${brandColor}cc` }}
+                  aria-label={`View ${item.name} in 3D`}
                 >
-                  <Smartphone className="w-4 h-4 transition-transform group-hover/ar:rotate-12" />
-                  {t('tpl.menu.viewIn3DAR')}
+                  <Box className="w-3.5 h-3.5" />
+                  <span>{t('tpl.menu.viewIn3D', 'View in 3D')}</span>
                 </button>
               )}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleShare();
-                }}
-                className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-all px-3 py-2 rounded-xl hover:bg-white/5"
-                aria-label={t('tpl.menu.share')}
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                {t('tpl.menu.share')}
-              </button>
 
               {/* Dropdown menu — edit mode */}
               {isEditMode && (
@@ -2210,8 +2311,8 @@ const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(
             brandColor={brandColor}
             showPrices={showPrices}
             currency={currency}
-            fieldVisibility={fieldVisibility}
-            onToggleFieldVisibility={onToggleFieldVisibility}
+            fieldVisibility={effectiveFieldVisibility}
+            onToggleFieldVisibility={handleItemToggleFieldVisibility}
             onSave={handleSaveEdits}
             onDetails={onDetails}
             onView3D={onView3D}
@@ -3370,6 +3471,7 @@ const ItemDetailsSheet: React.FC<ItemDetailsSheetProps> = ({
                   const matched = allItems.find((i) => i.id === id);
                   return matched ? matched.name : id;
                 })}
+                variant="detail"
                 brandColor={brandColor}
                 className="p-5"
               >
@@ -4914,9 +5016,10 @@ const RestaurantMenu: React.FC = () => {
   const handleDuplicateItem = (itemId: string) => {
     const item = menuItems.find((i) => i.id === itemId);
     if (!item) return;
+    const copyId = `${item.id}-copy-${crypto.randomUUID?.() ?? Math.random().toString(36).slice(2)}`;
     const copy: MenuItem = {
       ...item,
-      id: `${item.id}-copy-${crypto.randomUUID?.() ?? Math.random().toString(36).slice(2)}`,
+      id: copyId,
       name: `${item.name} (copy)`,
     };
     setMenuItems((prev) => {
@@ -4928,6 +5031,11 @@ const RestaurantMenu: React.FC = () => {
     success(
       t('tpl.menu.itemDuplicated', { name: item.name, defaultValue: `"${item.name}" duplicated` })
     );
+    // Scroll the new card into view after React renders
+    requestAnimationFrame(() => {
+      const el = document.querySelector(`[data-item-id="${copyId}"]`);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
   };
 
   const handleAddFromLibrary = (libraryItem: MenuItem) => {

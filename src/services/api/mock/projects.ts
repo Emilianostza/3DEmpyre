@@ -15,11 +15,12 @@ const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 10
 
 // Mutable in-memory store for mock projects
 const MOCK_PROJECTS: Project[] = [
-  // ── Bistro 55 (3 projects) ─────────────────────────────────────
+  // ── Bistro 55 (2 projects) ─────────────────────────────────────
   {
     id: 'PRJ-001',
     name: 'Summer Menu Update',
     client: 'Bistro 55',
+    customer_id: 'cust-bistro',
     status: ProjectStatus.Delivered,
     items: 12,
     type: 'restaurant_menu',
@@ -31,6 +32,7 @@ const MOCK_PROJECTS: Project[] = [
     id: 'PRJ-002',
     name: 'Cocktail Bar Remodel',
     client: 'Bistro 55',
+    customer_id: 'cust-bistro',
     status: ProjectStatus.Approved,
     items: 8,
     type: 'restaurant_menu',
@@ -38,23 +40,13 @@ const MOCK_PROJECTS: Project[] = [
     created_at: daysAgo(20),
     updated_at: daysAgo(3),
   },
-  {
-    id: 'PRJ-003',
-    name: 'Dessert Showcase 2026',
-    client: 'Bistro 55',
-    status: ProjectStatus.Pending,
-    items: 6,
-    type: 'restaurant_menu',
-    address: '123 Main St, Austin TX',
-    created_at: daysAgo(2),
-    updated_at: daysAgo(2),
-  },
 
   // ── Café Luna (3 projects) ─────────────────────────────────────
   {
     id: 'PRJ-004',
     name: 'Full Menu Digitization',
     client: 'Café Luna',
+    customer_id: 'cust-retail',
     status: ProjectStatus.InProgress,
     items: 24,
     type: 'restaurant_menu',
@@ -67,6 +59,7 @@ const MOCK_PROJECTS: Project[] = [
     id: 'PRJ-005',
     name: 'Pastry Collection',
     client: 'Café Luna',
+    customer_id: 'cust-retail',
     status: ProjectStatus.QA,
     items: 10,
     type: 'restaurant_menu',
@@ -78,6 +71,7 @@ const MOCK_PROJECTS: Project[] = [
     id: 'PRJ-006',
     name: 'Wine Cellar Experience',
     client: 'Café Luna',
+    customer_id: 'cust-retail',
     status: ProjectStatus.Processing,
     items: 15,
     type: 'restaurant_menu',
@@ -91,6 +85,7 @@ const MOCK_PROJECTS: Project[] = [
     id: 'PRJ-007',
     name: 'Lobby & Restaurant 3D Tour',
     client: 'Hotel Athena',
+    customer_id: 'cust-hotel',
     status: ProjectStatus.Delivered,
     items: 18,
     type: 'standard',
@@ -102,6 +97,7 @@ const MOCK_PROJECTS: Project[] = [
     id: 'PRJ-008',
     name: 'Rooftop Bar Menu',
     client: 'Hotel Athena',
+    customer_id: 'cust-hotel',
     status: ProjectStatus.Approved,
     items: 14,
     type: 'restaurant_menu',
@@ -113,6 +109,7 @@ const MOCK_PROJECTS: Project[] = [
     id: 'PRJ-009',
     name: 'Spa Product Showcase',
     client: 'Hotel Athena',
+    customer_id: 'cust-hotel',
     status: ProjectStatus.Rejected,
     items: 5,
     type: 'product_showcase',
@@ -127,6 +124,7 @@ const MOCK_PROJECTS: Project[] = [
     id: 'PRJ-010',
     name: 'Vendor Stall Menus',
     client: 'Tallinn Market Hall',
+    customer_id: 'cust-realestate',
     status: ProjectStatus.Delivered,
     items: 32,
     type: 'restaurant_menu',
@@ -138,6 +136,7 @@ const MOCK_PROJECTS: Project[] = [
     id: 'PRJ-011',
     name: 'Artisan Products Collection',
     client: 'Tallinn Market Hall',
+    customer_id: 'cust-realestate',
     status: ProjectStatus.Archived,
     items: 20,
     type: 'product_showcase',
@@ -149,6 +148,7 @@ const MOCK_PROJECTS: Project[] = [
     id: 'PRJ-012',
     name: 'Spring Market Refresh',
     client: 'Tallinn Market Hall',
+    customer_id: 'cust-realestate',
     status: ProjectStatus.Assigned,
     items: 16,
     type: 'restaurant_menu',
@@ -171,6 +171,9 @@ export async function fetchProjects(filter: Record<string, string> = {}) {
   let results = [...MOCK_PROJECTS];
 
   // Apply filters if provided
+  if (filter.customer_id) {
+    results = results.filter((p) => p.customer_id === filter.customer_id);
+  }
   if (filter.status) {
     results = results.filter((p) => p.status === filter.status);
   }

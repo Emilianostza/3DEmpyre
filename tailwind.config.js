@@ -72,6 +72,9 @@ export default {
         'glow-brand': '0 0 24px rgba(124, 58, 237, 0.3), 0 0 48px rgba(124, 58, 237, 0.1)',
         'glow-cyan': '0 0 20px rgba(6, 182, 212, 0.35)',
         'glow-emerald': '0 0 20px rgba(16, 185, 129, 0.3)',
+        // Portal
+        'portal-card': '0 1px 2px 0 rgb(0 0 0 / 0.03), 0 1px 3px -1px rgb(0 0 0 / 0.02)',
+        'portal-hover': '0 4px 16px -2px rgb(0 0 0 / 0.06), 0 2px 6px -2px rgb(0 0 0 / 0.03)',
         // Inner
         'inner-soft': 'inset 0 2px 4px 0 rgb(0 0 0 / 0.04)',
       },

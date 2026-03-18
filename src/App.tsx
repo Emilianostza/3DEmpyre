@@ -68,11 +68,15 @@ const AssetsPage = lazy(() => import('./pages/portal/AssetsPage'));
 
 const BillingPage = lazy(() => import('./pages/portal/BillingPage'));
 const SettingsLayout = lazy(() => import('./pages/portal/SettingsLayout'));
+const SettingsGeneralPage = lazy(() => import('./pages/portal/SettingsGeneralPage'));
 const SettingsProfilePage = lazy(() => import('./pages/portal/SettingsProfilePage'));
+const SettingsAppearancePage = lazy(() => import('./pages/portal/SettingsAppearancePage'));
 const SettingsSecurityPage = lazy(() => import('./pages/portal/SettingsSecurityPage'));
 const SettingsNotificationsPage = lazy(() => import('./pages/portal/SettingsNotificationsPage'));
+const SettingsIntegrationsPage = lazy(() => import('./pages/portal/SettingsIntegrationsPage'));
 const ProjectDetailPage = lazy(() => import('./pages/portal/ProjectDetailPage'));
 const PhotoPipelinePage = lazy(() => import('./pages/portal/PhotoPipelinePage'));
+const MenuEditorPage = lazy(() => import('./pages/portal/MenuEditorPage'));
 
 
 /** Wraps a lazy-loaded page in its own ErrorBoundary so one broken page doesn't crash the whole app */
@@ -120,6 +124,7 @@ function getRouteGroupKey(pathname: string): string {
   if (
     pathname.startsWith('/app/dashboard') ||
     pathname.startsWith('/app/projects') ||
+    pathname.startsWith('/app/assets') ||
     pathname.startsWith('/app/customers') ||
     pathname.startsWith('/app/pipeline') ||
     pathname.startsWith('/app/settings')
@@ -240,10 +245,13 @@ const AnimatedRoutes: React.FC = () => {
               <Route path="customers" element={<Navigate to="/app/assets" replace />} />
               <Route path="pipeline" element={<PhotoPipelinePage />} />
               <Route path="settings" element={<SettingsLayout role="employee" />}>
-                <Route index element={<Navigate to="profile" replace />} />
+                <Route index element={<Navigate to="general" replace />} />
+                <Route path="general" element={<SettingsGeneralPage />} />
                 <Route path="profile" element={<SettingsProfilePage />} />
-                <Route path="security" element={<SettingsSecurityPage />} />
+                <Route path="appearance" element={<SettingsAppearancePage />} />
                 <Route path="notifications" element={<SettingsNotificationsPage />} />
+                <Route path="security" element={<SettingsSecurityPage />} />
+                <Route path="integrations" element={<SettingsIntegrationsPage />} />
               </Route>
             </Route>
 
@@ -263,12 +271,17 @@ const AnimatedRoutes: React.FC = () => {
               <Route path="assets" element={<AssetsPage />} />
               <Route path="projects" element={<ProjectsPage />} />
               <Route path="projects/:id" element={<ProjectDetailPage />} />
-              <Route path="billing" element={<BillingPage />} />
+              <Route path="menu-editor" element={<MenuEditorPage />} />
+              <Route path="billing" element={<Navigate to="/portal/settings/billing" replace />} />
               <Route path="settings" element={<SettingsLayout role="customer" />}>
-                <Route index element={<Navigate to="profile" replace />} />
+                <Route index element={<Navigate to="general" replace />} />
+                <Route path="general" element={<SettingsGeneralPage />} />
                 <Route path="profile" element={<SettingsProfilePage />} />
-                <Route path="security" element={<SettingsSecurityPage />} />
+                <Route path="appearance" element={<SettingsAppearancePage />} />
                 <Route path="notifications" element={<SettingsNotificationsPage />} />
+                <Route path="security" element={<SettingsSecurityPage />} />
+                <Route path="integrations" element={<SettingsIntegrationsPage />} />
+                <Route path="billing" element={<BillingPage />} />
               </Route>
             </Route>
 

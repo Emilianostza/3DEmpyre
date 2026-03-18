@@ -5,7 +5,8 @@ import {
   UtensilsCrossed, Search, Box, Smartphone,
   LayoutGrid, List, SlidersHorizontal, ChevronDown, Pencil,
   ArrowUpDown, EyeOff, X, Check, Share2,
-  MoreVertical, QrCode, Copy, Trash2, Paintbrush,
+  MoreVertical, QrCode, Copy, Trash2,
+  CheckSquare, Square, Eye, Tag,
 } from 'lucide-react';
 import { usePortalContext } from '@/types/portal';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,9 +16,7 @@ import { tagStyle } from '@/components/common/DishCardContent';
 import { DishCardShell } from '@/components/common/DishCardShell';
 import { ItemEditModal } from '@/components/common/ItemEditModal';
 import {
-  CustomizationPanel,
   DEFAULT_CUSTOMIZATION,
-  useLayoutPresets,
   resolveTheme,
   type CustomizationState,
 } from '@/components/common/CustomizationPanel';
@@ -230,7 +229,9 @@ const DishCard: React.FC<{
   cardRadius?: 'sharp' | 'rounded' | 'pill';
   fieldVisibility?: EditorCache['fieldVisibility'];
   onUpdateItem?: (updated: Partial<MenuItemDTO>) => void;
-}> = ({ item, allItems, showPrices, currency, projectId, brandColor, cardStyle, cardRadius, fieldVisibility, onUpdateItem }) => {
+  selected?: boolean;
+  onToggleSelect?: () => void;
+}> = ({ item, allItems, showPrices, currency, projectId: _projectId, brandColor, cardStyle, cardRadius, fieldVisibility, onUpdateItem, selected, onToggleSelect }) => {
   const [editOpen, setEditOpen] = useState(false);
 
   // Match RestaurantMenu: replace '$' in stored price with the chosen currency
@@ -246,6 +247,16 @@ const DishCard: React.FC<{
 
   return (
     <>
+      <div className="relative">
+        {onToggleSelect && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onToggleSelect(); }}
+            className={`absolute top-3 left-3 z-10 p-1 rounded-lg transition-all ${selected ? 'text-brand-400' : 'text-zinc-600 hover:text-zinc-300'}`}
+            aria-label={selected ? 'Deselect dish' : 'Select dish'}
+          >
+            {selected ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5" />}
+          </button>
+        )}
       <DishCardShell
         name={item.name}
         price={price}
@@ -305,6 +316,7 @@ const DishCard: React.FC<{
           onClose={() => setEditOpen(false)}
         />
       )}
+      </div>
     </>
   );
 };
@@ -317,12 +329,21 @@ const DishRow: React.FC<{
   currency: string;
   projectId: string;
   brandColor: string;
-}> = ({ item, showPrices, currency, projectId, brandColor }) => {
+  selected?: boolean;
+  onToggleSelect?: () => void;
+}> = ({ item, showPrices, currency, projectId, brandColor, selected, onToggleSelect }) => {
   const price = showPrices && item.price
     ? item.price.replace('$', currency)
     : '—';
   return (
-    <tr className="group hover:bg-white/5 transition-colors" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+    <tr className={`group hover:bg-white/5 transition-colors ${selected ? 'bg-brand-500/5' : ''}`} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      {onToggleSelect && (
+        <td className="pl-4 pr-1 py-3.5">
+          <button onClick={onToggleSelect} className={`p-0.5 transition-colors ${selected ? 'text-brand-400' : 'text-zinc-600 hover:text-zinc-300'}`}>
+            {selected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
+          </button>
+        </td>
+      )}
       <td className="px-5 py-3.5">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0 bg-zinc-800">
@@ -378,6 +399,7 @@ const AssetsPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showHidden, setShowHidden] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (projects.length > 0 && !selectedProjectId) setSelectedProjectId(projects[0].id);
@@ -471,6 +493,51 @@ const AssetsPage: React.FC = () => {
     });
   }, [config, selectedProjectId, orgId]);
 
+  const handleToggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const handleBatchHide = useCallback((hide: boolean) => {
+    if (!config) return;
+    const newItems = config.items.map((it) =>
+      selectedIds.has(it.id) ? { ...it, hidden: hide } : it
+    );
+    const newConfig = { ...config, items: newItems };
+    setConfig(newConfig);
+    writeItemsToEditorCache(orgId, selectedProjectId, newItems);
+    const { id: _id, org_id: _org, project_id: _pid, created_at: _ca, updated_at: _ua, ...payload } = newConfig;
+    MenusProvider.save(selectedProjectId, payload).catch(() => setConfig(config));
+    setSelectedIds(new Set());
+  }, [config, selectedIds, selectedProjectId, orgId]);
+
+  const handleBatchCategory = useCallback((category: string) => {
+    if (!config) return;
+    const newItems = config.items.map((it) =>
+      selectedIds.has(it.id) ? { ...it, category } : it
+    );
+    const newConfig = { ...config, items: newItems };
+    setConfig(newConfig);
+    writeItemsToEditorCache(orgId, selectedProjectId, newItems);
+    const { id: _id, org_id: _org, project_id: _pid, created_at: _ca, updated_at: _ua, ...payload } = newConfig;
+    MenusProvider.save(selectedProjectId, payload).catch(() => setConfig(config));
+    setSelectedIds(new Set());
+  }, [config, selectedIds, selectedProjectId, orgId]);
+
+  const handleBatchDelete = useCallback(() => {
+    if (!config) return;
+    const newItems = config.items.filter((it) => !selectedIds.has(it.id));
+    const newConfig = { ...config, items: newItems };
+    setConfig(newConfig);
+    writeItemsToEditorCache(orgId, selectedProjectId, newItems);
+    const { id: _id, org_id: _org, project_id: _pid, created_at: _ca, updated_at: _ua, ...payload } = newConfig;
+    MenusProvider.save(selectedProjectId, payload).catch(() => setConfig(config));
+    setSelectedIds(new Set());
+  }, [config, selectedIds, selectedProjectId, orgId]);
+
   const filtered = useMemo(() => {
     let result = showHidden ? items : items.filter((i) => !i.hidden);
     if (activeCategory !== 'All') result = result.filter((i) => i.category === activeCategory);
@@ -519,7 +586,22 @@ const AssetsPage: React.FC = () => {
           <p className="text-sm text-zinc-500 mt-0.5">
             {filtered.length} {t('portal.dishes.items', 'dishes')}
             {hiddenCount > 0 && !showHidden && <span className="ml-2 text-zinc-600">· {hiddenCount} hidden</span>}
+            {selectedIds.size > 0 && <span className="ml-2 text-brand-400 font-medium">· {selectedIds.size} selected</span>}
           </p>
+          {filtered.length > 0 && (
+            <button
+              onClick={() => {
+                const allFilteredIds = new Set(filtered.map((i) => i.id));
+                const allSelected = filtered.every((i) => selectedIds.has(i.id));
+                setSelectedIds(allSelected ? new Set() : allFilteredIds);
+              }}
+              className="flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-300 transition-colors mt-1"
+            >
+              {filtered.every((i) => selectedIds.has(i.id))
+                ? <><CheckSquare className="w-3.5 h-3.5" /> Deselect all</>
+                : <><Square className="w-3.5 h-3.5" /> Select all</>}
+            </button>
+          )}
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
@@ -677,6 +759,8 @@ const AssetsPage: React.FC = () => {
               cardRadius={cardRadius}
               fieldVisibility={fieldVisibility}
               onUpdateItem={handleUpdateItem}
+              selected={selectedIds.has(item.id)}
+              onToggleSelect={() => handleToggleSelect(item.id)}
             />
           ))}
         </div>
@@ -688,6 +772,20 @@ const AssetsPage: React.FC = () => {
           <table className="w-full text-sm text-left">
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <th className="pl-4 pr-1 py-3 w-8">
+                  <button
+                    onClick={() => {
+                      const allFilteredIds = new Set(filtered.map((i) => i.id));
+                      const allSelected = filtered.every((i) => selectedIds.has(i.id));
+                      setSelectedIds(allSelected ? new Set() : allFilteredIds);
+                    }}
+                    className={`p-0.5 transition-colors ${filtered.every((i) => selectedIds.has(i.id)) && filtered.length > 0 ? 'text-brand-400' : 'text-zinc-600 hover:text-zinc-300'}`}
+                  >
+                    {filtered.every((i) => selectedIds.has(i.id)) && filtered.length > 0
+                      ? <CheckSquare className="w-4 h-4" />
+                      : <Square className="w-4 h-4" />}
+                  </button>
+                </th>
                 {['Dish', 'Category', 'Tags', 'Price', 'Actions'].map((h) => (
                   <th key={h} className="px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-zinc-500">{h}</th>
                 ))}
@@ -695,10 +793,83 @@ const AssetsPage: React.FC = () => {
             </thead>
             <tbody>
               {filtered.map((item) => (
-                <DishRow key={item.id} item={item} showPrices={showPrices} currency={currency} projectId={selectedProjectId} brandColor={brandColor} />
+                <DishRow
+                  key={item.id}
+                  item={item}
+                  showPrices={showPrices}
+                  currency={currency}
+                  projectId={selectedProjectId}
+                  brandColor={brandColor}
+                  selected={selectedIds.has(item.id)}
+                  onToggleSelect={() => handleToggleSelect(item.id)}
+                />
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* ── Floating Batch Action Bar ── */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl border backdrop-blur-xl"
+          style={{ background: 'rgba(24,24,27,0.95)', borderColor: 'rgba(255,255,255,0.1)' }}
+        >
+          <span className="text-sm font-bold text-white mr-1">
+            {selectedIds.size} {selectedIds.size === 1 ? 'dish' : 'dishes'}
+          </span>
+          <div className="w-px h-6 bg-zinc-700" />
+          <button
+            onClick={() => handleBatchHide(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
+            title="Hide selected"
+          >
+            <EyeOff className="w-3.5 h-3.5" /> Hide
+          </button>
+          <button
+            onClick={() => handleBatchHide(false)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
+            title="Show selected"
+          >
+            <Eye className="w-3.5 h-3.5" /> Show
+          </button>
+          {categories.length > 2 && (
+            <div className="relative group/cat">
+              <button
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
+                title="Change category"
+              >
+                <Tag className="w-3.5 h-3.5" /> Category <ChevronDown className="w-3 h-3" />
+              </button>
+              <div className="absolute bottom-full left-0 mb-2 w-40 rounded-xl py-1.5 shadow-2xl hidden group-hover/cat:block"
+                style={{ background: '#18181b', border: '1px solid #27272a' }}
+              >
+                {categories.filter((c) => c !== 'All').map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => handleBatchCategory(cat)}
+                    className="w-full text-left px-3.5 py-2 text-xs font-medium text-zinc-400 hover:bg-white/5 hover:text-white transition-all capitalize"
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          <button
+            onClick={() => handleBatchDelete()}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all"
+            title="Delete selected"
+          >
+            <Trash2 className="w-3.5 h-3.5" /> Delete
+          </button>
+          <div className="w-px h-6 bg-zinc-700" />
+          <button
+            onClick={() => setSelectedIds(new Set())}
+            className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-white/10 transition-all"
+            title="Clear selection"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
     </div>

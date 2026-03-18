@@ -7,6 +7,7 @@ export interface PortalOutletContext {
   assets: Asset[];
   loading: boolean;
   error: string | null;
+  sidebarCollapsed: boolean;
   handleCreateProject: (data: {
     name: string;
     client: string;
@@ -19,6 +20,7 @@ export interface PortalOutletContext {
   setEditingProject: (project: Project | null) => void;
   setAssigningProject: (project: Project | null) => void;
   setIsModalOpen: (open: boolean) => void;
+  setModalMode: (mode: 'project' | 'menu') => void;
   setShowUpgradePlanModal: (open: boolean) => void;
   announce?: (message: string) => void;
 }

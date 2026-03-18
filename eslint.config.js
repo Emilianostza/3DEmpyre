@@ -76,6 +76,7 @@ export default [
         IntersectionObserverCallback: 'readonly',
         IntersectionObserverInit: 'readonly',
         FormDataEntryValue: 'readonly',
+        StorageEvent: 'readonly',
         // Node.js globals
         atob: 'readonly',
         btoa: 'readonly',

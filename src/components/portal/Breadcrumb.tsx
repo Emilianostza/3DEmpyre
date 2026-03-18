@@ -16,12 +16,18 @@ interface BreadcrumbProps {
 const SEGMENT_KEYS: Record<string, string> = {
   dashboard: 'breadcrumb.dashboard',
   projects: 'breadcrumb.projects',
+  assets: 'breadcrumb.assets',
   customers: 'breadcrumb.customers',
+  'menu-editor': 'breadcrumb.menuEditor',
+  pipeline: 'breadcrumb.pipeline',
   settings: 'breadcrumb.settings',
+  general: 'breadcrumb.general',
   billing: 'breadcrumb.billing',
   profile: 'breadcrumb.profile',
+  appearance: 'breadcrumb.appearance',
   security: 'breadcrumb.security',
   notifications: 'breadcrumb.notifications',
+  integrations: 'breadcrumb.integrations',
 };
 
 // ── Component ───────────────────────────────────────────────────

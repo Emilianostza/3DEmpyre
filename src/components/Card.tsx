@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type CardVariant = 'default' | 'glass' | 'flat' | 'elevated' | 'bordered' | 'gradient';
+export type CardVariant = 'default' | 'glass' | 'flat' | 'elevated' | 'bordered' | 'gradient' | 'portal';
 
 interface CardProps {
   children: React.ReactNode;
@@ -41,6 +41,9 @@ const Card: React.FC<CardProps> = ({
 
     // Gradient — premium background with gradient, for feature highlights
     gradient: 'bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700/60 shadow-card',
+
+    // Portal — clean, lightweight card for portal UIs
+    portal: 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-portal-card',
   };
 
   const hoverStyles: Partial<Record<CardVariant, string>> = {
@@ -50,6 +53,7 @@ const Card: React.FC<CardProps> = ({
     elevated: 'hover:shadow-glow hover:-translate-y-1',
     bordered: 'hover:border-brand-700 hover:bg-brand-950/20',
     gradient: 'hover:shadow-hover hover:-translate-y-0.5 hover:border-zinc-600',
+    portal: 'hover:shadow-portal-hover hover:border-zinc-300 dark:hover:border-zinc-700',
   };
 
   const paddings = {

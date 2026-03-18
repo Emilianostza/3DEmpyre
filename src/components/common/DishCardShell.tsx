@@ -48,6 +48,8 @@ export interface DishCardShellProps {
   cardRadius?: CardRadius;
 
   /* ── Article overrides ── */
+  /** data-item-id attribute for DOM lookup (e.g. scroll-into-view after duplicate) */
+  dataItemId?: string;
   /** Extra classes appended to the article (e.g. drag-state, z-index) */
   articleClassName?: string;
   /** Extra inline styles merged onto the article */
@@ -97,7 +99,7 @@ export const DishCardShell: React.FC<DishCardShellProps> = ({
   cardStyle = 'horizontal', cardRadius = 'rounded',
 
   // Article overrides
-  articleClassName = '', articleStyle,
+  dataItemId, articleClassName = '', articleStyle,
   onClick, onDragOver, onDrop,
 
   // Image slots
@@ -121,6 +123,7 @@ export const DishCardShell: React.FC<DishCardShellProps> = ({
 
   return (
     <article
+      data-item-id={dataItemId}
       className={`group relative flex ${layout} backdrop-blur-md border ${articleRadius(cardRadius)} overflow-visible transition-all duration-500 shadow-xl shadow-black/10 premium-card-glow ${
         hidden
           ? 'border-white/10 opacity-50'
