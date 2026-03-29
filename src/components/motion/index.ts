@@ -1,5 +1,4 @@
 export { default as PageTransition } from './PageTransition';
-export { default as AnimatedOutlet } from './AnimatedOutlet';
 export { default as StaggerContainer } from './StaggerContainer';
 export { default as StaggerItem } from './StaggerItem';
 export {

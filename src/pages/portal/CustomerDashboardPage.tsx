@@ -20,6 +20,8 @@ import { ProjectCards } from '@/components/portal/ProjectCards';
 import { QRCodeModal } from '@/components/portal/QRCodeModal';
 import { StatCard } from '@/components/portal/StatCard';
 import { SectionHeader } from '@/components/portal/SectionHeader';
+import { RecentAssetsStrip } from '@/components/portal/RecentAssetsStrip';
+import { DishPerformanceWidget } from '@/components/portal/DishPerformanceWidget';
 
 const CustomerDashboardPage: React.FC = () => {
   const { t } = useTranslation();
@@ -150,6 +152,10 @@ const CustomerDashboardPage: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* Recent Assets + Performance */}
+          <RecentAssetsStrip assets={assets} />
+          <DishPerformanceWidget assets={assets} />
 
           {/* Menu Preview Card */}
           {menuUrl && primaryProject && (

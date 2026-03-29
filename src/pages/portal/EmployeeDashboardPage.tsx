@@ -23,6 +23,8 @@ import { ClientHealthMetrics } from '@/components/portal/ClientHealthMetrics';
 import { TechnicianMetrics } from '@/components/portal/TechnicianMetrics';
 import { AutomatedReporting } from '@/components/portal/AutomatedReporting';
 import { getStatusConfig } from '@/constants/status-config';
+import { SchedulingCalendar } from '@/components/portal/SchedulingCalendar';
+import { DishPerformanceWidget } from '@/components/portal/DishPerformanceWidget';
 
 const AVATAR_COLORS = [
   'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300',
@@ -209,6 +211,15 @@ const EmployeeDashboardPage: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Scheduling Calendar */}
+          <div>
+            <SectionHeader title={t('portal.schedule', 'Schedule')} />
+            <SchedulingCalendar
+              projects={projects}
+              onSelectProject={(project) => setEditingProject(project)}
+            />
+          </div>
         </div>
 
         {/* Side Column */}
@@ -235,6 +246,7 @@ const EmployeeDashboardPage: React.FC = () => {
             <ClientHealthMetrics projects={projects} assets={assets} />
             <TechnicianMetrics projects={projects} />
             <AutomatedReporting projects={projects} assets={assets} />
+            <DishPerformanceWidget assets={assets} />
           </div>
         )}
       </div>

@@ -3,18 +3,17 @@
   "entry": ["src/App.tsx"],
   "project": ["src/**/*.{ts,tsx}"],
   "ignore": [
-    "src/components/motion/AnimatedOutlet.tsx",
     "src/components/motion/index.ts",
     "src/components/motion/PageTransition.tsx",
     "src/components/portal/IndustryHeader.tsx",
     "src/components/portal/IndustryKPIStrip.tsx",
-    "src/components/portal/IndustryWidgetRenderer.tsx",
     "src/components/portal/ProjectProgress.tsx",
-    "src/components/portal/QAReviewPanel.tsx",
-    "src/components/portal/ReviewBanner.tsx",
     "src/components/portal/TechnicianMetrics.tsx",
-    "src/components/portal/TechnicianUpload.tsx",
-    "src/components/portal/OnboardingChecklist.tsx"
+    "src/components/portal/OnboardingChecklist.tsx",
+    "src/components/portal/StatusTimeline.tsx",
+    "src/components/portal/ProgressBar.tsx",
+    "src/components/portal/FormInput.tsx",
+    "src/components/portal/MiniSparkline.tsx"
   ],
   "ignoreDependencies": [
     "@types/eslint__js",
