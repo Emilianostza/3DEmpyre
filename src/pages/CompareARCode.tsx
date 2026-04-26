@@ -182,7 +182,7 @@ const CompareARCode: React.FC = () => {
       <section data-section="approaches" className="relative py-20 bg-zinc-950">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* 3D Empyre */}
+            {/* 3Difys */}
             <div className="relative p-6 rounded-2xl border-2 border-brand-500 bg-zinc-900/40 backdrop-blur-sm">
               <div className="absolute -top-3 left-6">
                 <span className="inline-flex items-center px-3 py-1 rounded-full bg-brand-600 text-white text-xs font-bold uppercase tracking-wider">

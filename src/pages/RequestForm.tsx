@@ -403,6 +403,16 @@ const RequestForm: React.FC = () => {
         status: ProjectStatus.Pending,
         phone: formData.contact.phone,
         address: formData.country,
+        description: [
+          `Contact: ${formData.contact.full_name} <${formData.contact.email}>`,
+          `Plan: ${formData.selected_plan || 'Not selected'}`,
+          `Quantity: ${formData.quantity_range || 'Not specified'}`,
+          `Object size: ${formData.object_size_range || 'Not specified'}`,
+          formData.materials.length > 0 ? `Materials: ${formData.materials.join(', ')}` : null,
+          `Location: ${formData.location_mode || 'Not specified'}`,
+          formData.preferred_window ? `Preferred window: ${formData.preferred_window}` : null,
+          formData.deliverables.length > 0 ? `Deliverables: ${formData.deliverables.join(', ')}` : null,
+        ].filter(Boolean).join('\n'),
       });
       sessionStorage.removeItem(STORAGE_KEY);
       setSubmitted(true);
@@ -981,6 +991,8 @@ const RequestForm: React.FC = () => {
                           return (
                             <label
                               key={id}
+                              role="checkbox"
+                              aria-checked={selected}
                               className={`relative flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
                                 selected
                                   ? 'border-brand-500/50 bg-brand-500/5'
@@ -1044,6 +1056,8 @@ const RequestForm: React.FC = () => {
                         const arInfo = 'We deliver your 3D model optimized for augmented reality on all platforms. iPhone, iPad, and Android users can tap a link and instantly place your product in their real environment through the camera — no app required. Works with Safari, Chrome, and all major browsers.';
                         return (
                           <label
+                            role="checkbox"
+                            aria-checked={arSelected}
                             className={`relative flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
                               arSelected
                                 ? 'border-brand-500/50 bg-brand-500/5'
@@ -1119,6 +1133,8 @@ const RequestForm: React.FC = () => {
                           return (
                             <label
                               key={id}
+                              role="checkbox"
+                              aria-checked={selected}
                               className={`relative flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
                                 selected
                                   ? 'border-brand-500/50 bg-brand-500/5'
@@ -1252,7 +1268,7 @@ const RequestForm: React.FC = () => {
 
                   {/* Terms */}
                   <div className="flex items-start gap-3 text-sm">
-                    <input type="checkbox" required className="mt-1 accent-brand-600" />
+                    <input type="checkbox" required className="mt-1 accent-brand-600" id="terms-agree" aria-label={t('requestForm.step3.terms')} />
                     <span className="text-zinc-500 text-xs leading-relaxed">
                       {t('requestForm.step3.terms')}{' '}
                       <Link

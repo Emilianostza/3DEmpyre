@@ -93,11 +93,13 @@ const ADDON_META: AddonMeta[] = [
   { key: 'a5', setup: 30, monthly: 5 },
   { key: 'a6', setup: 30, monthly: 5 },
   { key: 'a7', setup: 50, monthly: 5 },
-  { key: 'a9', setup: 20, monthly: 2 },
   { key: 'a10', setup: 20, monthly: 2 },
-  { key: 'a11', setup: 50, monthly: 10 },
+  { key: 'a11', setup: 0, monthly: 10 },
   { key: 'a12', setup: 40, monthly: 2 },
 ];
+
+// Add-ons announced but not yet available
+const UPCOMING_ADDON_KEYS = ['a9'] as const;
 
 // ─── FAQ META ────────────────────────────────────────────────────────────────
 
@@ -158,6 +160,13 @@ const RestaurantPricing: React.FC = () => {
     ...meta,
     name: t(`restPricing.addons.${meta.key}.name`),
     detail: t(`restPricing.addons.${meta.key}.detail`),
+  }));
+
+  // Upcoming add-ons (announced but not yet available)
+  const upcomingAddons = UPCOMING_ADDON_KEYS.map((key) => ({
+    key,
+    name: t(`restPricing.addons.${key}.name`),
+    detail: t(`restPricing.addons.${key}.detail`),
   }));
 
   // Build translated FAQ items
@@ -657,6 +666,34 @@ const RestaurantPricing: React.FC = () => {
               {t('restPricing.addons.extraStoragePrice')}
             </p>
           </div>
+
+          {/* Upcoming add-ons teaser */}
+          {upcomingAddons.length > 0 && (
+            <div className="mt-6">
+              <p className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-3">
+                {t('restPricing.addons.comingSoonLabel', { defaultValue: 'Coming Soon' })}
+              </p>
+              {upcomingAddons.map((addon) => (
+                <div
+                  key={addon.key}
+                  className="bg-zinc-900/60 rounded-2xl border border-dashed border-zinc-700 p-6 flex items-center justify-between gap-4 opacity-60"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-amber-900/20 flex items-center justify-center flex-shrink-0">
+                      <Zap className="w-5 h-5 text-amber-500/60" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white">{addon.name}</p>
+                      <p className="text-xs text-zinc-500">{addon.detail}</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold uppercase tracking-widest text-amber-500/70 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 whitespace-nowrap">
+                    {t('restPricing.addons.comingSoonBadge', { defaultValue: 'Coming Soon' })}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

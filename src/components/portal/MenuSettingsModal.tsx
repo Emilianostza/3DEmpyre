@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useEscapeKey } from '@/hooks/useEscapeKey';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
-import { X, Save, Palette, Type, Clock } from 'lucide-react';
+import { X, Save, Type, Clock } from 'lucide-react';
 
 interface MenuSettings {
   title: string;
@@ -29,7 +29,7 @@ interface MenuSettingsModalProps {
   onSave: (settings: MenuSettings) => void;
 }
 
-const THEME_PRESETS = [
+const _THEME_PRESETS = [
   { id: 'amber', label: 'Warm Amber', brandColor: '#d97706', bg: '#09090b', surface: '#18181b', accent: '#fbbf24' },
   { id: 'slate', label: 'Cool Slate', brandColor: '#6366f1', bg: '#0f172a', surface: '#1e293b', accent: '#818cf8' },
   { id: 'emerald', label: 'Emerald', brandColor: '#059669', bg: '#022c22', surface: '#064e3b', accent: '#34d399' },
@@ -52,7 +52,7 @@ export const MenuSettingsModal: React.FC<MenuSettingsModalProps> = ({
     if (isOpen) {
       setSettings(currentSettings);
     }
-  }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const trapRef = useFocusTrap<HTMLDivElement>(isOpen);
 

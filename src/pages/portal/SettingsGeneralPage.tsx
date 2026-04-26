@@ -31,7 +31,7 @@ const SettingsGeneralPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
 
   const [companyName, setCompanyName] = useState(
-    role === 'employee' ? '3D Empyre' : 'Acme Restaurant'
+    role === 'employee' ? '3Difys' : 'Acme Restaurant'
   );
   const [industry, setIndustry] = useState('restaurant');
   const [timezone, setTimezone] = useState('America/New_York');

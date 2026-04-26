@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Paintbrush, ChevronUp, ChevronDown, X, Loader2, Wand2, Sparkles,
@@ -603,7 +603,7 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = React.memo(
               />
               {state.heroImage ? (
                 <div className="flex items-center gap-2">
-                  <img src={state.heroImage} alt="Hero preview" className="w-12 h-8 rounded-lg object-cover border border-white/10" />
+                  <img src={state.heroImage} alt="Hero preview" className="w-12 h-8 rounded-lg object-cover border border-white/10" loading="lazy" width={48} height={32} />
                   <button
                     type="button"
                     onClick={() => document.getElementById('hero-image-upload')?.click()}

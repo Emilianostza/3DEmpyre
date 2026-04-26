@@ -7,7 +7,6 @@ import {
   CalendarClock,
   ScanFace,
   Cpu,
-  Eye,
   Rocket,
   Store,
 } from 'lucide-react';
@@ -22,8 +21,7 @@ const TIMELINE_META = [
   { icon: CalendarClock, color: 'cyan' },
   { icon: ScanFace, color: 'purple' },
   { icon: Cpu, color: 'orange' },
-  { icon: Eye, color: 'green' },
-  { icon: Rocket, color: 'brand' },
+  { icon: Rocket, color: 'green' },
 ];
 
 const colorMap: Record<string, { icon: string; ring: string; label: string }> = {

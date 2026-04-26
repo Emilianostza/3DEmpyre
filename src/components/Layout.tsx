@@ -34,7 +34,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const onScroll = () => setIsScrolled(window.scrollY > 8);
     onScroll(); // sync initial state
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll, { passive: true } as EventListenerOptions);
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   const { stripLocalePath } = useLocale();
@@ -86,7 +86,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Box className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
               </div>
               <span>
-                3D <span className="text-brand-400">Empyre</span>
+                3Difys
               </span>
             </Link>
 
@@ -204,7 +204,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         <Box className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
                       </div>
                       <span>
-                        3D <span className="text-brand-400">Empyre</span>
+                        3Difys
                       </span>
                     </Link>
                     <button
@@ -299,7 +299,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <div className="w-8 h-8 rounded-lg bg-gradient-brand flex items-center justify-center shadow-glow/30">
                   <Box className="w-4 h-4 text-white" strokeWidth={2.5} />
                 </div>
-                3D <span className="text-brand-500">Empyre</span>
+                3Difys
               </Link>
               <p className="text-base text-zinc-400 leading-relaxed max-w-[280px]">
                 {t('footer.description')}
@@ -347,9 +347,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <ul className="space-y-2.5 text-sm">
                 {[
                   { label: t('footer.restaurants'), path: '/industries/restaurants' },
-                  { label: t('footer.hospitality'), path: '/industries/hospitality' },
+                  // Hidden until ready — keep the data, just not in footer
+                  // { label: t('footer.hospitality'), path: '/industries/hospitality' },
                   { label: t('footer.retail'), path: '/industries/retail' },
-                  { label: t('footer.realEstate'), path: '/industries/real-estate' },
+                  // { label: t('footer.realEstate'), path: '/industries/real-estate' },
                 ].map((l) => (
                   <li key={l.path}>
                     <Link

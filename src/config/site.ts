@@ -9,8 +9,8 @@
  */
 
 // ── Brand ────────────────────────────────────────────────────────
-export const SITE_NAME = '3D Empyre';
-export const SITE_NAME_SHORT = '3D Empyre';
+export const SITE_NAME = '3Difys';
+export const SITE_NAME_SHORT = '3Difys';
 
 // ── URLs ─────────────────────────────────────────────────────────
 export const SITE_ORIGIN = 'https://3dempyre.com';
@@ -27,7 +27,7 @@ export const DEMO_MODELS = {
   astronaut: {
     glb: `${MODEL_BASE}/3DModel_Custom.gltf`,
     usdz: `${MODEL_BASE}/3DModel_Custom.gltf`,
-    poster: `${MODEL_BASE}/3DModel_Custom.jpg`,
+    poster: '/images/2N2A1724.webp',
   },
   materialSuite: {
     glb: `${MODEL_BASE}/3DModel_Custom.gltf`,

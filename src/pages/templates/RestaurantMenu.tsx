@@ -38,7 +38,7 @@ import {
   Edit3,
   SlidersHorizontal as _SlidersHorizontal,
   Paintbrush,
-  LayoutGrid,
+  LayoutGrid as _LayoutGrid,
   FolderOpen,
   ChevronUp,
   ChevronDown,
@@ -71,8 +71,8 @@ import {
   DEFAULT_CUSTOMIZATION,
   hexToRgb,
   rgbToHsl,
-  extractDominantColor,
-  suggestLayoutFromColor,
+  extractDominantColor as _extractDominantColor,
+  suggestLayoutFromColor as _suggestLayoutFromColor,
   useLayoutPresets,
   type CustomizationState,
   type CardLayout,
@@ -813,7 +813,7 @@ const HERO_SIZE_CLASSES: Record<HeroSize, string> = {
 };
 
 const MenuHero: React.FC<MenuHeroProps> = React.memo(
-  ({ title, brandColor, onViewSignature, onHowAR, heroSize = 'default', heroImage, onHeroImageChange, isEditMode, onCustomize, customizeChangedCount = 0, presets = [], activePresetId = null, onLoadPreset, hours, onHoursChange }) => {
+  ({ title, brandColor, onViewSignature: _onViewSignature, onHowAR: _onHowAR, heroSize = 'default', heroImage, onHeroImageChange, isEditMode, onCustomize, customizeChangedCount = 0, presets = [], activePresetId = null, onLoadPreset, hours, onHoursChange }) => {
     const { t } = useTranslation();
     const [showPresets, setShowPresets] = useState(false);
     const presetsDropdownRef = useRef<HTMLDivElement>(null);
@@ -1042,7 +1042,7 @@ const MenuHero: React.FC<MenuHeroProps> = React.memo(
                         </div>
                       </div>
                     ) : aiPreviewUrl ? (
-                      <img src={aiPreviewUrl} alt="AI generated preview" className="w-full h-48 object-cover" />
+                      <img src={aiPreviewUrl} alt="AI generated preview" className="w-full h-48 object-cover" loading="lazy" width={400} height={192} />
                     ) : null}
                   </div>
                 )}
@@ -1263,7 +1263,7 @@ const MenuHero: React.FC<MenuHeroProps> = React.memo(
                                     const closed = isDateClosed(day);
                                     const today = new Date();
                                     const isToday = day === today.getDate() && calMonth.getMonth() === today.getMonth() && calMonth.getFullYear() === today.getFullYear();
-                                    const hasOverride = !!dateOverrides[toDateStr(day)];
+                                    const hasOverride = Boolean(dateOverrides[toDateStr(day)]);
                                     const isSelected = selectedCalDay === day;
                                     return (
                                       <div key={day} className="relative">
@@ -1763,7 +1763,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = React.memo(
                     <button
                       key={dish.id}
                       onClick={() => {
-                        onAddFromLibrary!(dish);
+                        onAddFromLibrary?.(dish);
                         setShowLibrary(false);
                         setLibrarySearch('');
                       }}
@@ -1841,11 +1841,11 @@ const MenuItemCard: React.FC<MenuItemCardProps> = React.memo(
     showPrices,
     currency,
     fieldVisibility,
-    onToggleFieldVisibility,
+    onToggleFieldVisibility: _onToggleFieldVisibility,
     isEditMode,
     onDetails,
     onView3D,
-    onLaunchAR,
+    onLaunchAR: _onLaunchAR,
     onUpdate,
     onDelete,
     onDuplicate,

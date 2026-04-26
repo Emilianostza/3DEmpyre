@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 /** Non-English locales that get a URL prefix */
-export const LOCALE_PREFIXES = ['de', 'es', 'ru'] as const;
+export const LOCALE_PREFIXES = ['de', 'el', 'es', 'ru'] as const;
 export const ALL_LOCALES = ['en', ...LOCALE_PREFIXES] as const;
 type Locale = (typeof ALL_LOCALES)[number];
 

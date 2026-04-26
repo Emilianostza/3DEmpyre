@@ -37,7 +37,8 @@ export function announceToScreenReader(
   fallback.setAttribute('aria-live', priority);
   // Clear first to force re-announcement of identical messages
   fallback.textContent = '';
+  const el = fallback;
   requestAnimationFrame(() => {
-    fallback!.textContent = message;
+    el.textContent = message;
   });
 }

@@ -56,7 +56,7 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
   }, []);
 
   /* ── Mouse & Touch — attach global listeners only while dragging ── */
-  const onPointerStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+  const onPointerStart = useCallback((_e: React.MouseEvent | React.TouchEvent) => {
     isDragging.current = true;
 
     const onMouseMove = (ev: MouseEvent) => {

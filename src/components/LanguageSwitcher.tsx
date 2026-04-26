@@ -6,6 +6,7 @@ import { useLocale } from '@/contexts/LocaleContext';
 const LANGS = [
   { code: 'en', flag: '🇬🇧' },
   { code: 'de', flag: '🇩🇪' },
+  { code: 'el', flag: '🇬🇷' },
   { code: 'es', flag: '🇪🇸' },
   { code: 'ru', flag: '🇷🇺' },
 ] as const;

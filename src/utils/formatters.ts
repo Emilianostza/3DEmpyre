@@ -78,8 +78,9 @@ export function formatStatus(status: string): string {
 export function i18nToLocale(lang: string): string {
   const map: Record<string, string> = {
     en: 'en-US',
-    es: 'es-ES',
     de: 'de-DE',
+    el: 'el-GR',
+    es: 'es-ES',
     ru: 'ru-RU',
   };
   return map[lang] ?? 'en-US';

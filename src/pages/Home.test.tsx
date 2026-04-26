@@ -93,7 +93,7 @@ vi.mock('@/config/site', () => ({
   },
   PLACEHOLDER_BEFORE: 'data:image/svg+xml,<svg/>',
   PLACEHOLDER_AFTER: 'data:image/svg+xml,<svg/>',
-  SITE_NAME: '3D Empyre',
+  SITE_NAME: '3Difys',
   SITE_ORIGIN: 'https://managedcapture3d.com',
   CONTACT_EMAIL: 'info@managedcapture.com',
   placeholder: () => 'data:image/svg+xml,<svg/>',

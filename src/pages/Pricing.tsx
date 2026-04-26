@@ -463,7 +463,7 @@ const Pricing: React.FC = () => {
         </div>
       </section>
 
-      {/* ── Section 2: 3D Empyre ────────────────────────────────────────── */}
+      {/* ── Section 2: 3Difys ────────────────────────────────────────── */}
       <section
         data-section="managed-capture"
         className="py-20 bg-zinc-800/40 border-t border-zinc-800"

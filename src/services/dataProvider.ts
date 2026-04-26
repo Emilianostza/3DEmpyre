@@ -41,6 +41,9 @@ const getAssetsService = () =>
 const getMenusService = () =>
   USE_REAL_API ? import('@/services/api/real/menus') : import('@/services/api/mock/menus');
 
+const getFeedbackService = () =>
+  USE_REAL_API ? import('@/services/api/real/feedback') : import('@/services/api/mock/feedback');
+
 /**
  * Projects Data Provider
  *
@@ -147,6 +150,45 @@ export const MenusProvider = {
   async save(projectId: string, data: import('@/types/dtos').MenuConfigUpsertDTO) {
     const svc = await getMenusService();
     return svc.upsertMenuConfig(projectId, data);
+  },
+};
+
+/**
+ * Feedback Data Provider
+ *
+ * Usage:
+ * const config = await FeedbackProvider.getConfig(projectId);
+ * await FeedbackProvider.saveConfig(projectId, { ... });
+ * await FeedbackProvider.submit(projectId, { overall_rating: 5, ... });
+ * const dashboard = await FeedbackProvider.getDashboard(projectId);
+ */
+export const FeedbackProvider = {
+  async getConfig(projectId: string) {
+    const svc = await getFeedbackService();
+    return svc.getFeedbackConfig(projectId);
+  },
+
+  async saveConfig(
+    projectId: string,
+    data: import('@/types/feedback').FeedbackFormConfigUpsertDTO
+  ) {
+    const svc = await getFeedbackService();
+    return svc.upsertFeedbackConfig(projectId, data);
+  },
+
+  async submit(projectId: string, data: import('@/types/feedback').FeedbackSubmitDTO) {
+    const svc = await getFeedbackService();
+    return svc.submitFeedback(projectId, data);
+  },
+
+  async getDashboard(projectId: string) {
+    const svc = await getFeedbackService();
+    return svc.getFeedbackDashboard(projectId);
+  },
+
+  async getResponses(projectId: string) {
+    const svc = await getFeedbackService();
+    return svc.getFeedbackResponses(projectId);
   },
 };
 

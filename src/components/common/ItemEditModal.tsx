@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Eye, EyeOff, Check, ChevronDown, Save } from 'lucide-react';
+import { X, Check, ChevronDown, Save } from 'lucide-react';
 import type { MenuItemDTO } from '@/types/dtos';
 import { tagStyle } from './DishCardContent';
 
@@ -147,6 +147,8 @@ export const ItemEditModal: React.FC<ItemEditModalProps> = ({
                 alt={draft.name}
                 className="w-full h-full object-cover"
                 loading="lazy"
+                width={320}
+                height={240}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-stone-600 text-sm">

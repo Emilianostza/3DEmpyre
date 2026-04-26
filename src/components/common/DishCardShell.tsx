@@ -170,6 +170,8 @@ export const DishCardShell: React.FC<DishCardShellProps> = ({
               src={image}
               alt={name}
               loading="lazy"
+              width={400}
+              height={400}
               onLoad={() => setImgLoaded(true)}
               className={`w-full h-full object-cover ${
                 !imageFadesOnHover

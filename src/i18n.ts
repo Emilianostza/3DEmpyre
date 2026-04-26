@@ -9,7 +9,7 @@ const pathDetector = {
   lookup(): string | undefined {
     const segments = window.location.pathname.split('/').filter(Boolean);
     const first = segments[0];
-    if (first && ['de', 'es', 'ru'].includes(first)) return first;
+    if (first && ['de', 'el', 'es', 'ru'].includes(first)) return first;
     return undefined; // fall through to next detector
   },
 };
@@ -23,7 +23,7 @@ i18n
   .use(initReactI18next)
   .init({
     fallbackLng: 'en',
-    supportedLngs: ['en', 'de', 'es', 'ru'],
+    supportedLngs: ['en', 'de', 'el', 'es', 'ru'],
     interpolation: { escapeValue: false },
     backend: {
       loadPath: '/locales/{{lng}}/translation.json',

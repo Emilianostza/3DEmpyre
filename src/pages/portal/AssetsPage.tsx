@@ -348,7 +348,7 @@ const DishRow: React.FC<{
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0 bg-zinc-800">
             {item.image
-              ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
+              ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" loading="lazy" width={44} height={44} />
               : <div className="w-full h-full flex items-center justify-center"><UtensilsCrossed className="w-4 h-4 text-zinc-600" /></div>}
           </div>
           <div>
@@ -386,7 +386,7 @@ const AssetsPage: React.FC = () => {
   const { t } = useTranslation();
   const { projects } = usePortalContext();
   const { user } = useAuth();
-  const orgId = user?.orgId ?? 'org-001';
+  const orgId = user?.orgId ?? user?.id ?? 'anonymous';
 
   const [selectedProjectId, setSelectedProjectId] = useState('');
   const [config, setConfig] = useState<MenuConfigDTO | null>(null);

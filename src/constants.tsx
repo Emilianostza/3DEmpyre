@@ -24,9 +24,10 @@ export const NAV_ITEMS: NavItem[] = [
     path: '/industries',
     children: [
       { label: 'nav.restaurants', path: '/industries/restaurants' },
-      { label: 'nav.hospitality', path: '/industries/hospitality' },
+      // Hidden until ready — keep the data, just not in nav
+      // { label: 'nav.hospitality', path: '/industries/hospitality' },
       { label: 'nav.retail', path: '/industries/retail' },
-      { label: 'nav.realEstate', path: '/industries/real-estate' },
+      // { label: 'nav.realEstate', path: '/industries/real-estate' },
     ],
   },
   { label: 'nav.howItWorks', path: '/how-it-works' },
@@ -39,7 +40,7 @@ export const INDUSTRIES: Record<string, IndustryConfig> = {
   restaurants: {
     id: 'restaurants',
     title: 'Turn your signature items into interactive 3D',
-    subtitle: '3D Empyre by employees + web/AR-ready delivery for menus and marketing.',
+    subtitle: '3Difys by employees + web/AR-ready delivery for menus and marketing.',
     heroImage: placeholder(1200, 600, '3D Restaurant Experience', 270),
     demoImage: placeholder(800, 600, 'Interactive 3D Demo', 250),
     outcomes: [

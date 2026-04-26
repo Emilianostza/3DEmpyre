@@ -108,7 +108,7 @@ const Blog: React.FC = () => {
                   <div className="aspect-[16/9] overflow-hidden">
                     <img
                       src={placeholder(800, 450, post.category, CATEGORY_HUES[post.category])}
-                      alt=""
+                      alt={post.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
                       width={800}

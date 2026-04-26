@@ -57,6 +57,7 @@ const ProductShowcase = lazy(() => import('./pages/templates/ProductShowcase'));
 const CatalogGrid = lazy(() => import('./pages/templates/CatalogGrid'));
 const ArtifactViewer = lazy(() => import('./pages/templates/ArtifactViewer'));
 const PortfolioGallery = lazy(() => import('./pages/templates/PortfolioGallery'));
+const FeedbackForm = lazy(() => import('./pages/templates/FeedbackForm'));
 const Library = lazy(() => import('./pages/Library'));
 
 // Portal layout + sub-pages (nested routing)
@@ -77,6 +78,8 @@ const SettingsIntegrationsPage = lazy(() => import('./pages/portal/SettingsInteg
 const ProjectDetailPage = lazy(() => import('./pages/portal/ProjectDetailPage'));
 const PhotoPipelinePage = lazy(() => import('./pages/portal/PhotoPipelinePage'));
 const MenuEditorPage = lazy(() => import('./pages/portal/MenuEditorPage'));
+const FeedbackSettingsPage = lazy(() => import('./pages/portal/FeedbackSettingsPage'));
+const FeedbackDashboardPage = lazy(() => import('./pages/portal/FeedbackDashboardPage'));
 
 
 /** Wraps a lazy-loaded page in its own ErrorBoundary so one broken page doesn't crash the whole app */
@@ -272,6 +275,8 @@ const AnimatedRoutes: React.FC = () => {
               <Route path="projects" element={<ProjectsPage />} />
               <Route path="projects/:id" element={<ProjectDetailPage />} />
               <Route path="menu-editor" element={<MenuEditorPage />} />
+              <Route path="feedback" element={<FeedbackSettingsPage />} />
+              <Route path="feedback/dashboard" element={<FeedbackDashboardPage />} />
               <Route path="billing" element={<Navigate to="/portal/settings/billing" replace />} />
               <Route path="settings" element={<SettingsLayout role="customer" />}>
                 <Route index element={<Navigate to="general" replace />} />
@@ -293,6 +298,7 @@ const AnimatedRoutes: React.FC = () => {
             <Route path="/project/:id/catalog" element={<SafePage><CatalogGrid /></SafePage>} />
             <Route path="/project/:id/artifacts" element={<SafePage><ArtifactViewer /></SafePage>} />
             <Route path="/project/:id/portfolio" element={<SafePage><PortfolioGallery /></SafePage>} />
+            <Route path="/project/:id/feedback" element={<SafePage><FeedbackForm /></SafePage>} />
 
             {/* Public WebAR viewer — scanned from QR codes */}
             <Route path="/view/:assetId" element={<SafePage><ARViewer /></SafePage>} />

@@ -1,5 +1,5 @@
 /**
- * Photogrammetry Types - 3D Empyre Photo-to-3D Pipeline
+ * Photogrammetry Types - 3Difys Photo-to-3D Pipeline
  *
  * DTOs and interfaces for photogrammetry job processing, photo validation,
  * capture guidance, and PBR material output.

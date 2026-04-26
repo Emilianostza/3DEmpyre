@@ -186,7 +186,7 @@ const Home: React.FC = () => {
                 label={t('home.stats.delivery')}
                 delay={0}
               />
-              <AnimatedStat end={100} suffix="%" label={t('home.stats.retention')} delay={150} />
+              <AnimatedStat end={98} suffix="%" label={t('home.stats.retention')} delay={150} />
               <AnimatedStat end={3} label={t('home.stats.countries')} delay={300} />
             </div>
           </div>
@@ -208,6 +208,9 @@ const Home: React.FC = () => {
                 disable-zoom
                 auto-rotate
                 ar
+                camera-orbit="90deg 60deg auto"
+                min-camera-orbit="auto 30deg auto"
+                max-camera-orbit="auto 90deg auto"
                 loading="eager"
                 reveal="auto"
                 touch-action="pan-y"
@@ -289,7 +292,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Brand Story — Why "3D Empyre"? */}
+      {/* Brand Story — Why "3Difys"? */}
       <section
         data-section="brand-story"
         className="py-20 bg-zinc-950 border-t border-zinc-800/40 relative overflow-hidden"

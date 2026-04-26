@@ -8,7 +8,6 @@
     "src/components/portal/IndustryHeader.tsx",
     "src/components/portal/IndustryKPIStrip.tsx",
     "src/components/portal/ProjectProgress.tsx",
-    "src/components/portal/TechnicianMetrics.tsx",
     "src/components/portal/OnboardingChecklist.tsx",
     "src/components/portal/StatusTimeline.tsx",
     "src/components/portal/ProgressBar.tsx",
@@ -17,9 +16,7 @@
   ],
   "ignoreDependencies": [
     "@types/eslint__js",
-    "lint-staged",
-    "@vitest/coverage-v8",
-    "wrangler"
+    "lint-staged"
   ],
   "ignoreExportsUsedInFile": true,
   "rules": {

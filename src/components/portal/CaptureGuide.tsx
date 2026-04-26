@@ -456,5 +456,3 @@ export const CaptureGuide: React.FC<CaptureGuideProps> = ({
     </div>
   );
 };
-
-export default CaptureGuide;

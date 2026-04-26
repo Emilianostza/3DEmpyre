@@ -16,6 +16,7 @@ import {
   LogOut,
   User,
   X,
+  MessageSquare,
 } from 'lucide-react';
 import { sheetFromLeft, modalOverlay } from '@/components/motion/presets';
 
@@ -49,6 +50,7 @@ function useNavItems(role: 'employee' | 'customer'): SidebarNavItem[] {
       { path: 'dashboard', label: t('portal.tab.menus', 'Dashboard'), icon: LayoutDashboard },
       { path: 'assets', label: t('portal.tab.dishes', 'Dishes'), icon: UtensilsCrossed },
       { path: 'menu-editor', label: t('portal.tab.menuEditor', 'Menu Editor'), icon: Paintbrush },
+      { path: 'feedback', label: t('portal.tab.feedback', 'Feedback'), icon: MessageSquare },
       { path: 'billing', label: t('portal.tab.billing', 'Billing'), icon: CreditCard },
       { path: 'settings', label: t('portal.tab.settings', 'Settings'), icon: Settings },
     ];
@@ -107,7 +109,7 @@ const SidebarContent: React.FC<{
         </div>
         {!effectiveCollapsed && (
           <span className="font-bold text-zinc-900 dark:text-white text-base whitespace-nowrap overflow-hidden">
-            3D <span className="text-brand-600 dark:text-brand-400">Empyre</span>
+            3Difys
           </span>
         )}
       </div>

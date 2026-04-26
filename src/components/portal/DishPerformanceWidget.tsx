@@ -99,6 +99,8 @@ export const DishPerformanceWidget: React.FC<DishPerformanceWidgetProps> = ({ as
               alt={dish.name}
               className="w-10 h-10 rounded-lg object-cover border border-zinc-200 dark:border-zinc-700 flex-shrink-0"
               loading="lazy"
+              width={40}
+              height={40}
             />
 
             {/* Name + Views bar */}

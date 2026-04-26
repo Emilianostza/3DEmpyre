@@ -6,6 +6,7 @@ import { useLocale, LOCALE_PREFIXES } from '@/contexts/LocaleContext';
 const LOCALE_TO_OG: Record<string, string> = {
   en: 'en_US',
   de: 'de_DE',
+  el: 'el_GR',
   es: 'es_ES',
   ru: 'ru_RU',
 };
@@ -22,7 +23,7 @@ interface SEOProps {
 // they are automatically hoisted to <head> without a provider.
 export const SEO: React.FC<SEOProps> = ({
   title,
-  description = '3D Empyre Platform - Create and share immersive AR experiences.',
+  description = '3Difys Platform - Create and share immersive AR experiences.',
   image = SITE_OG_IMAGE,
   url,
   type = 'website',

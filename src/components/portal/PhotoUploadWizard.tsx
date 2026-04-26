@@ -937,5 +937,3 @@ export const PhotoUploadWizard: React.FC<PhotoUploadWizardProps> = ({
     </div>
   );
 };
-
-export default PhotoUploadWizard;
